@@ -160,143 +160,12 @@
 <li>如果小于一定距离那么就回到原位</li>
 </ol>
 <p>首先这里可以看的出来，我们每一个子View都是沾满一个屏幕的，所以这里整个ViewGroup的高度就能确定出来了，就是屏幕的高度乘子View的个数</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    int count = getChildCount();
-    for (int i = 0; i &lt; count; i++) {
-        View child = getChildAt(i);         //获得每一个子view
-        measureChild(child, widthMeasureSpec, heightMeasureSpec);      //测量子view
-    }
-}
-</code></pre><p>我们先在onMeasure()方法中测量每一个子View，这里直接调用measureChild()方法就可以进行对子View的测量，用一个for循环很方便。</p>
-<pre><code>protected void onLayout(boolean changed, int l, int t, int r, int b) {
-    int childCount = getChildCount();
-    MarginLayoutParams mlp = (MarginLayoutParams) getLayoutParams();
-    /**
-     * 这里对整个ViewGroup的高度进行初始化
-     * 屏幕的高度乘子View的个数
-     */
-    mlp.height = mScreenHeight * childCount; 
-    setLayoutParams(mlp);
-
-
-    for (int i = 0; i &lt; childCount; i++) {
-        View child = getChildAt(i);
-        if (child.getVisibility() != View.GONE) {
-            /**
-             * 这里对子View进行布局,由于我们的ViewGroup是上下滑动
-             * 所以只需要确定top和bottom两个值就可以,让他们从上到下排列
-             */
-            child.layout(
-                    l,
-                    i * mScreenHeight,
-                    r,
-                    (i + 1) * mScreenHeight
-            );
-        }
-    }
-}
-</code></pre><p>到这里我们就已经完成了对ViewGroup的测量和对子View位置的控制，接下来就是对触摸事件进行控制</p>
-<pre><code>public boolean onTouchEvent(MotionEvent event) {
-    int y = (int) event.getY();
-
-    switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            mLastY = y;
-            mStartY = getScrollY();
-            break;
-        case MotionEvent.ACTION_MOVE:
-            if (!mScroller.isFinished()) {
-                mScroller.abortAnimation();
-            }
-            int dy = mLastY - y;
-
-            /**
-             * getScrollY()小于0则为第一屏
-             */
-            if (getScrollY() &lt; 0) {
-                dy = 0;
-            }
-            /**
-             * 最后一屏
-             */
-            if (getScrollY() &gt; mTotalHeight - mScreenHeight) {
-                dy = 0;
-            }
-            scrollBy(0, dy);
-            mLastY = y;
-            break;
-        case MotionEvent.ACTION_UP:
-            int dScrollY = check();
-
-            if (dScrollY &gt; 0) { //从下往上滑
-                /**
-                 * 如果这个距离小于屏幕的1/3
-                 * 那么就回到原位,也就是当前距离取负值
-                 * 如果大于屏幕的1/3
-                 * 那么就直接进入到下一个子View
-                 */
-                if (dScrollY &lt; mScreenHeight / 3) {
-                    mScroller.startScroll(
-                            0, getScrollY(),
-                            0, -dScrollY)
-                    ;
-                } else {
-                    mScroller.startScroll(
-                            0, getScrollY(),
-                            0, mScreenHeight - dScrollY
-                    );
-                }
-            } else {
-                if (-dScrollY &lt; mScreenHeight / 3) {
-                    mScroller.startScroll(
-                            0, getScrollY(),
-                            0, -dScrollY
-                    );
-                } else {
-                    mScroller.startScroll(
-                            0, getScrollY(),
-                            0, -mScreenHeight - dScrollY
-                    );
-                }
-            }
-            break;
-
-    }
-    postInvalidate();   //重绘
-    return true;
-}
-
-private int check() {
-    int mEnd = getScrollY();
-    /**
-     * 判断滑动方向
-     * true 从下往上滑
-     * false 从上往下滑
-     */
-    boolean isUp = mEnd - mStartY &gt; 0;
-    /**
-     * 关于这两个变量,读者可以自行的打印出来理解一下
-     * 用语言来描述不好描述（好吧,其实是表达能力有限）
-     */
-    int lastPrev = mEnd % mScreenHeight;
-    int lastNext = mScreenHeight - lastPrev;
-    if (isUp) {
-        return lastPrev;
-    } else {
-        return -lastNext;
-    }
-}
-
-@Override
-public void computeScroll() {
-    super.computeScroll();
-    if(mScroller.computeScrollOffset()){
-        scrollTo(0, mScroller.getCurrY());
-        postInvalidate();
-    }
-}
-</code></pre><ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">    <span class="keyword">int</span> count = getChildCount();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        View child = getChildAt(i);         <span class="comment">//获得每一个子view</span></span><br><span class="line">        measureChild(child, widthMeasureSpec, heightMeasureSpec);      <span class="comment">//测量子view</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们先在onMeasure()方法中测量每一个子View，这里直接调用measureChild()方法就可以进行对子View的测量，用一个for循环很方便。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onLayout</span><span class="params">(<span class="keyword">boolean</span> changed, <span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> childCount = getChildCount();</span><br><span class="line">    MarginLayoutParams mlp = (MarginLayoutParams) getLayoutParams();</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 这里对整个ViewGroup的高度进行初始化</span></span><br><span class="line"><span class="comment">     * 屏幕的高度乘子View的个数</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    mlp.height = mScreenHeight * childCount; </span><br><span class="line">    setLayoutParams(mlp);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</span><br><span class="line">        View child = getChildAt(i);</span><br><span class="line">        <span class="keyword">if</span> (child.getVisibility() != View.GONE) &#123;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 这里对子View进行布局,由于我们的ViewGroup是上下滑动</span></span><br><span class="line"><span class="comment">             * 所以只需要确定top和bottom两个值就可以,让他们从上到下排列</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            child.layout(</span><br><span class="line">                    l,</span><br><span class="line">                    i * mScreenHeight,</span><br><span class="line">                    r,</span><br><span class="line">                    (i + <span class="number">1</span>) * mScreenHeight</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到这里我们就已经完成了对ViewGroup的测量和对子View位置的控制，接下来就是对触摸事件进行控制</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouchEvent</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> y = (<span class="keyword">int</span>) event.getY();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (event.getAction()) &#123;</span><br><span class="line">        <span class="keyword">case</span> MotionEvent.ACTION_DOWN:</span><br><span class="line">            mLastY = y;</span><br><span class="line">            mStartY = getScrollY();</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MotionEvent.ACTION_MOVE:</span><br><span class="line">            <span class="keyword">if</span> (!mScroller.isFinished()) &#123;</span><br><span class="line">                mScroller.abortAnimation();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">int</span> dy = mLastY - y;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * getScrollY()小于0则为第一屏</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">if</span> (getScrollY() &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                dy = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 最后一屏</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">if</span> (getScrollY() &gt; mTotalHeight - mScreenHeight) &#123;</span><br><span class="line">                dy = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            scrollBy(<span class="number">0</span>, dy);</span><br><span class="line">            mLastY = y;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MotionEvent.ACTION_UP:</span><br><span class="line">            <span class="keyword">int</span> dScrollY = check();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (dScrollY &gt; <span class="number">0</span>) &#123; <span class="comment">//从下往上滑</span></span><br><span class="line">                <span class="comment">/**</span></span><br><span class="line"><span class="comment">                 * 如果这个距离小于屏幕的1/3</span></span><br><span class="line"><span class="comment">                 * 那么就回到原位,也就是当前距离取负值</span></span><br><span class="line"><span class="comment">                 * 如果大于屏幕的1/3</span></span><br><span class="line"><span class="comment">                 * 那么就直接进入到下一个子View</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                <span class="keyword">if</span> (dScrollY &lt; mScreenHeight / <span class="number">3</span>) &#123;</span><br><span class="line">                    mScroller.startScroll(</span><br><span class="line">                            <span class="number">0</span>, getScrollY(),</span><br><span class="line">                            <span class="number">0</span>, -dScrollY)</span><br><span class="line">                    ;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    mScroller.startScroll(</span><br><span class="line">                            <span class="number">0</span>, getScrollY(),</span><br><span class="line">                            <span class="number">0</span>, mScreenHeight - dScrollY</span><br><span class="line">                    );</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (-dScrollY &lt; mScreenHeight / <span class="number">3</span>) &#123;</span><br><span class="line">                    mScroller.startScroll(</span><br><span class="line">                            <span class="number">0</span>, getScrollY(),</span><br><span class="line">                            <span class="number">0</span>, -dScrollY</span><br><span class="line">                    );</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    mScroller.startScroll(</span><br><span class="line">                            <span class="number">0</span>, getScrollY(),</span><br><span class="line">                            <span class="number">0</span>, -mScreenHeight - dScrollY</span><br><span class="line">                    );</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    postInvalidate();   <span class="comment">//重绘</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">check</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> mEnd = getScrollY();</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 判断滑动方向</span></span><br><span class="line"><span class="comment">     * true 从下往上滑</span></span><br><span class="line"><span class="comment">     * false 从上往下滑</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">boolean</span> isUp = mEnd - mStartY &gt; <span class="number">0</span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 关于这两个变量,读者可以自行的打印出来理解一下</span></span><br><span class="line"><span class="comment">     * 用语言来描述不好描述（好吧,其实是表达能力有限）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">int</span> lastPrev = mEnd % mScreenHeight;</span><br><span class="line">    <span class="keyword">int</span> lastNext = mScreenHeight - lastPrev;</span><br><span class="line">    <span class="keyword">if</span> (isUp) &#123;</span><br><span class="line">        <span class="keyword">return</span> lastPrev;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> -lastNext;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">computeScroll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.computeScroll();</span><br><span class="line">    <span class="keyword">if</span>(mScroller.computeScrollOffset())&#123;</span><br><span class="line">        scrollTo(<span class="number">0</span>, mScroller.getCurrY());</span><br><span class="line">        postInvalidate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol>
 <li>这里我们首先在ActionDown事件中获取到第一次碰到屏幕时候的Y轴偏移量</li>
 <li>然后我们在ActionMove事件中来对这个值来进行运算并且调用scrollBy()方法来进行滑动</li>
 <li>最后我们在ActionUp方法中对这个事件进行总的处理，首先我们在check()方法中判断用户是从上往下滑还是从下往上滑，然后通过滑动方向来计算值并且返回，接着我们用check()方法返回的数据来进行判断滑动的距离是否大于屏幕的三分之一，如果大于，则调用Scroller.startScroll()方法来进行滑动到下/上一屏，如果小于则返回原位。</li>
@@ -326,7 +195,7 @@ public void computeScroll() {
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

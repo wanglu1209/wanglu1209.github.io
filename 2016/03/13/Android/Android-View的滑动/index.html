@@ -176,33 +176,8 @@ Andro">
 <li><strong>layout方法</strong></li>
 </ul>
 <p>我们知道在View进行绘制的时候会通过onLayout()方法来设置View的显示位置，这里我们通过修改View的left, top, right, bottom四个值来控制View的坐标</p>
-<pre><code>public boolean onTouchEvent(MotionEvent event) {
-    int x = (int) event.getX();
-    int y = (int) event.getY();
-
-    switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            //记录触摸点的坐标
-            lastX = x;
-            lastY = y;
-            break;
-        case MotionEvent.ACTION_MOVE:
-            //计算偏移量
-            int offsetX = x - lastX;
-            int offsetY = y - lastY;
-
-            //在当前位置基础加上偏移量
-            layout(
-                    getLeft() + offsetX,
-                    getTop() + offsetY,
-                    getRight() + offsetX,
-                    getBottom() + offsetY
-            );
-            break;
-    }
-    return true;
-}
-</code></pre><hr>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouchEvent</span><span class="params">(MotionEvent event)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> x = (<span class="keyword">int</span>) event.getX();</span><br><span class="line">    <span class="keyword">int</span> y = (<span class="keyword">int</span>) event.getY();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (event.getAction()) &#123;</span><br><span class="line">        <span class="keyword">case</span> MotionEvent.ACTION_DOWN:</span><br><span class="line">            <span class="comment">//记录触摸点的坐标</span></span><br><span class="line">            lastX = x;</span><br><span class="line">            lastY = y;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> MotionEvent.ACTION_MOVE:</span><br><span class="line">            <span class="comment">//计算偏移量</span></span><br><span class="line">            <span class="keyword">int</span> offsetX = x - lastX;</span><br><span class="line">            <span class="keyword">int</span> offsetY = y - lastY;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//在当前位置基础加上偏移量</span></span><br><span class="line">            layout(</span><br><span class="line">                    getLeft() + offsetX,</span><br><span class="line">                    getTop() + offsetY,</span><br><span class="line">                    getRight() + offsetX,</span><br><span class="line">                    getBottom() + offsetY</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
 <ul>
 <li><strong>offsetLeftAndRight()和offsetTopAndBottom</strong></li>
 </ul>
@@ -244,28 +219,8 @@ setLayoutParams(params);
 <li>startScroll()开启滑动</li>
 </ol>
 <p>代码如下：</p>
-<pre><code>        case MotionEvent.ACTION_UP:
-            View viewGroup = (View) getParent();
-            mScroller.startScroll(
-                    viewGroup.getScrollX(),
-                    viewGroup.getScrollY(),
-                    -viewGroup.getScrollX(),
-                    -viewGroup.getScrollY()
-            );
-            invalidate();
-            break;
-
-  ----------------------------------------------------------------     
-
-        @Overrid  
-        public void computeScroll() {
-            super.computeScroll();
-            if (mScroller.computeScrollOffset()) {
-            ((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
-            invalidate();
-    }
-}
-</code></pre><p>当我们手指抬起来的时候开启Scroller滑动，获取到当前view的移动距离，然后我们把需要移动的偏移量设置为相反数就ok，最后调用invalidate来通知重绘，从而调用computeScroll()方法。运行程序如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">        <span class="keyword">case</span> MotionEvent.ACTION_UP:</span><br><span class="line">            View viewGroup = (View) getParent();</span><br><span class="line">            mScroller.startScroll(</span><br><span class="line">                    viewGroup.getScrollX(),</span><br><span class="line">                    viewGroup.getScrollY(),</span><br><span class="line">                    -viewGroup.getScrollX(),</span><br><span class="line">                    -viewGroup.getScrollY()</span><br><span class="line">            );</span><br><span class="line">            invalidate();</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">            </span><br><span class="line">  ----------------------------------------------------------------     </span><br><span class="line">            </span><br><span class="line">        <span class="meta">@Overrid</span>  </span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">computeScroll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    		<span class="keyword">super</span>.computeScroll();</span><br><span class="line">    		<span class="keyword">if</span> (mScroller.computeScrollOffset()) &#123;</span><br><span class="line">        	((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());</span><br><span class="line">        	invalidate();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我们手指抬起来的时候开启Scroller滑动，获取到当前view的移动距离，然后我们把需要移动的偏移量设置为相反数就ok，最后调用invalidate来通知重绘，从而调用computeScroll()方法。运行程序如下：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/1822424-2251dce7b4d1c1c7.gif?imageMogr2/auto-orient/strip" alt=""></p>
 <p>现在就把这几种View的滑动都说完了，自己动手写一下，感触良多。</p>
 <hr>
@@ -292,7 +247,7 @@ setLayoutParams(params);
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

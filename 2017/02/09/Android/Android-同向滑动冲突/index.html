@@ -143,184 +143,14 @@
 <p><strong>获取顶部和底部的View</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">lv.setOnScrollListener(<span class="keyword">new</span> AbsListView.OnScrollListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScrollStateChanged</span><span class="params">(AbsListView view, <span class="keyword">int</span> scrollState)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScroll</span><span class="params">(AbsListView view, <span class="keyword">int</span> firstVisibleItem,</span></span></span><br><span class="line"><span class="function"><span class="params">                         <span class="keyword">int</span> visibleItemCount, <span class="keyword">int</span> totalItemCount)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 从这里获取最后一个item的View和第一个item的View</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        lastView = view.getChildAt(totalItemCount - firstVisibleItem - <span class="number">1</span>);</span><br><span class="line">        firstView = view.getChildAt(firstVisibleItem);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 <p><strong>判断是否达到顶端或者底端</strong></p>
-<pre><code>int action = motionEvent.getAction();
-if (action == MotionEvent.ACTION_DOWN) {
-    lastY = (int) motionEvent.getY();
-} else if (action == MotionEvent.ACTION_MOVE) {
-    /**
-     * 这里判断是向下还是向上滑动
-     */
-    if (lastY &gt; motionEvent.getY()) {
-        isDown = true;
-        isUp = false;
-    } else {
-        isDown = false;
-        isUp = true;
-    }
-}
-
-if (lv != null) {
-    if (firstView != null &amp;&amp; isUp) {
-        /**
-         * 如果ListView已经初始化并且firstView不为空
-         * 而且不是第一次加载视图（因为第一次加载视图getTop肯定为0）并且向上滑动
-         *
-         */
-        if (firstView.getTop() == 0) {
-            flag = true;
-        } else {
-            flag = false;
-        }
-    }
-    if (lastView != null &amp;&amp; isDown) {
-        /**
-         * 这里判断坐标，如果lastView的Bottom等于这个ListView的高度并且是往下滑
-         * 则把flag设置为true，当然这里还有一个坑，因为ListView是固定高度，所以所有的item高度之和都没有达到ListView的高度，那么这个也需要判断一下
-         */
-
-        int childHeight = lv.getChildAt(0).getHeight();
-        int childCount = lv.getChildCount();
-        int totalChildHeight = childHeight * childCount;
-
-        if ((lastView.getBottom()) == view.getHeight() || totalChildHeight &lt; view.getHeight()) {
-            flag = true;
-        } else {
-            flag = false;
-        }
-        isFirst = false;
-    }
-}
-</code></pre><p>这里我们还需要判断一下手势，达到了顶端并且是往上滑，达到了底部并且往下滑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> action = motionEvent.getAction();</span><br><span class="line"><span class="keyword">if</span> (action == MotionEvent.ACTION_DOWN) &#123;</span><br><span class="line">    lastY = (<span class="keyword">int</span>) motionEvent.getY();</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (action == MotionEvent.ACTION_MOVE) &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 这里判断是向下还是向上滑动</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (lastY &gt; motionEvent.getY()) &#123;</span><br><span class="line">        isDown = <span class="keyword">true</span>;</span><br><span class="line">        isUp = <span class="keyword">false</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        isDown = <span class="keyword">false</span>;</span><br><span class="line">        isUp = <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (lv != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (firstView != <span class="keyword">null</span> &amp;&amp; isUp) &#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 如果ListView已经初始化并且firstView不为空</span></span><br><span class="line"><span class="comment">         * 而且不是第一次加载视图（因为第一次加载视图getTop肯定为0）并且向上滑动</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="keyword">if</span> (firstView.getTop() == <span class="number">0</span>) &#123;</span><br><span class="line">            flag = <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            flag = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (lastView != <span class="keyword">null</span> &amp;&amp; isDown) &#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 这里判断坐标，如果lastView的Bottom等于这个ListView的高度并且是往下滑</span></span><br><span class="line"><span class="comment">         * 则把flag设置为true，当然这里还有一个坑，因为ListView是固定高度，所以所有的item高度之和都没有达到ListView的高度，那么这个也需要判断一下</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> childHeight = lv.getChildAt(<span class="number">0</span>).getHeight();</span><br><span class="line">        <span class="keyword">int</span> childCount = lv.getChildCount();</span><br><span class="line">        <span class="keyword">int</span> totalChildHeight = childHeight * childCount;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ((lastView.getBottom()) == view.getHeight() || totalChildHeight &lt; view.getHeight()) &#123;</span><br><span class="line">            flag = <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            flag = <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        isFirst = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里我们还需要判断一下手势，达到了顶端并且是往上滑，达到了底部并且往下滑。</p>
 <p>当然这里还有一个坑，那就是我们刚家在布局的时候getTop()是肯定等于0的，所以我们要判断一下是否是第一次加载</p>
 <p>最后我们通过flag来判断一下是否让ScrollView来拦截事件</p>
-<pre><code>/**
- * flag 为 true的时候 ScrollView开始获得事件
- */
-if (flag &amp;&amp; !isFirst) {
-    sv.requestDisallowInterceptTouchEvent(false);
-} else {
-    sv.requestDisallowInterceptTouchEvent(true);
-}
-</code></pre><p>这样一来也就结束了，放上全部代码</p>
-<pre><code>public class MainActivity extends AppCompatActivity {
-
-    List&lt;String&gt; mData;
-    ListView lv;
-    ArrayAdapter&lt;String&gt; adapter;
-    ScrollView sv;
-    boolean flag, isFirst = true;
-    boolean isUp, isDown;
-    int lastY;
-    View lastView, firstView;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        mData = new ArrayList&lt;&gt;();
-        for (int i = 0; i &lt; 10; i++) {
-            mData.add(&quot;ad &quot; + i);
-        }
-
-        tv1 = (TextView) findViewById(R.id.tv1);
-        sv = (ScrollView) findViewById(R.id.sv);
-        lv = (ListView) findViewById(R.id.lv);
-        adapter = new ArrayAdapter&lt;&gt;(this, android.R.layout.simple_expandable_list_item_1, mData);
-        lv.setAdapter(adapter);
-
-        lv.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                sv.requestDisallowInterceptTouchEvent(true);
-
-            int action = motionEvent.getAction();
-            if (action == MotionEvent.ACTION_DOWN) {
-                lastY = (int) motionEvent.getY();
-            } else if (action == MotionEvent.ACTION_MOVE) {
-                /**
-                 * 这里判断是向下还是向上滑动
-                 */
-                if (lastY &gt; motionEvent.getY()) {
-                    isDown = true;
-                    isUp = false;
-                } else {
-                    isDown = false;
-                    isUp = true;
-                }
-            }
-
-            if (lv != null) {
-                if (firstView != null &amp;&amp; isUp) {
-                    /**
-                     * 如果ListView已经初始化并且firstView不为空
-                     * 而且不是第一次加载视图（因为第一次加载视图getTop肯定为0）并且向上滑动
-                     *
-                     */
-                    if (firstView.getTop() == 0) {
-                        flag = true;
-                    } else {
-                        flag = false;
-                    }
-                }
-                if (lastView != null &amp;&amp; isDown) {
-                    /**
-                     * 这里判断坐标，如果lastView的Bottom等于这个ListView的高度并且是往下滑
-                     * 则把flag设置为true
-                     */
-
-                    int childHeight = lv.getChildAt(0).getHeight();
-                    int childCount = lv.getChildCount();
-                    int totalChildHeight = childHeight * childCount;
-
-                    if ((lastView.getBottom()) == view.getHeight() || totalChildHeight &lt; view.getHeight()) {
-                        flag = true;
-                    } else {
-                        flag = false;
-                    }
-                    isFirst = false;
-                }
-            }
-
-
-                /**
-                 * flag 为 true的时候 ScrollView开始获得事件
-                 */
-                if (flag &amp;&amp; !isFirst) {
-                    sv.requestDisallowInterceptTouchEvent(false);
-                } else {
-                    sv.requestDisallowInterceptTouchEvent(true);
-                }
-
-
-                return false;
-            }
-        });
-
-        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-
-            }
-
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem,
-                                 int visibleItemCount, int totalItemCount) {
-
-                /**
-                 * 从这里获取最后一个item的View和第一个item的View
-                 */
-                lastView = view.getChildAt(totalItemCount - firstVisibleItem - 1);
-                firstView = view.getChildAt(firstVisibleItem);
-
-
-            }
-        });
-    }
-}
-</code></pre><hr>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * flag 为 true的时候 ScrollView开始获得事件</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">if</span> (flag &amp;&amp; !isFirst) &#123;</span><br><span class="line">    sv.requestDisallowInterceptTouchEvent(<span class="keyword">false</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    sv.requestDisallowInterceptTouchEvent(<span class="keyword">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样一来也就结束了，放上全部代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    List&lt;String&gt; mData;</span><br><span class="line">    ListView lv;</span><br><span class="line">    ArrayAdapter&lt;String&gt; adapter;</span><br><span class="line">    ScrollView sv;</span><br><span class="line">    <span class="keyword">boolean</span> flag, isFirst = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">boolean</span> isUp, isDown;</span><br><span class="line">    <span class="keyword">int</span> lastY;</span><br><span class="line">    View lastView, firstView;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line"></span><br><span class="line">        mData = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">            mData.add(<span class="string">"ad "</span> + i);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        tv1 = (TextView) findViewById(R.id.tv1);</span><br><span class="line">        sv = (ScrollView) findViewById(R.id.sv);</span><br><span class="line">        lv = (ListView) findViewById(R.id.lv);</span><br><span class="line">        adapter = <span class="keyword">new</span> ArrayAdapter&lt;&gt;(<span class="keyword">this</span>, android.R.layout.simple_expandable_list_item_1, mData);</span><br><span class="line">        lv.setAdapter(adapter);</span><br><span class="line"></span><br><span class="line">        lv.setOnTouchListener(<span class="keyword">new</span> View.OnTouchListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouch</span><span class="params">(View view, MotionEvent motionEvent)</span> </span>&#123;</span><br><span class="line">                sv.requestDisallowInterceptTouchEvent(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">int</span> action = motionEvent.getAction();</span><br><span class="line">      <span class="keyword">if</span> (action == MotionEvent.ACTION_DOWN) &#123;</span><br><span class="line">          lastY = (<span class="keyword">int</span>) motionEvent.getY();</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (action == MotionEvent.ACTION_MOVE) &#123;</span><br><span class="line">          <span class="comment">/**</span></span><br><span class="line"><span class="comment">           * 这里判断是向下还是向上滑动</span></span><br><span class="line"><span class="comment">           */</span></span><br><span class="line">          <span class="keyword">if</span> (lastY &gt; motionEvent.getY()) &#123;</span><br><span class="line">              isDown = <span class="keyword">true</span>;</span><br><span class="line">              isUp = <span class="keyword">false</span>;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              isDown = <span class="keyword">false</span>;</span><br><span class="line">              isUp = <span class="keyword">true</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">		</span><br><span class="line">      <span class="keyword">if</span> (lv != <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (firstView != <span class="keyword">null</span> &amp;&amp; isUp) &#123;</span><br><span class="line">              <span class="comment">/**</span></span><br><span class="line"><span class="comment">               * 如果ListView已经初始化并且firstView不为空</span></span><br><span class="line"><span class="comment">               * 而且不是第一次加载视图（因为第一次加载视图getTop肯定为0）并且向上滑动</span></span><br><span class="line"><span class="comment">               *</span></span><br><span class="line"><span class="comment">               */</span></span><br><span class="line">              <span class="keyword">if</span> (firstView.getTop() == <span class="number">0</span>) &#123;</span><br><span class="line">                  flag = <span class="keyword">true</span>;</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  flag = <span class="keyword">false</span>;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">if</span> (lastView != <span class="keyword">null</span> &amp;&amp; isDown) &#123;</span><br><span class="line">              <span class="comment">/**</span></span><br><span class="line"><span class="comment">               * 这里判断坐标，如果lastView的Bottom等于这个ListView的高度并且是往下滑</span></span><br><span class="line"><span class="comment">               * 则把flag设置为true</span></span><br><span class="line"><span class="comment">               */</span></span><br><span class="line">		</span><br><span class="line">              <span class="keyword">int</span> childHeight = lv.getChildAt(<span class="number">0</span>).getHeight();</span><br><span class="line">              <span class="keyword">int</span> childCount = lv.getChildCount();</span><br><span class="line">              <span class="keyword">int</span> totalChildHeight = childHeight * childCount;</span><br><span class="line">		</span><br><span class="line">              <span class="keyword">if</span> ((lastView.getBottom()) == view.getHeight() || totalChildHeight &lt; view.getHeight()) &#123;</span><br><span class="line">                  flag = <span class="keyword">true</span>;</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  flag = <span class="keyword">false</span>;</span><br><span class="line">              &#125;</span><br><span class="line">              isFirst = <span class="keyword">false</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="comment">/**</span></span><br><span class="line"><span class="comment">                 * flag 为 true的时候 ScrollView开始获得事件</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                <span class="keyword">if</span> (flag &amp;&amp; !isFirst) &#123;</span><br><span class="line">                    sv.requestDisallowInterceptTouchEvent(<span class="keyword">false</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    sv.requestDisallowInterceptTouchEvent(<span class="keyword">true</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        lv.setOnScrollListener(<span class="keyword">new</span> AbsListView.OnScrollListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScrollStateChanged</span><span class="params">(AbsListView view, <span class="keyword">int</span> scrollState)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScroll</span><span class="params">(AbsListView view, <span class="keyword">int</span> firstVisibleItem,</span></span></span><br><span class="line"><span class="function"><span class="params">                                 <span class="keyword">int</span> visibleItemCount, <span class="keyword">int</span> totalItemCount)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">/**</span></span><br><span class="line"><span class="comment">                 * 从这里获取最后一个item的View和第一个item的View</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                lastView = view.getChildAt(totalItemCount - firstVisibleItem - <span class="number">1</span>);</span><br><span class="line">                firstView = view.getChildAt(firstVisibleItem);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
 <h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱小丽，爱Android</p>
 
                     
@@ -344,7 +174,7 @@ if (flag &amp;&amp; !isFirst) {
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

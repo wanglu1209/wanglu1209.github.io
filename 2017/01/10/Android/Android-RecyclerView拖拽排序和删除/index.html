@@ -143,148 +143,14 @@
 <p>这么长一大段，我以小学英语水平大致看了一下，差不多的意思就是说『如果用户拖动了某一个Item，那么就会回调onMove这个方法，而在收到这个回调的时候我们应该让RecyclerView做一些事情，比如从旧的位置(dragged.getAdapterPosition())到新的位置（target.getAdapterPosition()），然后在你的adapter中调用notifyItemMoved(int, int)方法』</p>
 <p><strong>大致就是这个意思，反正我看不太懂</strong></p>
 <p>所以我们应该能有点思路，就是拖动的时候要回调onMove()方法，然后我们根据这个方法来回调参数进行我们的操作，这首先就想到了接口，所以我们定义一个接口：</p>
-<pre><code>public interface OnItemCallbackListener {
-    /**
-     * @param fromPosition 起始位置
-     * @param toPosition 移动的位置
-     */
-    void onMove(int fromPosition, int toPosition);
-    void onSwipe(int position);
-}
-</code></pre><p>然后在onMove()/onSwiped()方法中回调</p>
-<pre><code>/**
- * Item是否能被Swipe到dismiss
- * 也就是删除这条数据
- */
-@Override
-public boolean isItemViewSwipeEnabled() {
-    return true;
-}
-
-/**
- * Item长按是否可以拖拽
- */
-@Override
-public boolean isLongPressDragEnabled() {
-    return true;
-}
-
-/**
- * 设置Drag/Swipe的Flag
- * 这里我们把滑动(Drag)的四个方向全都设置上了,说明Item可以随意移动
- * 然后把删除(暂且叫删除/swipe)的方向设置为Start和End,说明可以水平拖动删除
- */
-@Override
-public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-    int dragFlag = ItemTouchHelper.LEFT | ItemTouchHelper.DOWN | ItemTouchHelper.UP | ItemTouchHelper.RIGHT;
-    int swipeFlag = ItemTouchHelper.START | ItemTouchHelper.END;
-
-    return makeMovementFlags(dragFlag, swipeFlag);
-}
-
-@Override
-public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-    /**
-     * 回调
-     */
-    adapter.onMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-    return true;
-}
-
-@Override
-public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-    /**
-     * 回调
-     */
-    adapter.onSwipe(viewHolder.getAdapterPosition());
-}
-</code></pre><p>然后我们定义一个自己的adapter来实现这个接口，代码如下：</p>
-<pre><code>public class MyAdapter extends  RecyclerView.Adapter&lt;MyAdapter.Holder&gt; implements OnItemCallbackListener{
-
-    private List&lt;String&gt; mData;
-    private Context mContext;
-
-    public MyAdapter(Context mContext) {
-        this.mContext = mContext;
-        mData = new ArrayList&lt;&gt;();
-        mData.add(&quot;one&quot;);
-        mData.add(&quot;two&quot;);
-        mData.add(&quot;three&quot;);
-        mData.add(&quot;four&quot;);
-        mData.add(&quot;five&quot;);
-        mData.add(&quot;six&quot;);
-        mData.add(&quot;seven&quot;);
-    }
-
-    @Override
-    public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.adapter_test, parent, false);
-        return new Holder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(final Holder holder, int position) {
-        holder.tv.setText(mData.get(position));
-    }
-
-    @Override
-    public int getItemCount() {
-        return mData.size();
-    }
-
-    @Override
-    public void onMove(int fromPosition, int toPosition) {
-        /**
-         * 在这里进行给原数组数据的移动
-         */
-        Collections.swap(mData, fromPosition, toPosition);
-        /**
-         * 通知数据移动
-         */
-        notifyItemMoved(fromPosition, toPosition);
-    }
-
-    @Override
-    public void onSwipe(int position) {
-        /**
-         * 原数据移除数据
-         */
-        mData.remove(position);
-        /**
-         * 通知移除
-         */
-        notifyItemRemoved(position);
-    }
-
-    class Holder extends RecyclerView.ViewHolder {
-        TextView tv;
-        public Holder(View itemView) {
-            super(itemView);
-            tv = (TextView) itemView.findViewById(R.id.tv);
-        }
-    }
-}
-</code></pre><p>最后在Activity中：</p>
-<pre><code>@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-
-    RecyclerView rv = (RecyclerView) findViewById(R.id.rv);
-    rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-
-    final MyAdapter adapter = new MyAdapter(this);
-    rv.setAdapter(adapter);
-
-    ItemTouchHelper.Callback callback = new OnItemCallbackHelper(adapter);
-
-    /**
-     * 实例化ItemTouchHelper对象,然后添加到RecyclerView
-     */
-    ItemTouchHelper helper = new ItemTouchHelper(callback);
-    helper.attachToRecyclerView(rv);
-}
-</code></pre><p>这样一个最简单的拖拽滑动、删除的效果就完成了，其实还可以设置RecyclerView的其他LayoutManager，这里就不过多做解释了，有兴趣的可以试试</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">OnItemCallbackListener</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> fromPosition 起始位置</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> toPosition 移动的位置</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onMove</span><span class="params">(<span class="keyword">int</span> fromPosition, <span class="keyword">int</span> toPosition)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onSwipe</span><span class="params">(<span class="keyword">int</span> position)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在onMove()/onSwiped()方法中回调</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Item是否能被Swipe到dismiss</span></span><br><span class="line"><span class="comment"> * 也就是删除这条数据</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isItemViewSwipeEnabled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Item长按是否可以拖拽</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isLongPressDragEnabled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置Drag/Swipe的Flag</span></span><br><span class="line"><span class="comment"> * 这里我们把滑动(Drag)的四个方向全都设置上了,说明Item可以随意移动</span></span><br><span class="line"><span class="comment"> * 然后把删除(暂且叫删除/swipe)的方向设置为Start和End,说明可以水平拖动删除</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMovementFlags</span><span class="params">(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> dragFlag = ItemTouchHelper.LEFT | ItemTouchHelper.DOWN | ItemTouchHelper.UP | ItemTouchHelper.RIGHT;</span><br><span class="line">    <span class="keyword">int</span> swipeFlag = ItemTouchHelper.START | ItemTouchHelper.END;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> makeMovementFlags(dragFlag, swipeFlag);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onMove</span><span class="params">(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 回调</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    adapter.onMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSwiped</span><span class="params">(RecyclerView.ViewHolder viewHolder, <span class="keyword">int</span> direction)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 回调</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    adapter.onSwipe(viewHolder.getAdapterPosition());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们定义一个自己的adapter来实现这个接口，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyAdapter</span> <span class="keyword">extends</span>  <span class="title">RecyclerView</span>.<span class="title">Adapter</span>&lt;<span class="title">MyAdapter</span>.<span class="title">Holder</span>&gt; <span class="keyword">implements</span> <span class="title">OnItemCallbackListener</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;String&gt; mData;</span><br><span class="line">    <span class="keyword">private</span> Context mContext;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyAdapter</span><span class="params">(Context mContext)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mContext = mContext;</span><br><span class="line">        mData = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        mData.add(<span class="string">"one"</span>);</span><br><span class="line">        mData.add(<span class="string">"two"</span>);</span><br><span class="line">        mData.add(<span class="string">"three"</span>);</span><br><span class="line">        mData.add(<span class="string">"four"</span>);</span><br><span class="line">        mData.add(<span class="string">"five"</span>);</span><br><span class="line">        mData.add(<span class="string">"six"</span>);</span><br><span class="line">        mData.add(<span class="string">"seven"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Holder <span class="title">onCreateViewHolder</span><span class="params">(ViewGroup parent, <span class="keyword">int</span> viewType)</span> </span>&#123;</span><br><span class="line">        View view = LayoutInflater.from(mContext).inflate(R.layout.adapter_test, parent, <span class="keyword">false</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Holder(view);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onBindViewHolder</span><span class="params">(<span class="keyword">final</span> Holder holder, <span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">        holder.tv.setText(mData.get(position));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getItemCount</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mData.size();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMove</span><span class="params">(<span class="keyword">int</span> fromPosition, <span class="keyword">int</span> toPosition)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 在这里进行给原数组数据的移动</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        Collections.swap(mData, fromPosition, toPosition);</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 通知数据移动</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        notifyItemMoved(fromPosition, toPosition);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSwipe</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 原数据移除数据</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        mData.remove(position);</span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 通知移除</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        notifyItemRemoved(position);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Holder</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">ViewHolder</span> </span>&#123;</span><br><span class="line">        TextView tv;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Holder</span><span class="params">(View itemView)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>(itemView);</span><br><span class="line">            tv = (TextView) itemView.findViewById(R.id.tv);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后在Activity中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">    setContentView(R.layout.activity_main);</span><br><span class="line"></span><br><span class="line">    RecyclerView rv = (RecyclerView) findViewById(R.id.rv);</span><br><span class="line">    rv.setLayoutManager(<span class="keyword">new</span> LinearLayoutManager(<span class="keyword">this</span>, LinearLayoutManager.VERTICAL, <span class="keyword">false</span>));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> MyAdapter adapter = <span class="keyword">new</span> MyAdapter(<span class="keyword">this</span>);</span><br><span class="line">    rv.setAdapter(adapter);</span><br><span class="line">    </span><br><span class="line">    ItemTouchHelper.Callback callback = <span class="keyword">new</span> OnItemCallbackHelper(adapter);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 实例化ItemTouchHelper对象,然后添加到RecyclerView</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ItemTouchHelper helper = <span class="keyword">new</span> ItemTouchHelper(callback);</span><br><span class="line">    helper.attachToRecyclerView(rv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样一个最简单的拖拽滑动、删除的效果就完成了，其实还可以设置RecyclerView的其他LayoutManager，这里就不过多做解释了，有兴趣的可以试试</p>
 <hr>
 <h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
 
@@ -309,7 +175,7 @@ protected void onCreate(Bundle savedInstanceState) {
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

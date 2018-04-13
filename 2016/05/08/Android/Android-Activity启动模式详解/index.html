@@ -169,24 +169,8 @@ Activity的LaunchMode
 <h2 id="强行举个特殊的例子"><a href="#强行举个特殊的例子" class="headerlink" title="强行举个特殊的例子"></a>强行举个特殊的例子</h2><p>如图：</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip" alt=""></p>
 <p>首先我们看一下AndroidManifest里的配置</p>
-<pre><code>&lt;activity android:name=&quot;.MainActivity&quot;&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-
-        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-    &lt;/intent-filter&gt;
-&lt;/activity&gt;
-
-&lt;activity
-    android:name=&quot;.SecondActivity&quot;
-    android:launchMode=&quot;singleTask&quot;
-    android:taskAffinity=&quot;com.task1&quot; /&gt;
-
-&lt;activity
-    android:name=&quot;.ThirdActivity&quot;
-    android:launchMode=&quot;singleTask&quot;
-    android:taskAffinity=&quot;com.task1&quot; /&gt;
-</code></pre><p>可以看到我们给SecondActivity和ThirdActivity设置了singleTask模式和taskAffinity，也就是所需的任务栈。从图里我们可以看出，首先由MainActivity启动SecondActivity，然后由SecondActivity启动ThirdActivity，再由ThirdActivity启动MainActivity，最后再启动SecondActivity。然后我们按两次回退键，发现回到了桌面了，这是为什么？</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">".MainActivity"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.MAIN"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">"android.intent.category.LAUNCHER"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">activity</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">".SecondActivity"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:launchMode</span>=<span class="string">"singleTask"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:taskAffinity</span>=<span class="string">"com.task1"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">activity</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">".ThirdActivity"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:launchMode</span>=<span class="string">"singleTask"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:taskAffinity</span>=<span class="string">"com.task1"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以看到我们给SecondActivity和ThirdActivity设置了singleTask模式和taskAffinity，也就是所需的任务栈。从图里我们可以看出，首先由MainActivity启动SecondActivity，然后由SecondActivity启动ThirdActivity，再由ThirdActivity启动MainActivity，最后再启动SecondActivity。然后我们按两次回退键，发现回到了桌面了，这是为什么？</p>
 <p>首先我们把MainActivity设为A，SecondActivity为B，ThirdActivity为C。</p>
 <p>从Manifest文件中可以看到A为standard模式，任务栈为包名，而B和C是singleTask模式，任务栈为com.task1。</p>
 <p>所以当我们从A启动B的时候，系统会为我们新建一个任务栈，就是com.task1，从而把B进栈。</p>
@@ -219,7 +203,7 @@ Activity的LaunchMode
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

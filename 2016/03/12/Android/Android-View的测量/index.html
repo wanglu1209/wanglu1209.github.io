@@ -160,62 +160,13 @@ UNSPECIFIED
 </ol>
 <p>其中View类<strong>默认的</strong>onMeasure()方法<strong>只支持EXACTLY模式</strong>，所以说如果不重写onMeasure()方法的话就只能使用EXACTLY模式。</p>
 <p>一言不合上代码</p>
-<pre><code>public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-    setBackgroundColor(Color.BLUE);
-} 
-</code></pre><p>这里我只给当前自定义View设置了一个背景颜色，然后在XML中设置成wrap_content</p>
-<pre><code>&lt;com.github.wanglu1209.CustomView
-    android:layout_width=&quot;wrap_content&quot;
-    android:layout_height=&quot;wrap_content&quot; /&gt; 
-</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">CustomView</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">super</span>(context, attrs, defStyleAttr);</span><br><span class="line">       setBackgroundColor(Color.BLUE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里我只给当前自定义View设置了一个背景颜色，然后在XML中设置成wrap_content</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;com.github.wanglu1209.CustomView</span><br><span class="line">       android:layout_width=<span class="string">"wrap_content"</span></span><br><span class="line">       android:layout_height=<span class="string">"wrap_content"</span> /&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <p>运行起来就是这样全屏的，下面我们还是这个例子，重写onMeasure()方法</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-    int specMode, specSize = 0;
-    int mWidth, mHeight;
-
-    /**
-     * Measure Width
-     */
-    specMode = MeasureSpec.getMode(widthMeasureSpec);
-    switch (specMode){
-        case MeasureSpec.AT_MOST:   //wrap_content
-            specSize = 200;
-            break;
-        case MeasureSpec.EXACTLY:   //math_content 和 精确值
-            specSize = MeasureSpec.getSize(widthMeasureSpec);
-            break;
-        case MeasureSpec.UNSPECIFIED:
-            specSize = 400;
-            break;
-    }
-    mWidth = specSize;
-
-    /**
-     * Measure Height
-     */
-    specMode = MeasureSpec.getMode(heightMeasureSpec);
-    switch (specMode){
-        case MeasureSpec.AT_MOST:   //wrap_content
-            specSize = 200;
-            break;
-        case MeasureSpec.EXACTLY:   //math_content 和 精确值
-            specSize = MeasureSpec.getSize(heightMeasureSpec);
-            break;
-        case MeasureSpec.UNSPECIFIED:
-            specSize = 400;
-            break;
-    }
-    mHeight = specSize;
-
-    /**
-     * 最后调用setMeasuredDimension进行赋值
-     */
-    setMeasuredDimension(mWidth, mHeight);
-}
-</code></pre><p>可以看到这里我们给wrap_content赋值200，我们XML代码不变还是wrap_content，运行一下程序</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">        </span><br><span class="line">       <span class="keyword">int</span> specMode, specSize = <span class="number">0</span>;</span><br><span class="line">       <span class="keyword">int</span> mWidth, mHeight;</span><br><span class="line"></span><br><span class="line">       <span class="comment">/**</span></span><br><span class="line"><span class="comment">        * Measure Width</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">       specMode = MeasureSpec.getMode(widthMeasureSpec);</span><br><span class="line">       <span class="keyword">switch</span> (specMode)&#123;</span><br><span class="line">           <span class="keyword">case</span> MeasureSpec.AT_MOST:   <span class="comment">//wrap_content</span></span><br><span class="line">               specSize = <span class="number">200</span>;</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> MeasureSpec.EXACTLY:   <span class="comment">//math_content 和 精确值</span></span><br><span class="line">               specSize = MeasureSpec.getSize(widthMeasureSpec);</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> MeasureSpec.UNSPECIFIED:</span><br><span class="line">               specSize = <span class="number">400</span>;</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       mWidth = specSize;</span><br><span class="line"></span><br><span class="line">       <span class="comment">/**</span></span><br><span class="line"><span class="comment">        * Measure Height</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">       specMode = MeasureSpec.getMode(heightMeasureSpec);</span><br><span class="line">       <span class="keyword">switch</span> (specMode)&#123;</span><br><span class="line">           <span class="keyword">case</span> MeasureSpec.AT_MOST:   <span class="comment">//wrap_content</span></span><br><span class="line">               specSize = <span class="number">200</span>;</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> MeasureSpec.EXACTLY:   <span class="comment">//math_content 和 精确值</span></span><br><span class="line">               specSize = MeasureSpec.getSize(heightMeasureSpec);</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">           <span class="keyword">case</span> MeasureSpec.UNSPECIFIED:</span><br><span class="line">               specSize = <span class="number">400</span>;</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       mHeight = specSize;</span><br><span class="line"></span><br><span class="line">       <span class="comment">/**</span></span><br><span class="line"><span class="comment">        * 最后调用setMeasuredDimension进行赋值</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">       setMeasuredDimension(mWidth, mHeight);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里我们给wrap_content赋值200，我们XML代码不变还是wrap_content，运行一下程序</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/1822424-0e9fc7b558921b74.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <p>可以看的出来大小确实变成了200，通过这个小例子就可以对View的测量有一个不错的认识了，并没有什么高深莫测的东西，一步一步来。</p>
 <hr>
@@ -242,7 +193,7 @@ UNSPECIFIED
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

@@ -146,59 +146,10 @@
 <li>不能控制自动播放</li>
 </ul>
 <p>所以这就需要自己封装一个了，其实还是用的ViewPager，只不过更改了他的触摸事件并且设置了自动轮播的时间，然后自己写了一个PagerAdapter来实现无限轮播，最后下面的指示器和ViewPager、PagerAdapter封装到了一起，所以使用的时候很简单。<strong>只需要继承自BannerPagerAdapter，重写构造和setView()方法。然后在使用的时候调用方法即可</strong>，基本代码如下：</p>
-<pre><code>List&lt;Integer&gt; data = new ArrayList&lt;&gt;();
-data.add(R.mipmap.a1);
-data.add(R.mipmap.a2);
-data.add(R.mipmap.a3);
-data.add(R.mipmap.a4);
-
-
-AdapterDemo ad = new AdapterDemo(this, data);
-
-Banner banner = (Banner) findViewById(R.id.banner);
-
-/**
- * 关于这里的设置参数问题,是需要这样使用的
- * 在设置了小圆点之后才能设置适配器
- * 因为只有在适配器里才会根据一共多少条数据来适配
- * 最后需要调用开始轮播
- * 个人建议在onPause()/onDestroy()方法中来停止 -- stopAutoPlay()
- */
-banner.setDot(R.drawable.no_selected_dot, R.drawable.selected_dot).
-    setDotGravity(Banner.CENTER).
-    setAdapter(ad).
-    setOnItemClickListener(new BannerPagerAdapter.onItemClickListener() {
-        @Override
-        public void onClick(int position) {
-            Toast.makeText(MainActivity.this, &quot;&quot; + position, Toast.LENGTH_SHORT).show();
-        }
-    }).
-    startAutoPlay(); 
-</code></pre><p>下面是AdapterDemo的代码：</p>
-<pre><code>public class AdapterDemo extends BannerPagerAdapter {
-
-    private Context mContext;
-    private List&lt;Integer&gt; data;
-
-    public AdapterDemo(Context context, List data) {
-        super(context, data);
-        mContext = context;
-        this.data = data;
-    }
-
-    /**
-     * 只需要重写构造和这个方法即可
-     * 在这里可以设置自己的View,使用自己的图片加载库
-     */
-    @Override
-    public View setView(int position) {
-        View v = LayoutInflater.from(mContext).inflate(R.layout.test, null);
-        ImageView iv = (ImageView) v.findViewById(R.id.iv);
-        iv.setImageResource(data.get(position));
-        return v;
-    }
-}
-</code></pre><p>可以看的出来这里给调用者很大的空间来进行自己的操作，在setView中直接可以根据position来设置自己的View和数据，<strong>并且使用自己的图片加载库。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; data = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">data.add(R.mipmap.a1);</span><br><span class="line">data.add(R.mipmap.a2);</span><br><span class="line">data.add(R.mipmap.a3);</span><br><span class="line">data.add(R.mipmap.a4);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">AdapterDemo ad = <span class="keyword">new</span> AdapterDemo(<span class="keyword">this</span>, data);</span><br><span class="line"></span><br><span class="line">Banner banner = (Banner) findViewById(R.id.banner);</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 关于这里的设置参数问题,是需要这样使用的</span></span><br><span class="line"><span class="comment"> * 在设置了小圆点之后才能设置适配器</span></span><br><span class="line"><span class="comment"> * 因为只有在适配器里才会根据一共多少条数据来适配</span></span><br><span class="line"><span class="comment"> * 最后需要调用开始轮播</span></span><br><span class="line"><span class="comment"> * 个人建议在onPause()/onDestroy()方法中来停止 -- stopAutoPlay()</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">banner.setDot(R.drawable.no_selected_dot, R.drawable.selected_dot).</span><br><span class="line">    setDotGravity(Banner.CENTER).</span><br><span class="line">    setAdapter(ad).</span><br><span class="line">    setOnItemClickListener(<span class="keyword">new</span> BannerPagerAdapter.onItemClickListener() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">            Toast.makeText(MainActivity.<span class="keyword">this</span>, <span class="string">""</span> + position, Toast.LENGTH_SHORT).show();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;).</span><br><span class="line">    startAutoPlay();</span><br></pre></td></tr></table></figure>
+<p>下面是AdapterDemo的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AdapterDemo</span> <span class="keyword">extends</span> <span class="title">BannerPagerAdapter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Context mContext;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Integer&gt; data;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AdapterDemo</span><span class="params">(Context context, List data)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(context, data);</span><br><span class="line">        mContext = context;</span><br><span class="line">        <span class="keyword">this</span>.data = data;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 只需要重写构造和这个方法即可</span></span><br><span class="line"><span class="comment">     * 在这里可以设置自己的View,使用自己的图片加载库</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> View <span class="title">setView</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">        View v = LayoutInflater.from(mContext).inflate(R.layout.test, <span class="keyword">null</span>);</span><br><span class="line">        ImageView iv = (ImageView) v.findViewById(R.id.iv);</span><br><span class="line">        iv.setImageResource(data.get(position));</span><br><span class="line">        <span class="keyword">return</span> v;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看的出来这里给调用者很大的空间来进行自己的操作，在setView中直接可以根据position来设置自己的View和数据，<strong>并且使用自己的图片加载库。</strong></p>
 <p>如果感兴趣的可以移步<a href="https://github.com/wanglu1209/Banner" target="_blank" rel="noopener">GitHub</a></p>
 <hr>
 <p><strong>下面开始说如何写</strong></p>
@@ -215,91 +166,8 @@ banner.setDot(R.drawable.no_selected_dot, R.drawable.selected_dot).
 <p>关于指示器，其实现在大部分都是小圆点，这里我实现的思路是创建一个FrameLayout来添加ViewPager和指示器</p>
 <p>但是可以看到，这里的指示器会有一个随着页面滑动而滑动的效果，这里就需要两层了，<strong>一个是包含未选中的，一个是包含了选中和未选中的（Group）</strong></p>
 <p>代码如下：</p>
-<pre><code>private void init() {
-    mPager = new BannerViewPager(mContext);
-    addView(mPager);
-    /**
-     * 实例化两个Group
-     */
-    mFrameLayout = new FrameLayout(mContext);
-    mDotGroup = new LinearLayout(mContext);
-    /**
-     * 设置小圆点Group的方向为水平
-     */
-    mDotGroup.setOrientation(LinearLayout.HORIZONTAL);
-    /**
-     * 如果不设置则小圆点在中间
-     */
-    mDotGroup.setGravity(CENTER | Gravity.BOTTOM);
-    /**
-     * 两个Group的大小都为match_parent
-     */
-    LinearLayout.LayoutParams params =
-            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-    /**
-     * 首先添加小圆点的Group
-     */
-    mFrameLayout.addView(mDotGroup, params);
-    /**
-     * 然后添加包含的Group（f**k,表达能力有限）
-     */
-    addView(mFrameLayout, params);
-
-    /**
-     * 添加到任务栈,当前所有任务完事之后添加已经选中的那个小圆点
-     */
-    post(new Runnable() {
-        @Override
-        public void run() {
-            ImageView iv = new ImageView(mContext);
-            iv.setImageDrawable(mContext.getResources().getDrawable(mDot[1]));
-            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            /**
-             * 设置选中小圆点的左边距
-             */
-            params.leftMargin = (int) mDotGroup.getChildAt(0).getX();
-            params.gravity = Gravity.BOTTOM;
-            mFrameLayout.addView(iv, params);
-            mSelectedDot = mFrameLayout.getChildAt(1);
-        }
-    });
-    mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            /**
-             * 获取到当前position
-             */
-            position %= mAdapter.size;
-            /**
-             * 判断如果当前的position不是最后一个,那么就设置偏移量来实现被选中小圆点的滑动效果
-             */
-            if (mSelectedDot != null &amp;&amp; position != mAdapter.size -1) {
-                float dx = mDotGroup.getChildAt(1).getX() - mDotGroup.getChildAt(0).getX();
-                mSelectedDot.setTranslationX((position * dx) + positionOffset * dx);
-            }
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            position %= mAdapter.size;
-            /**
-             * 如果已经是最后一个,那么则直接把小圆点定位到那,不然滑动效果会出错
-             */
-            if (mSelectedDot != null &amp;&amp; position == mAdapter.size - 1) {
-                float dx = mDotGroup.getChildAt(1).getX() - mDotGroup.getChildAt(0).getX();
-                mSelectedDot.setTranslationX(position * dx);
-            }
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-
-        }
-    });
-
-}
-</code></pre><p>可以看到我们首先添加了ViewPager，然后我们添加了未选中指示器的Group，之后我们才添加的选中的指示器。在添加选中指示器的时候用了一个post，这个方法是把runnable里的代码添加到任务栈，前面的任务结束了这个任务才会执行，所以我们可以获取到第一个未选中小圆点的坐标，然后把选中指示器覆盖上去，后来我们移动的时候就直接移动选中的指示器就好了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mPager = <span class="keyword">new</span> BannerViewPager(mContext);</span><br><span class="line">    addView(mPager);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 实例化两个Group</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    mFrameLayout = <span class="keyword">new</span> FrameLayout(mContext);</span><br><span class="line">    mDotGroup = <span class="keyword">new</span> LinearLayout(mContext);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 设置小圆点Group的方向为水平</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    mDotGroup.setOrientation(LinearLayout.HORIZONTAL);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 如果不设置则小圆点在中间</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    mDotGroup.setGravity(CENTER | Gravity.BOTTOM);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 两个Group的大小都为match_parent</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    LinearLayout.LayoutParams params =</span><br><span class="line">            <span class="keyword">new</span> LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,</span><br><span class="line">                    ViewGroup.LayoutParams.MATCH_PARENT);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 首先添加小圆点的Group</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    mFrameLayout.addView(mDotGroup, params);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 然后添加包含的Group（f**k,表达能力有限）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    addView(mFrameLayout, params);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 添加到任务栈,当前所有任务完事之后添加已经选中的那个小圆点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            ImageView iv = <span class="keyword">new</span> ImageView(mContext);</span><br><span class="line">            iv.setImageDrawable(mContext.getResources().getDrawable(mDot[<span class="number">1</span>]));</span><br><span class="line">            FrameLayout.LayoutParams params = <span class="keyword">new</span> FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 设置选中小圆点的左边距</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            params.leftMargin = (<span class="keyword">int</span>) mDotGroup.getChildAt(<span class="number">0</span>).getX();</span><br><span class="line">            params.gravity = Gravity.BOTTOM;</span><br><span class="line">            mFrameLayout.addView(iv, params);</span><br><span class="line">            mSelectedDot = mFrameLayout.getChildAt(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    mPager.addOnPageChangeListener(<span class="keyword">new</span> ViewPager.OnPageChangeListener() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrolled</span><span class="params">(<span class="keyword">int</span> position, <span class="keyword">float</span> positionOffset, <span class="keyword">int</span> positionOffsetPixels)</span> </span>&#123;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 获取到当前position</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            position %= mAdapter.size;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 判断如果当前的position不是最后一个,那么就设置偏移量来实现被选中小圆点的滑动效果</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">if</span> (mSelectedDot != <span class="keyword">null</span> &amp;&amp; position != mAdapter.size -<span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">float</span> dx = mDotGroup.getChildAt(<span class="number">1</span>).getX() - mDotGroup.getChildAt(<span class="number">0</span>).getX();</span><br><span class="line">                mSelectedDot.setTranslationX((position * dx) + positionOffset * dx);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageSelected</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</span><br><span class="line">            position %= mAdapter.size;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 如果已经是最后一个,那么则直接把小圆点定位到那,不然滑动效果会出错</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">if</span> (mSelectedDot != <span class="keyword">null</span> &amp;&amp; position == mAdapter.size - <span class="number">1</span>) &#123;</span><br><span class="line">                <span class="keyword">float</span> dx = mDotGroup.getChildAt(<span class="number">1</span>).getX() - mDotGroup.getChildAt(<span class="number">0</span>).getX();</span><br><span class="line">                mSelectedDot.setTranslationX(position * dx);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPageScrollStateChanged</span><span class="params">(<span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到我们首先添加了ViewPager，然后我们添加了未选中指示器的Group，之后我们才添加的选中的指示器。在添加选中指示器的时候用了一个post，这个方法是把runnable里的代码添加到任务栈，前面的任务结束了这个任务才会执行，所以我们可以获取到第一个未选中小圆点的坐标，然后把选中指示器覆盖上去，后来我们移动的时候就直接移动选中的指示器就好了。</p>
 <p>关于滑动指示器，其实就是用了一个setTranslationX()方法，这个方法可以虽然移动View的位置，但是没有真正的移动该View，所以我们在移动的时候根据position来计算，但是当移动到最后一个的时候就不应该用这个方法了，如果还用的话就会造成一种『出界』了的感觉，所以这里在最后一个的时候不进入方法。</p>
 <p>有人应该会想到『在第一页的时候』，这里我们大家可以自己测试一下，当手指向右滑的时候，就已经是size-1页了，所以我们直接就用一个判断就够了</p>
 <p><strong>额，写的乱七八糟，但是代码会说话的~</strong></p>
@@ -328,7 +196,7 @@ banner.setDot(R.drawable.no_selected_dot, R.drawable.selected_dot).
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

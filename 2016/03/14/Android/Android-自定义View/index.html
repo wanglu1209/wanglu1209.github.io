@@ -144,32 +144,10 @@
 <p>这里以TextView为例，要实现这样的一个效果</p>
 <p><img src="http://upload-images.jianshu.io/upload_images/1822424-f3394b37f9c32fd1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <p>只是在原有的TextView上加了一层框，其实就是绘制一个空心的矩形，理解这个我们就可以着手写代码了</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    /**
-     * 在调用super之前，这里也就是在绘制文本内容前来处理自己的逻辑
-     */
-    Paint p = new Paint();    
-    p.setStyle(Paint.Style.STROKE);    //设置为空心
-    p.setStrokeWidth(5);                //设置外框线的宽度
-    p.setColor(Color.YELLOW);            //设置线的颜色
-    /**
-     * 绘制矩形，起始x坐标，起始y坐标，终点x坐标，终点y坐标，用来绘画的paint
-     */
-    canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), p);
-
-    super.onDraw(canvas);
-
-    /**
-     * 在绘制完文本后处理自己的逻辑
-     */
-}
-</code></pre><p>这时候就完成了对现有的控件的扩展，我们在XML中使用我们自定义的控件</p>
-<pre><code>&lt;com.github.wanglu1209.MyTextViewDemo
-    android:layout_width=&quot;wrap_content&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:layout_margin=&quot;20dp&quot;
-    android:text=&quot;My Android TextView&quot; /&gt;
-</code></pre><p>这里和使用正常的TextView没有什么区别，现在运行一下程序就是我们上面看到的效果了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 在调用super之前，这里也就是在绘制文本内容前来处理自己的逻辑</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    Paint p = <span class="keyword">new</span> Paint();	</span><br><span class="line">    p.setStyle(Paint.Style.STROKE);	<span class="comment">//设置为空心</span></span><br><span class="line">    p.setStrokeWidth(<span class="number">5</span>);				<span class="comment">//设置外框线的宽度</span></span><br><span class="line">    p.setColor(Color.YELLOW);			<span class="comment">//设置线的颜色</span></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 绘制矩形，起始x坐标，起始y坐标，终点x坐标，终点y坐标，用来绘画的paint</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    canvas.drawRect(<span class="number">0</span>, <span class="number">0</span>, getMeasuredWidth(), getMeasuredHeight(), p);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">super</span>.onDraw(canvas);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 在绘制完文本后处理自己的逻辑</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这时候就完成了对现有的控件的扩展，我们在XML中使用我们自定义的控件</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;com.github.wanglu1209.MyTextViewDemo</span><br><span class="line">    android:layout_width=<span class="string">"wrap_content"</span></span><br><span class="line">    android:layout_height=<span class="string">"wrap_content"</span></span><br><span class="line">    android:layout_margin=<span class="string">"20dp"</span></span><br><span class="line">    android:text=<span class="string">"My Android TextView"</span> /&gt;</span><br></pre></td></tr></table></figure>
+<p>这里和使用正常的TextView没有什么区别，现在运行一下程序就是我们上面看到的效果了</p>
 <hr>
 <blockquote>
 <p>定义全新的控件</p>
@@ -179,44 +157,12 @@
 <p><img src="http://upload-images.jianshu.io/upload_images/1822424-7cc5ae38e23d1af6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
 <p>首先来分析一下，无非就是两个部分，中间的圆和外面的弧线，只要在onDraw()中依次绘制就可以了。</p>
 <p>在构造中初始化参数</p>
-<pre><code>private void initView() {
-    mCirclePaint = new Paint();
-    mCirclePaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));
-    mCirclePaint.setAntiAlias(true);    //设置抗锯齿
-
-    mArcPaint = new Paint();
-    mArcPaint.setAntiAlias(true);
-    mArcPaint.setStyle(Paint.Style.STROKE);     //设置为空心
-    mArcPaint.setStrokeWidth(40);
-    mArcPaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));
-
-}
-</code></pre><p>然后在onMeasure()中获取宽度，这里为了简单，直接就是屏幕的宽度</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    int length = MeasureSpec.getSize(widthMeasureSpec);
-    mCircleXY = length / 2;
-    mRadius = mCircleXY / 2;
-    mRectF = new RectF(
-            (float) (length * 0.1),
-            (float) (length * 0.1),
-            (float) (length * 0.9),
-            (float) (length * 0.9)
-    );
-}
-</code></pre><p>最后在onDraw()中绘制这两个图形即可</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    /**
-     * 绘制圆形,参数依次为 圆的中心x坐标,圆的中心y坐标,圆的半径,画圆的笔
-     */
-    canvas.drawCircle(mCircleXY, mCircleXY, mRadius, mCirclePaint);
-    /**
-     * 绘制扇形,参数依次为 扇形的大小,起始角度,角度,是否与半径连线,画笔
-     */
-    canvas.drawArc(mRectF, 270, 240, false, mArcPaint);
-}
-</code></pre><p>现在运行程序，就可以看到我们最开始的效果啦</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initView</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mCirclePaint = <span class="keyword">new</span> Paint();</span><br><span class="line">    mCirclePaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));</span><br><span class="line">    mCirclePaint.setAntiAlias(<span class="keyword">true</span>);    <span class="comment">//设置抗锯齿</span></span><br><span class="line"></span><br><span class="line">    mArcPaint = <span class="keyword">new</span> Paint();</span><br><span class="line">    mArcPaint.setAntiAlias(<span class="keyword">true</span>);</span><br><span class="line">    mArcPaint.setStyle(Paint.Style.STROKE);     <span class="comment">//设置为空心</span></span><br><span class="line">    mArcPaint.setStrokeWidth(<span class="number">40</span>);</span><br><span class="line">    mArcPaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后在onMeasure()中获取宽度，这里为了简单，直接就是屏幕的宽度</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</span><br><span class="line">    <span class="keyword">int</span> length = MeasureSpec.getSize(widthMeasureSpec);</span><br><span class="line">    mCircleXY = length / <span class="number">2</span>;</span><br><span class="line">    mRadius = mCircleXY / <span class="number">2</span>;</span><br><span class="line">    mRectF = <span class="keyword">new</span> RectF(</span><br><span class="line">            (<span class="keyword">float</span>) (length * <span class="number">0.1</span>),</span><br><span class="line">            (<span class="keyword">float</span>) (length * <span class="number">0.1</span>),</span><br><span class="line">            (<span class="keyword">float</span>) (length * <span class="number">0.9</span>),</span><br><span class="line">            (<span class="keyword">float</span>) (length * <span class="number">0.9</span>)</span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后在onDraw()中绘制这两个图形即可</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onDraw(canvas);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 绘制圆形,参数依次为 圆的中心x坐标,圆的中心y坐标,圆的半径,画圆的笔</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    canvas.drawCircle(mCircleXY, mCircleXY, mRadius, mCirclePaint);</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 绘制扇形,参数依次为 扇形的大小,起始角度,角度,是否与半径连线,画笔</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    canvas.drawArc(mRectF, <span class="number">270</span>, <span class="number">240</span>, <span class="keyword">false</span>, mArcPaint);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在运行程序，就可以看到我们最开始的效果啦</p>
 <hr>
 <h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
 
@@ -241,7 +187,7 @@
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

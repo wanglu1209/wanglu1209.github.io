@@ -159,141 +159,10 @@ MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关�
 <li>加载失败的回调</li>
 </ul>
 <p>根据这几个我们就可以定义出来一个view的接口<code>IZhiHuFgView</code>，接口如下：</p>
-<pre><code>public interface IZhiHuFgView {
-    /**
-     * 加载的的数据
-     */
-    void setStories(List&lt;Stories&gt; stories);
-
-    /**
-     * 设置banner的View
-     */
-    void setBanner(View bannerView);
-
-    /**
-     * 出错
-     */
-    void onError();
-}
-</code></pre><p>然后我们的<code>ZhiHuFragment</code>来实现这个接口，实现这些方法就可以来添加数据了</p>
-<pre><code>public class ZhiHuFragment extends Fragment implements IZhiHuFgView, AbsListView.OnScrollListener, SwipeRefreshLayout.OnRefreshListener {
-
-    @Bind(R.id.stories_list)
-    ListView storiesList;
-    @Bind(R.id.refresh_view)
-    SwipeRefreshLayout refreshView;
-
-    /**
-     * 持有presenter的对象来处理数据
-     */
-    private IZhiHuFgPresenter zhiHuFgPresenter;
-    private List&lt;Stories&gt; stories;
-    private StoriesAdapter storiesAdapter;
-    private boolean isRequest = false;
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = LayoutInflater
-                .from(getContext())
-                .inflate(R.layout.fragment_zhihu, container, false);
-        ButterKnife.bind(this, view);
-
-        init();
-        return view;
-    }
-
-    /**
-     * 初始化一些view
-     */
-    private void init() {
-        zhiHuFgPresenter = new ZhiHuFgPresenter(getActivity(), this);
-        storiesAdapter = new StoriesAdapter(getContext());
-        storiesList.setAdapter(storiesAdapter);
-        stories = new ArrayList&lt;&gt;();
-
-        refreshView.setColorSchemeColors(
-                getActivity().getResources().getColor(R.color.colorPrimary));
-        refreshView.post(new Runnable() {
-            @Override
-            public void run() {
-                refreshView.setRefreshing(true);
-            }
-        });
-        refreshView.setOnRefreshListener(this);
-        storiesList.setOnScrollListener(this);
-        zhiHuFgPresenter.getZhiHuStories();
-
-    }
-
-    /**
-     * 设置加载的数据
-     */
-    @Override
-    public void setStories(List&lt;Stories&gt; stories) {
-        isRequest = false;
-        this.stories.addAll(stories);
-        storiesAdapter.setData(this.stories);
-
-        refreshView.post(new Runnable() {
-            @Override
-            public void run() {
-                refreshView.setRefreshing(false);
-            }
-        });
-    }
-
-    /**
-     * 设置banner
-     */
-    @Override
-    public void setBanner(View bannerView) {
-        storiesList.addHeaderView(bannerView);
-    }
-
-
-    /**
-     * 出错
-     */
-    @Override
-    public void onError() {
-        Toast.makeText(getContext(), &quot;error&quot;, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 加载更多滑动监听
-     */
-    @Override
-    public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
-                &amp;&amp; view.getLastVisiblePosition() == (view.getCount() - 1) &amp;&amp; !isRequest) {
-            isRequest = true;
-            zhiHuFgPresenter.getBeforeStories();
-        }
-    }
-
-    @Override
-    public void onScroll(AbsListView absListView, int i, int i1, int i2) {
-
-    }
-
-    /**
-     * 刷新
-     */
-    @Override
-    public void onRefresh() {
-        stories.clear();
-        zhiHuFgPresenter.getZhiHuStories();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        ButterKnife.unbind(this);
-    }
-
-}
-</code></pre><p>可以清楚的看到，我们的<strong>view层只是用来展示数据</strong>，调理是不是清晰了很多，剩下的就是用presenter这个中间层来处理数据回调给view层了，代码很简单，就不贴了，有需要的可以移步<a href="https://github.com/wanglu1209/ZhiHuDaily_MVP" target="_blank" rel="noopener">GitHub</a>查看详细代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IZhiHuFgView</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 加载的的数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setStories</span><span class="params">(List&lt;Stories&gt; stories)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 设置banner的View</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setBanner</span><span class="params">(View bannerView)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 出错</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">onError</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们的<code>ZhiHuFragment</code>来实现这个接口，实现这些方法就可以来添加数据了</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZhiHuFragment</span> <span class="keyword">extends</span> <span class="title">Fragment</span> <span class="keyword">implements</span> <span class="title">IZhiHuFgView</span>, <span class="title">AbsListView</span>.<span class="title">OnScrollListener</span>, <span class="title">SwipeRefreshLayout</span>.<span class="title">OnRefreshListener</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bind</span>(R.id.stories_list)</span><br><span class="line">    ListView storiesList;</span><br><span class="line">    <span class="meta">@Bind</span>(R.id.refresh_view)</span><br><span class="line">    SwipeRefreshLayout refreshView;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 持有presenter的对象来处理数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> IZhiHuFgPresenter zhiHuFgPresenter;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Stories&gt; stories;</span><br><span class="line">    <span class="keyword">private</span> StoriesAdapter storiesAdapter;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> isRequest = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Nullable</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> View <span class="title">onCreateView</span><span class="params">(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        View view = LayoutInflater</span><br><span class="line">                .from(getContext())</span><br><span class="line">                .inflate(R.layout.fragment_zhihu, container, <span class="keyword">false</span>);</span><br><span class="line">        ButterKnife.bind(<span class="keyword">this</span>, view);</span><br><span class="line"></span><br><span class="line">        init();</span><br><span class="line">        <span class="keyword">return</span> view;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 初始化一些view</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        zhiHuFgPresenter = <span class="keyword">new</span> ZhiHuFgPresenter(getActivity(), <span class="keyword">this</span>);</span><br><span class="line">        storiesAdapter = <span class="keyword">new</span> StoriesAdapter(getContext());</span><br><span class="line">        storiesList.setAdapter(storiesAdapter);</span><br><span class="line">        stories = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        refreshView.setColorSchemeColors(</span><br><span class="line">                getActivity().getResources().getColor(R.color.colorPrimary));</span><br><span class="line">        refreshView.post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                refreshView.setRefreshing(<span class="keyword">true</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        refreshView.setOnRefreshListener(<span class="keyword">this</span>);</span><br><span class="line">        storiesList.setOnScrollListener(<span class="keyword">this</span>);</span><br><span class="line">        zhiHuFgPresenter.getZhiHuStories();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 设置加载的数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setStories</span><span class="params">(List&lt;Stories&gt; stories)</span> </span>&#123;</span><br><span class="line">        isRequest = <span class="keyword">false</span>;</span><br><span class="line">        <span class="keyword">this</span>.stories.addAll(stories);</span><br><span class="line">        storiesAdapter.setData(<span class="keyword">this</span>.stories);</span><br><span class="line"></span><br><span class="line">        refreshView.post(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                refreshView.setRefreshing(<span class="keyword">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 设置banner</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setBanner</span><span class="params">(View bannerView)</span> </span>&#123;</span><br><span class="line">        storiesList.addHeaderView(bannerView);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 出错</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Toast.makeText(getContext(), <span class="string">"error"</span>, Toast.LENGTH_SHORT).show();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 加载更多滑动监听</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScrollStateChanged</span><span class="params">(AbsListView view, <span class="keyword">int</span> scrollState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE</span><br><span class="line">                &amp;&amp; view.getLastVisiblePosition() == (view.getCount() - <span class="number">1</span>) &amp;&amp; !isRequest) &#123;</span><br><span class="line">            isRequest = <span class="keyword">true</span>;</span><br><span class="line">            zhiHuFgPresenter.getBeforeStories();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScroll</span><span class="params">(AbsListView absListView, <span class="keyword">int</span> i, <span class="keyword">int</span> i1, <span class="keyword">int</span> i2)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 刷新</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onRefresh</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        stories.clear();</span><br><span class="line">        zhiHuFgPresenter.getZhiHuStories();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDestroyView</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroyView();</span><br><span class="line">        ButterKnife.unbind(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以清楚的看到，我们的<strong>view层只是用来展示数据</strong>，调理是不是清晰了很多，剩下的就是用presenter这个中间层来处理数据回调给view层了，代码很简单，就不贴了，有需要的可以移步<a href="https://github.com/wanglu1209/ZhiHuDaily_MVP" target="_blank" rel="noopener">GitHub</a>查看详细代码</p>
 <hr>
 <h2 id="自我理解"><a href="#自我理解" class="headerlink" title="自我理解"></a>自我理解</h2><p>MVP最大的好处就是View和Model的解耦，方便单元测试等。但是代码量很多，会创建出很多的View层接口。</p>
 <p>我觉得写MVP的一个难点就是在于抽离，要思考这个页面需要什么，然后设计成接口</p>
@@ -322,7 +191,7 @@ MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关�
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

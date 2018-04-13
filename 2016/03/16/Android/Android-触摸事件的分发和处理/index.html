@@ -172,22 +172,8 @@
 </ol>
 <p>然后我们在这几个方法中什么都不改，只是在里面打印Log日志来看一下执行的顺序。</p>
 <p>XML布局如下：</p>
-<pre><code>&lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupA
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupB
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;&gt;
-
-        &lt;com.github.wanglu1209.androidqunyingzhuan.MyView
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot; /&gt;
-
-    &lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupB&gt;
-
-&lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupA&gt;
-</code></pre><p>现在运行程序，查看Log，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">com.github.wanglu1209.androidqunyingzhuan.ViewGroupA</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">com.github.wanglu1209.androidqunyingzhuan.ViewGroupB</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="tag">&lt;<span class="name">com.github.wanglu1209.androidqunyingzhuan.MyView</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span> /&gt;</span></span><br><span class="line">            </span><br><span class="line">    <span class="tag">&lt;/<span class="name">com.github.wanglu1209.androidqunyingzhuan.ViewGroupB</span>&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="tag">&lt;/<span class="name">com.github.wanglu1209.androidqunyingzhuan.ViewGroupA</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>现在运行程序，查看Log，如下：</p>
 <blockquote>
 <p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
 </blockquote>
@@ -252,7 +238,7 @@
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

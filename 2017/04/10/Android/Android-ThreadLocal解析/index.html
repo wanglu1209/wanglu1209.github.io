@@ -138,84 +138,16 @@ Handler的运行需要MessageQueue和Looper的支持，如果您对这方面不�
 <p>我们都知道，一个线程只能创建一个Looper，那么在这个线程中传递数据的就是ThreadLocal了</p>
 <p>ThreadLocal是一个线程内部的数据存储类，他可以在指定的线程中存储数据，然后当然也只能在存储数据的线程来获取数据，来看一个小demo</p>
 <p>首先我们定义一个ThreadLocal对象，然后分别在主线程和两个子线程中去设置数据和获取数据</p>
-<pre><code>private ThreadLocal&lt;Boolean&gt; mBooleanThreadLocal = new ThreadLocal&lt;&gt;();
-
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_main);
-
-    mBooleanThreadLocal.set(true);
-    Log.d(&quot;112233&quot;, Thread.currentThread().getName()
-            + &quot; = &quot; + 
-            mBooleanThreadLocal.get());
-
-    new Thread(&quot;Thread #1&quot;){
-        @Override
-        public void run() {
-            super.run();
-            mBooleanThreadLocal.set(false);
-            Log.d(&quot;112233&quot;, Thread.currentThread().getName()
-                    + &quot; = &quot; + 
-                    mBooleanThreadLocal.get());
-        }
-    }.start();
-
-    new Thread(&quot;Thread #2&quot;){
-        @Override
-        public void run() {
-            super.run();
-            Log.d(&quot;112233&quot;, Thread.currentThread().getName()
-                    + &quot; = &quot; + 
-                    mBooleanThreadLocal.get());
-        }
-    }.start();
-}
-</code></pre><p>可以看到这里用的都是同一个LocalThread对象，然后运行程序，看一下log</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> ThreadLocal&lt;Boolean&gt; mBooleanThreadLocal = <span class="keyword">new</span> ThreadLocal&lt;&gt;();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">    setContentView(R.layout.activity_main);</span><br><span class="line">    </span><br><span class="line">    mBooleanThreadLocal.set(<span class="keyword">true</span>);</span><br><span class="line">    Log.d(<span class="string">"112233"</span>, Thread.currentThread().getName()</span><br><span class="line">            + <span class="string">" = "</span> + </span><br><span class="line">            mBooleanThreadLocal.get());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> Thread(<span class="string">"Thread #1"</span>)&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>.run();</span><br><span class="line">            mBooleanThreadLocal.set(<span class="keyword">false</span>);</span><br><span class="line">            Log.d(<span class="string">"112233"</span>, Thread.currentThread().getName()</span><br><span class="line">                    + <span class="string">" = "</span> + </span><br><span class="line">                    mBooleanThreadLocal.get());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;.start();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> Thread(<span class="string">"Thread #2"</span>)&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">super</span>.run();</span><br><span class="line">            Log.d(<span class="string">"112233"</span>, Thread.currentThread().getName()</span><br><span class="line">                    + <span class="string">" = "</span> + </span><br><span class="line">                    mBooleanThreadLocal.get());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里用的都是同一个LocalThread对象，然后运行程序，看一下log</p>
 <pre><code>D/112233: main = true
 D/112233: Thread #1 = false
 D/112233: Thread #2 = null
 </code></pre><p>我们会发现在不同的线程中获得的值是不同的，下面来分析一下源码，来看一下为什么返回的值不一样</p>
-<pre><code>public T get() {
-    Thread t = Thread.currentThread();//从这里获取当前线程
-    ThreadLocalMap map = getMap(t);//这里获取当前线程的Map
-    if (map != null) {
-        //这里取出由当前threadLocal为key的entry
-        ThreadLocalMap.Entry e = map.getEntry(this);
-        if (e != null)
-            return (T)e.value;//返回value
-    }
-    return setInitialValue();//如果为空，那么初始化
-}
-
--------------------------------------------
-
-ThreadLocalMap getMap(Thread t) {
-    return t.threadLocals;//这里返回多个threadLocal的对象
-}
-
--------------------------------------------
-
-private T setInitialValue() {
-    T value = initialValue();//这个方法返回null
-    Thread t = Thread.currentThread();
-    ThreadLocalMap map = getMap(t);
-    if (map != null)
-        map.set(this, value);//如果map存在，则替换掉数据
-    else
-        createMap(t, value);//如果map不存在，则创建一个map，数据为null
-    return value;//最后返回null
-}
-</code></pre><p>从get方法我们可以看得出来获取数据是用Thread为参数的，所以说每个线程的数据都不一样。既然这样我们就再来看看set方法</p>
-<pre><code>public void set(T value) {
-    Thread t = Thread.currentThread();
-    ThreadLocalMap map = getMap(t);
-    if (map != null)
-        map.set(this, value);
-    else
-        createMap(t, value);
-}
-</code></pre><p>我们会发现和上面的setInitialValue()方法差不多，都是调用的map.set()方法，这个方法其实就是一个以当前ThreadLocal为key存储的过程，我们就不细细的去研究了，有兴趣的可以去看一下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> T <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Thread t = Thread.currentThread();<span class="comment">//从这里获取当前线程</span></span><br><span class="line">    ThreadLocalMap map = getMap(t);<span class="comment">//这里获取当前线程的Map</span></span><br><span class="line">    <span class="keyword">if</span> (map != <span class="keyword">null</span>) &#123;</span><br><span class="line">    	<span class="comment">//这里取出由当前threadLocal为key的entry</span></span><br><span class="line">        ThreadLocalMap.Entry e = map.getEntry(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">if</span> (e != <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">return</span> (T)e.value;<span class="comment">//返回value</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> setInitialValue();<span class="comment">//如果为空，那么初始化</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-------------------------------------------</span><br><span class="line"></span><br><span class="line"><span class="function">ThreadLocalMap <span class="title">getMap</span><span class="params">(Thread t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> t.threadLocals;<span class="comment">//这里返回多个threadLocal的对象</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">-------------------------------------------</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> T <span class="title">setInitialValue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    T value = initialValue();<span class="comment">//这个方法返回null</span></span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="keyword">null</span>)</span><br><span class="line">        map.set(<span class="keyword">this</span>, value);<span class="comment">//如果map存在，则替换掉数据</span></span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        createMap(t, value);<span class="comment">//如果map不存在，则创建一个map，数据为null</span></span><br><span class="line">    <span class="keyword">return</span> value;<span class="comment">//最后返回null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从get方法我们可以看得出来获取数据是用Thread为参数的，所以说每个线程的数据都不一样。既然这样我们就再来看看set方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(T value)</span> </span>&#123;</span><br><span class="line">    Thread t = Thread.currentThread();</span><br><span class="line">    ThreadLocalMap map = getMap(t);</span><br><span class="line">    <span class="keyword">if</span> (map != <span class="keyword">null</span>)</span><br><span class="line">        map.set(<span class="keyword">this</span>, value);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        createMap(t, value);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们会发现和上面的setInitialValue()方法差不多，都是调用的map.set()方法，这个方法其实就是一个以当前ThreadLocal为key存储的过程，我们就不细细的去研究了，有兴趣的可以去看一下</p>
 <p>至此这个ThreadLocal我们也就研究的差不多了，其实的就是<strong>在不同的线程存储不同的数据</strong></p>
 <hr>
 <p><strong>ThreadLocal和InheritableThreadLocal</strong></p>
@@ -244,7 +176,7 @@ private T setInitialValue() {
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>

@@ -155,39 +155,12 @@ Android性能的优化主要分为两点
 <h4 id="使用include标签"><a href="#使用include标签" class="headerlink" title="使用include标签"></a>使用include标签</h4><p>相信大家都会在项目的时候遇到toolbar，或者一个UI在多个界面使用的问题，遇到这种问题的时候我们一般都会用include（毕竟郭神『第一行代码』教的好），这样就减少了代码冗余，而且还利于后期更改</p>
 <h4 id="使用ViewStub实现View的延时加载"><a href="#使用ViewStub实现View的延时加载" class="headerlink" title="使用ViewStub实现View的延时加载"></a>使用ViewStub实现View的延时加载</h4><p>ViewStub标签和View.GONE的方式差不多，但是ViewStub只会在显示的时候去渲染，而GONE在初始化的时候就已经渲染完毕了，所以相比来说ViewStub的效率更高。下面来通过代码使用一下ViewStub</p>
 <p>首先我们定义一个布局文件</p>
-<pre><code>&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:orientation=&quot;vertical&quot; android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;TextView
-        android:id=&quot;@+id/tv&quot;
-        android:layout_width=&quot;wrap_content&quot;
-        android:layout_height=&quot;wrap_content&quot; /&gt;
-
-&lt;/LinearLayout&gt;
-</code></pre><p>这里面只放了一个TextView，然后我们在自己的布局中通过ViewStub来引用他</p>
-<pre><code>&lt;Button
-   android:id=&quot;@+id/btn&quot;
-   android:layout_width=&quot;wrap_content&quot;
-   android:layout_height=&quot;wrap_content&quot; /&gt;
-
-&lt;ViewStub
-   android:id=&quot;@+id/vs&quot;
-   android:layout_width=&quot;wrap_content&quot;
-   android:layout_height=&quot;wrap_content&quot;
-   android:layout=&quot;@layout/view_stub&quot;/&gt;
-</code></pre><p>这里的逻辑是点击按钮然后出现ViewStub引用的布局（也就是我们上面写的那个布局文件）</p>
-<pre><code>findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        ViewStub vs = (ViewStub) findViewById(R.id.vs);
-        View vsView = vs.inflate();
-        TextView tv = (TextView) vsView.findViewById(R.id.tv);
-        tv.setText(&quot;hahaha&quot;);
-
-    }
-});
-</code></pre><p>这里想要把ViewStub引用的布局显示出来有两种办法，一种是ViewStub.setVisibility();另一种就是ViewStub.inflate();这两种方法的区别就是inflate()能返回引用的布局，然后可以通过这个布局来找到里面的子View来进行操作</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:orientation</span>=<span class="string">"vertical"</span> <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">TextView</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:id</span>=<span class="string">"@+id/tv"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">        <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">LinearLayout</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这里面只放了一个TextView，然后我们在自己的布局中通过ViewStub来引用他</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Button</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:id</span>=<span class="string">"@+id/btn"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">ViewStub</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:id</span>=<span class="string">"@+id/vs"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:layout_width</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></span></span><br><span class="line"><span class="tag">      <span class="attr">android:layout</span>=<span class="string">"@layout/view_stub"</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这里的逻辑是点击按钮然后出现ViewStub引用的布局（也就是我们上面写的那个布局文件）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">findViewById(R.id.btn).setOnClickListener(<span class="keyword">new</span> View.OnClickListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</span><br><span class="line">        ViewStub vs = (ViewStub) findViewById(R.id.vs);</span><br><span class="line">        View vsView = vs.inflate();</span><br><span class="line">        TextView tv = (TextView) vsView.findViewById(R.id.tv);</span><br><span class="line">        tv.setText(<span class="string">"hahaha"</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这里想要把ViewStub引用的布局显示出来有两种办法，一种是ViewStub.setVisibility();另一种就是ViewStub.inflate();这两种方法的区别就是inflate()能返回引用的布局，然后可以通过这个布局来找到里面的子View来进行操作</p>
 <p>运行程序点击按钮，就可以看到TextView已经显示出来了，并且已经赋值『hahaha』</p>
 <h4 id="Hierarchy-Viewer"><a href="#Hierarchy-Viewer" class="headerlink" title="Hierarchy Viewer"></a>Hierarchy Viewer</h4><p>这个工具可以显示我们的布局，但是只可以在模拟器和工厂的Demo机上用，不过Google的大神提供了一个开源的项目ViewServer，有兴趣的可以看一下，地址：<a href="https://github.com/romainguy/ViewServer" target="_blank" rel="noopener">ViewServer</a></p>
 <p>这个就不过多阐述了，有兴趣的可以自行查看一下相关的资料</p>
@@ -253,7 +226,7 @@ Android性能的优化主要分为两点
             <img src="http://tachyons.io/img/avatar_1.jpg" class="mb4-l br-100 h3 w3 h4-l w4-l dib" title="王璐">
         </div>
         <div class="dtc db-l v-mid lh-copy measure center f6 black-50 tj">
-            My name is Jonathan Klughertz and this is my blog.<br>I am a full stack software engineer with a strong front-end focus.<br> I currently live and work in Singapore, hit me up if you are in the region.
+            王璐.
         </div>
     </article>
 </div>
