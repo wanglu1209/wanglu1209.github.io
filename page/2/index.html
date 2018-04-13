@@ -251,230 +251,7 @@ public boolean onTouchEvent(MotionEvent ev) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-自定义控件PickerView/" data-id="cjfx8xufu000aqqfyn5bmwylh" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-触摸事件的分发和处理" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-触摸事件的分发和处理/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-触摸事件的分发和处理/">Android-触摸事件的分发和处理</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"><a href="#首先想要了解事件的分发和处理，就要先了解什么是触摸事件" class="headerlink" title="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"></a>首先想要了解事件的分发和处理，就要先了解什么是触摸事件</h3><hr>
-<blockquote>
-<p>什么是触摸事件？</p>
-</blockquote>
-<p>顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件</p>
-<ol>
-<li>按下        Action_Down</li>
-<li>如果滑动    Action_Move</li>
-<li>抬起        Action_Up</li>
-</ol>
-<p>这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参数就是一个MotionEvent对象。在MotionEvent里不止有这几个事件，还可以取出当前触摸的坐标点等等。</p>
-<hr>
-<p>当然，这只是在一个View中，但是我们知道，Android的View结构是树形的，View可以放在一个ViewGroup当中，然后这个ViewGroup当中又嵌套一个ViewGroup。所以当我触摸屏幕的时候到底是谁来执行这个事件？这样就引出了『事件拦截』</p>
-<p><strong>我们想象一下场景</strong></p>
-<p>一个总经理，一个技术经理，然后干活的你。总经理把任务布置给技术经理，然后技术经理把任务安排给了你。过了一会你把任务完成，交给技术经理，技术经理觉的不错，就交给了总经理，这样这个任务就完成了</p>
-<p>了解了这个流程之后，对于事件拦截也就理解了小半了，下面来一个实例看一下</p>
-<hr>
-<p>首先我们自定义两个ViewGroup和一个View分别对应一个总经理一个技术经理和一个干活的。</p>
-<p>在两个ViewGroup中我们主要重写三个方法</p>
-<ol>
-<li>dispatchTouchEvent()</li>
-<li>onInterceptTouchEvent()</li>
-<li>onTouchEvent()</li>
-</ol>
-<p>然后在View中重写两个方法</p>
-<ol>
-<li>dispatchTouchEvent()</li>
-<li>onTouchEvent()</li>
-</ol>
-<p>然后我们在这几个方法中什么都不改，只是在里面打印Log日志来看一下执行的顺序。</p>
-<p>XML布局如下：</p>
-<pre><code>&lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupA
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupB
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;&gt;
-
-        &lt;com.github.wanglu1209.androidqunyingzhuan.MyView
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot; /&gt;
-
-    &lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupB&gt;
-
-&lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupA&gt;
-</code></pre><p>现在运行程序，查看Log，如下：</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
-</blockquote>
-<p>可以看的出来，正常情况下事件的传递顺序为：</p>
-<p>ViewGroupA -&gt; ViewGroupB -&gt; View</p>
-<p>事件的处理顺序为：</p>
-<p>View -&gt; ViewGroupB -&gt; ViewGroupA</p>
-<p>其中事件传递的返回值：</p>
-<ol>
-<li>True 拦截，不继续传递</li>
-<li>False 不拦截，传递</li>
-</ol>
-<p>事件处理的返回值：</p>
-<ol>
-<li>True 处理完毕，不交给上级</li>
-<li>False 交给上级</li>
-</ol>
-<blockquote>
-<p>事件分发</p>
-</blockquote>
-<p><strong>现在我们给代码做一些改动，把ViewGroupA的onInterceptTouchEvent()的返回值改为True，查看一下log</strong></p>
-<p>log如下：</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupA onTouchEvent</p>
-</blockquote>
-<p>这里我们直接在最外侧的ViewGroupA中把事件拦截了下来，所以后面的ViewGroupB和View都没有接收到触摸事件。如果我们在ViewGroupB中拦截事件，那么log如下；</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
-</blockquote>
-<p>这样把Log打印出来就对事件的拦截和传递有了一个清晰的认识，下面来看一下事件的处理</p>
-<hr>
-<blockquote>
-<p>事件处理</p>
-</blockquote>
-<p>开始的时候我们说过，当你完成了任务之后会像你的项目经理报告，需要上级的确认，所以你的事件处理返回false，如果有一天你不干了，那么你也就不用给上级报告了，返回了true，来看一下log</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent</p>
-</blockquote>
-<p>事件传递和以前一样依次的传递下来，但是处理事件到View这里就结束了，没有向上级传递，如果给ViewGroupB的onTouchEvent的返回值true，那么事件处理到ViewGroupB就结束了。</p>
-<p>这样一来，事件的分发和处理就了解了</p>
-<hr>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-触摸事件的分发和处理/" data-id="cjfx8xufw000bqqfy5cupuqp2" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-Activity启动模式详解" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-Activity启动模式详解/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-Activity启动模式详解/">Android-Activity启动模式详解</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"><a href="#最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。" class="headerlink" title="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"></a>最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。</h4><hr>
-<h2 id="Activity的LaunchMode"><a href="#Activity的LaunchMode" class="headerlink" title="Activity的LaunchMode"></a>Activity的LaunchMode</h2><blockquote>
-<p>为啥子需要启动模式？</p>
-</blockquote>
-<p>我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。<strong>举个例子</strong>，我们在当前Activity启动当前的Activity，那么任务栈里就全是当前Activity，这样当然很二逼了！所以启动模式就出来了，目前有四种启动模式</p>
-<ul>
-<li>standard</li>
-<li>singleTop</li>
-<li>singleTask</li>
-<li>singleInstance</li>
-</ul>
-<h4 id="standard"><a href="#standard" class="headerlink" title="standard"></a>standard</h4><p>standard是标准模式，也就是默认模式。每次启动一个Activity就会创建一个新的实例，不管这个实例是否已经存在，<strong>这就是典型的多实例实现。一个任务栈可以有多个实例，每个实例也可以属于不同的任务栈，谁启动了这个Activity，这个Activity就运行在启动它的那个任务栈中，</strong>当我们用ApplicationContext去启动一个standard模式的Activity会报错，因为standard的Activity会进入启动他的Activity任务栈中，但是由于非Activity类型的Context并没有任务栈，所以这样就出问题了</p>
-<h4 id="singleTop"><a href="#singleTop" class="headerlink" title="singleTop"></a>singleTop</h4><p>singleTop即栈顶复用模式，在这种模式下，如果新创建的Activity已经位于栈顶，那么就不会去创建新的实例，但是该Activity的onNewIntent会被调用，通过这个方法我们可以取出请求的信息。<strong>需要注意的是，该Activity的onCreate、onStart不会被调用，因为它没有发生改变。</strong>但是如果新的Activity不位于栈顶，那么就会创建一个新的实例。<strong>举个例子</strong>，比如现在一个任务栈有ABCD四个Activity，A位于栈底，D位于栈顶。这个时候如果去启动D，那么栈的情况还是ABCD四个实例，如果D的启动模式为standard，那么栈内就是ABCDD</p>
-<h4 id="singleTask"><a href="#singleTask" class="headerlink" title="singleTask"></a>singleTask</h4><p>栈内复用模式，在这种模式情况下，只要Activity在一个栈中存在，那么启动这个Activity都不会重新创建实例，也会调用onNewIntent。<strong>当一个singleTask模式的Activity『A』被请求启动，首先系统会寻找是否有A所需的任务栈，如果不存在，那就重新创建一个任务栈，然后创建A的实例放入栈中。如果存在A所需的任务栈，这时再看A是否在这个栈中有实例存在，如果存在，那么久回把A调到栈顶并调用onNewIntent方法。如果不存在，那么就创建A的实例并且压入栈中，举个例子</strong></p>
-<ul>
-<li>比如当前任务栈S1中有ABC三个实例，这个时候singleTask模式的D启动，但是其所需要的任务栈为S2，由于S2和D的实例都不存在，这个时候就会先创建S2任务栈，然后创建D的实例压栈到S2</li>
-<li>如果D需要的任务栈为S1，那么由于任务栈S1已经存在，所以直接会创建D的实例放到S1任务栈中</li>
-<li>如果D需要的任务栈为S1，并且S1的情况为ADBC，这时不会重新创建D的实例，会把D调用栈顶，同时<strong>singleTask默认具有clearTop效果，所以会导致D上面的Activity全部出栈</strong>，于是最终S1的情况为AD</li>
-</ul>
-<h4 id="singleInstance"><a href="#singleInstance" class="headerlink" title="singleInstance"></a>singleInstance</h4><p>单例模式，加强的singleTask，这种模式的Activity只能单独运行在一个单独的任务栈中，其他和singleTask一样</p>
-<blockquote>
-<p>所需的任务栈？</p>
-</blockquote>
-<p>在singleTask中提到『所需的任务栈』，什么是Activity所需的任务栈？这里就要提一个参数：TaskAffinity。这个参数标识了一个Activity所需的任务栈的名字，默认情况下所有的Activity所需的任务栈都是当前包名，当然我们也可以为每个Activity单独指定TaskAffinity，<strong>注意这个属性值必须不能和包名相同，</strong>TaskAffinity主要和singleTask配合使用，否则的话没什么意义。当启动一个被TaskAffinity标识了的Activity，那么该Activity就会运行在和TaskAffinity相同的任务栈中</p>
-<p>我们用两种方式设置Activity的启动模式</p>
-<ol>
-<li>在AndroidManifest里为Activity设置<br><code>android:launchMode=&quot;singleTop/singleTask/singleInstance&quot;</code></li>
-<li>通过Intent设置标志位来指定<br><code>intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</code></li>
-</ol>
-<p>这两种方式<strong>第二种的优先级要高于第一种，也就是说两者同时存在时，以第二种为准</strong></p>
-<hr>
-<h2 id="强行举个特殊的例子"><a href="#强行举个特殊的例子" class="headerlink" title="强行举个特殊的例子"></a>强行举个特殊的例子</h2><p>如图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<p>首先我们看一下AndroidManifest里的配置</p>
-<pre><code>&lt;activity android:name=&quot;.MainActivity&quot;&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-
-        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-    &lt;/intent-filter&gt;
-&lt;/activity&gt;
-
-&lt;activity
-    android:name=&quot;.SecondActivity&quot;
-    android:launchMode=&quot;singleTask&quot;
-    android:taskAffinity=&quot;com.task1&quot; /&gt;
-
-&lt;activity
-    android:name=&quot;.ThirdActivity&quot;
-    android:launchMode=&quot;singleTask&quot;
-    android:taskAffinity=&quot;com.task1&quot; /&gt;
-</code></pre><p>可以看到我们给SecondActivity和ThirdActivity设置了singleTask模式和taskAffinity，也就是所需的任务栈。从图里我们可以看出，首先由MainActivity启动SecondActivity，然后由SecondActivity启动ThirdActivity，再由ThirdActivity启动MainActivity，最后再启动SecondActivity。然后我们按两次回退键，发现回到了桌面了，这是为什么？</p>
-<p>首先我们把MainActivity设为A，SecondActivity为B，ThirdActivity为C。</p>
-<p>从Manifest文件中可以看到A为standard模式，任务栈为包名，而B和C是singleTask模式，任务栈为com.task1。</p>
-<p>所以当我们从A启动B的时候，系统会为我们新建一个任务栈，就是com.task1，从而把B进栈。</p>
-<p>从B启动C时，发现C所需要的任务栈com.task1已经存在，但是没有发现C的实例，这时候就创建C的实例并且进栈，这时com.task1里为BC</p>
-<p>然后我们又从C启动A，由于A为standard模式，所以A会进入到C的任务栈，这时有两个任务栈存在，一个是为包名的任务栈，一个是为com.task1的任务栈。包名的任务栈里只有一个A，而com.task1的任务栈里现在是BCA</p>
-<p>接着我们由A启动B，B是singleTask模式，而恰好当前栈里存在着B的实例，所以不会重新创建实例，而是把B调到栈顶，并且把前面的Activity通通出栈，此时com.task1的任务栈里就只剩下一个B了</p>
-<p>最后我们按下一次回退键，当前B被出栈，com.task1任务栈被销毁，调出包名任务栈，也就是A，然后再按一次就退出程序了，这也就间接的证明了切换singleTask模式的Activity会把在它之上的Activity出栈。</p>
-<hr>
-<p>写了这么多字累死我了</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-Activity启动模式详解/" data-id="cjfx8xufe0002qqfy0ppu3owq" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Android/Android-自定义控件PickerView/" data-id="cjfx95vdg000axafyhwlkvvok" class="article-share-link">Share</a>
       
       
     </footer>
@@ -658,7 +435,7 @@ public void computeScroll() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-ViewDragHelper/" data-id="cjfx8xuff0003qqfyt83kb5w7" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Android/Android-ViewDragHelper/" data-id="cjfx95vcz0003xafyfg1vh86g" class="article-share-link">Share</a>
       
       
     </footer>
@@ -668,9 +445,9 @@ public void computeScroll() {
 
 
   
-    <article id="post-Android/Android-View的滑动" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Android/Android-触摸事件的分发和处理" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-View的滑动/" class="article-date">
+    <a href="/2018/04/13/Android/Android-触摸事件的分发和处理/" class="article-date">
   <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
 </a>
     
@@ -682,7 +459,334 @@ public void computeScroll() {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-View的滑动/">Android-View的滑动</a>
+      <a class="article-title" href="/2018/04/13/Android/Android-触摸事件的分发和处理/">Android-触摸事件的分发和处理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"><a href="#首先想要了解事件的分发和处理，就要先了解什么是触摸事件" class="headerlink" title="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"></a>首先想要了解事件的分发和处理，就要先了解什么是触摸事件</h3><hr>
+<blockquote>
+<p>什么是触摸事件？</p>
+</blockquote>
+<p>顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件</p>
+<ol>
+<li>按下        Action_Down</li>
+<li>如果滑动    Action_Move</li>
+<li>抬起        Action_Up</li>
+</ol>
+<p>这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参数就是一个MotionEvent对象。在MotionEvent里不止有这几个事件，还可以取出当前触摸的坐标点等等。</p>
+<hr>
+<p>当然，这只是在一个View中，但是我们知道，Android的View结构是树形的，View可以放在一个ViewGroup当中，然后这个ViewGroup当中又嵌套一个ViewGroup。所以当我触摸屏幕的时候到底是谁来执行这个事件？这样就引出了『事件拦截』</p>
+<p><strong>我们想象一下场景</strong></p>
+<p>一个总经理，一个技术经理，然后干活的你。总经理把任务布置给技术经理，然后技术经理把任务安排给了你。过了一会你把任务完成，交给技术经理，技术经理觉的不错，就交给了总经理，这样这个任务就完成了</p>
+<p>了解了这个流程之后，对于事件拦截也就理解了小半了，下面来一个实例看一下</p>
+<hr>
+<p>首先我们自定义两个ViewGroup和一个View分别对应一个总经理一个技术经理和一个干活的。</p>
+<p>在两个ViewGroup中我们主要重写三个方法</p>
+<ol>
+<li>dispatchTouchEvent()</li>
+<li>onInterceptTouchEvent()</li>
+<li>onTouchEvent()</li>
+</ol>
+<p>然后在View中重写两个方法</p>
+<ol>
+<li>dispatchTouchEvent()</li>
+<li>onTouchEvent()</li>
+</ol>
+<p>然后我们在这几个方法中什么都不改，只是在里面打印Log日志来看一下执行的顺序。</p>
+<p>XML布局如下：</p>
+<pre><code>&lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupA
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupB
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;&gt;
+
+        &lt;com.github.wanglu1209.androidqunyingzhuan.MyView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot; /&gt;
+
+    &lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupB&gt;
+
+&lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupA&gt;
+</code></pre><p>现在运行程序，查看Log，如下：</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>可以看的出来，正常情况下事件的传递顺序为：</p>
+<p>ViewGroupA -&gt; ViewGroupB -&gt; View</p>
+<p>事件的处理顺序为：</p>
+<p>View -&gt; ViewGroupB -&gt; ViewGroupA</p>
+<p>其中事件传递的返回值：</p>
+<ol>
+<li>True 拦截，不继续传递</li>
+<li>False 不拦截，传递</li>
+</ol>
+<p>事件处理的返回值：</p>
+<ol>
+<li>True 处理完毕，不交给上级</li>
+<li>False 交给上级</li>
+</ol>
+<blockquote>
+<p>事件分发</p>
+</blockquote>
+<p><strong>现在我们给代码做一些改动，把ViewGroupA的onInterceptTouchEvent()的返回值改为True，查看一下log</strong></p>
+<p>log如下：</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>这里我们直接在最外侧的ViewGroupA中把事件拦截了下来，所以后面的ViewGroupB和View都没有接收到触摸事件。如果我们在ViewGroupB中拦截事件，那么log如下；</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>这样把Log打印出来就对事件的拦截和传递有了一个清晰的认识，下面来看一下事件的处理</p>
+<hr>
+<blockquote>
+<p>事件处理</p>
+</blockquote>
+<p>开始的时候我们说过，当你完成了任务之后会像你的项目经理报告，需要上级的确认，所以你的事件处理返回false，如果有一天你不干了，那么你也就不用给上级报告了，返回了true，来看一下log</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent</p>
+</blockquote>
+<p>事件传递和以前一样依次的传递下来，但是处理事件到View这里就结束了，没有向上级传递，如果给ViewGroupB的onTouchEvent的返回值true，那么事件处理到ViewGroupB就结束了。</p>
+<p>这样一来，事件的分发和处理就了解了</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-触摸事件的分发和处理/" data-id="cjfx95vdj000cxafyp4fp6s4h" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-自定义ViewGroup" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-自定义ViewGroup/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="自定义ViewGroup"><a href="#自定义ViewGroup" class="headerlink" title="自定义ViewGroup"></a>自定义ViewGroup</h2><blockquote>
+<p>自定义ViewGroup需要注意什么</p>
+</blockquote>
+<p>首先我们要明确一点，ViewGroup就是用来存放View的容器，用来对子View进行管理，给子View添加规则，so</p>
+<ol>
+<li>对子View进行测量，重写onMeasure()方法</li>
+<li>对子View的布局进行控制，重写onLayout()方法</li>
+<li>重写onTouchEvent()，dispatchEvent()来对点击触控事件进行控制</li>
+</ol>
+<hr>
+<blockquote>
+<p>实例</p>
+</blockquote>
+<p><strong>长这个样子</strong></p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-d70282c81ab583c5.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>从这个图就可以看的出来我们的需求</p>
+<ol>
+<li>可以滑动</li>
+<li>当滑动大于一定距离的时候显示下一个子View</li>
+<li>如果小于一定距离那么就回到原位</li>
+</ol>
+<p>首先这里可以看的出来，我们每一个子View都是沾满一个屏幕的，所以这里整个ViewGroup的高度就能确定出来了，就是屏幕的高度乘子View的个数</p>
+<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    int count = getChildCount();
+    for (int i = 0; i &lt; count; i++) {
+        View child = getChildAt(i);         //获得每一个子view
+        measureChild(child, widthMeasureSpec, heightMeasureSpec);      //测量子view
+    }
+}
+</code></pre><p>我们先在onMeasure()方法中测量每一个子View，这里直接调用measureChild()方法就可以进行对子View的测量，用一个for循环很方便。</p>
+<pre><code>protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    int childCount = getChildCount();
+    MarginLayoutParams mlp = (MarginLayoutParams) getLayoutParams();
+    /**
+     * 这里对整个ViewGroup的高度进行初始化
+     * 屏幕的高度乘子View的个数
+     */
+    mlp.height = mScreenHeight * childCount; 
+    setLayoutParams(mlp);
+
+
+    for (int i = 0; i &lt; childCount; i++) {
+        View child = getChildAt(i);
+        if (child.getVisibility() != View.GONE) {
+            /**
+             * 这里对子View进行布局,由于我们的ViewGroup是上下滑动
+             * 所以只需要确定top和bottom两个值就可以,让他们从上到下排列
+             */
+            child.layout(
+                    l,
+                    i * mScreenHeight,
+                    r,
+                    (i + 1) * mScreenHeight
+            );
+        }
+    }
+}
+</code></pre><p>到这里我们就已经完成了对ViewGroup的测量和对子View位置的控制，接下来就是对触摸事件进行控制</p>
+<pre><code>public boolean onTouchEvent(MotionEvent event) {
+    int y = (int) event.getY();
+
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            mLastY = y;
+            mStartY = getScrollY();
+            break;
+        case MotionEvent.ACTION_MOVE:
+            if (!mScroller.isFinished()) {
+                mScroller.abortAnimation();
+            }
+            int dy = mLastY - y;
+
+            /**
+             * getScrollY()小于0则为第一屏
+             */
+            if (getScrollY() &lt; 0) {
+                dy = 0;
+            }
+            /**
+             * 最后一屏
+             */
+            if (getScrollY() &gt; mTotalHeight - mScreenHeight) {
+                dy = 0;
+            }
+            scrollBy(0, dy);
+            mLastY = y;
+            break;
+        case MotionEvent.ACTION_UP:
+            int dScrollY = check();
+
+            if (dScrollY &gt; 0) { //从下往上滑
+                /**
+                 * 如果这个距离小于屏幕的1/3
+                 * 那么就回到原位,也就是当前距离取负值
+                 * 如果大于屏幕的1/3
+                 * 那么就直接进入到下一个子View
+                 */
+                if (dScrollY &lt; mScreenHeight / 3) {
+                    mScroller.startScroll(
+                            0, getScrollY(),
+                            0, -dScrollY)
+                    ;
+                } else {
+                    mScroller.startScroll(
+                            0, getScrollY(),
+                            0, mScreenHeight - dScrollY
+                    );
+                }
+            } else {
+                if (-dScrollY &lt; mScreenHeight / 3) {
+                    mScroller.startScroll(
+                            0, getScrollY(),
+                            0, -dScrollY
+                    );
+                } else {
+                    mScroller.startScroll(
+                            0, getScrollY(),
+                            0, -mScreenHeight - dScrollY
+                    );
+                }
+            }
+            break;
+
+    }
+    postInvalidate();   //重绘
+    return true;
+}
+
+private int check() {
+    int mEnd = getScrollY();
+    /**
+     * 判断滑动方向
+     * true 从下往上滑
+     * false 从上往下滑
+     */
+    boolean isUp = mEnd - mStartY &gt; 0;
+    /**
+     * 关于这两个变量,读者可以自行的打印出来理解一下
+     * 用语言来描述不好描述（好吧,其实是表达能力有限）
+     */
+    int lastPrev = mEnd % mScreenHeight;
+    int lastNext = mScreenHeight - lastPrev;
+    if (isUp) {
+        return lastPrev;
+    } else {
+        return -lastNext;
+    }
+}
+
+@Override
+public void computeScroll() {
+    super.computeScroll();
+    if(mScroller.computeScrollOffset()){
+        scrollTo(0, mScroller.getCurrY());
+        postInvalidate();
+    }
+}
+</code></pre><ol>
+<li>这里我们首先在ActionDown事件中获取到第一次碰到屏幕时候的Y轴偏移量</li>
+<li>然后我们在ActionMove事件中来对这个值来进行运算并且调用scrollBy()方法来进行滑动</li>
+<li>最后我们在ActionUp方法中对这个事件进行总的处理，首先我们在check()方法中判断用户是从上往下滑还是从下往上滑，然后通过滑动方向来计算值并且返回，接着我们用check()方法返回的数据来进行判断滑动的距离是否大于屏幕的三分之一，如果大于，则调用Scroller.startScroll()方法来进行滑动到下/上一屏，如果小于则返回原位。</li>
+</ol>
+<p>至此自定义ViewGroup就完全结束了，运行一下程序，可以看到我们开始的效果已经呈现出来了。</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-自定义ViewGroup/" data-id="cjfx95vd80007xafyuwafjyxt" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-View的测量" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/12/Android/Android-View的测量/" class="article-date">
+  <time datetime="2016-03-12T13:30:00.000Z" itemprop="datePublished">2016-03-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/12/Android/Android-View的测量/">Android View的测量</a>
     </h1>
   
 
@@ -691,144 +795,90 @@ public void computeScroll() {
     <div class="article-entry" itemprop="articleBody">
       
         <blockquote>
-<p>滑动效果是如何产生的？</p>
+<p>Android View的测量</p>
 </blockquote>
-<p>滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。</p>
-<h2 id="Android中的坐标体系"><a href="#Android中的坐标体系" class="headerlink" title="Android中的坐标体系"></a>Android中的坐标体系</h2><p>Android中的坐标体系分为两种：</p>
-<ol>
-<li>Android坐标系</li>
-<li>视图坐标系</li>
-</ol>
-<blockquote>
-<p>Android坐标系</p>
-</blockquote>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0ea610d2436d0fe0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Android坐标系"></p>
-<p>从图中我们可以看的出来<strong>在Android坐标系中以屏幕的左上方作为坐标系的原点，从原点向右为X轴的正方向，向下为Y轴的正方向</strong>。在触控事件中使用<strong>getRawX()、getRawY()</strong>来获得Android坐标系的坐标</p>
-<blockquote>
-<p>视图坐标系</p>
-</blockquote>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-a6921068bc9cf072?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="视图坐标系"></p>
-<p>视图坐标系主要描述的是该View和该View在父视图中的位置关系，和Android坐标系一样，也是以原点右方为X正方向，以原点下方为Y轴正方向，不过这里不是以屏幕的左上角为原点，而是<strong>以父视图的左上角为原点</strong>。在触控事件中使用<strong>getX()、getY()</strong>来获得视图坐标系的坐标</p>
-<h2 id="触控事件"><a href="#触控事件" class="headerlink" title="触控事件"></a>触控事件</h2><p>在上一篇文章中我们使用到了MotionEvent，这个就是触控事件的封装，首先看一下MotionEvent中封装的事件常量</p>
-<ul>
-<li>public static final int ACTION_DOWN = 0;    //单点触摸按下动作</li>
-<li>public static final int ACTION_UP = 1;    //单点触摸离开动作</li>
-<li>public static final int ACTION_MOVE = 2;    //单点触摸移动动作</li>
-<li>public static final int ACTION_CANCEL = 3;    //触摸动作取消</li>
-<li>public staiic final int ACTION_OUTSIDE = 4;    //触摸动作超出边界</li>
-<li>public static final int ACTION_POINTER_DOWN = 5; //多点触摸按下动作</li>
-<li>public static final int ACTION_POINTER_UP = 6; 多点离开动作</li>
-</ul>
-<p>通常情况下我们会在onTouchEvent(MotionEvent event)方法中通过event.getAction()来获取触控事件的类型。知道Android中的坐标系和触控事件之后我们就可以来实现View的滑动了</p>
-<hr>
-<h1 id="滑动实现"><a href="#滑动实现" class="headerlink" title="滑动实现"></a>滑动实现</h1><blockquote>
-<p>实现滑动有好多种方法，但是其思想都是一样的。当触摸到View时，记录当前触摸点的坐标，然后当手指移动时，获取到相对于前一个点的偏移量，这样我们就可以通过这个偏移量来进行修改View的坐标，这样不断的重复，就能实现View的滑动</p>
-</blockquote>
-<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>我们自定义一个View，让他来跟随我们手指的移动来移动，如图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-82d4117c39eaf270.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<ul>
-<li><strong>layout方法</strong></li>
-</ul>
-<p>我们知道在View进行绘制的时候会通过onLayout()方法来设置View的显示位置，这里我们通过修改View的left, top, right, bottom四个值来控制View的坐标</p>
-<pre><code>public boolean onTouchEvent(MotionEvent event) {
-    int x = (int) event.getX();
-    int y = (int) event.getY();
-
-    switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            //记录触摸点的坐标
-            lastX = x;
-            lastY = y;
-            break;
-        case MotionEvent.ACTION_MOVE:
-            //计算偏移量
-            int offsetX = x - lastX;
-            int offsetY = y - lastY;
-
-            //在当前位置基础加上偏移量
-            layout(
-                    getLeft() + offsetX,
-                    getTop() + offsetY,
-                    getRight() + offsetX,
-                    getBottom() + offsetY
-            );
-            break;
-    }
-    return true;
-}
-</code></pre><hr>
-<ul>
-<li><strong>offsetLeftAndRight()和offsetTopAndBottom</strong></li>
-</ul>
-<p>这个方法就是相当于系统提供的一个对左右、上下移动的API的封装，计算好偏移量后，调用方法即可：</p>
-<pre><code>offsetLeftAndRight(offsetX);
-offsetTopAndBottom(offsetY);
-</code></pre><hr>
-<ul>
-<li><strong>LayoutParams</strong></li>
-</ul>
-<p>LayoutParams保存了View的布局参数，所以我们可以改变LayoutParams来动态的改变布局的位置来达到滑动的效果。在程序中使用getLayoutParams()来获取当前View的LayoutParams，这里就和上面一样，获取到偏移量后通过setLayoutParams来设置该View的LayoutParams：</p>
-<pre><code>RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) getLayoutParams();
-params.leftMargin = getLeft() + offsetX;
-params.topMargin = getTop() + offsetY;
-setLayoutParams(params);
-</code></pre><p><strong>需要注意一点，通过getLayoutParams()获取LayoutParams的时候，要根据View的父布局的类型来设置，当然前提还要有一个父布局。还有就是我们可以使用ViewGroup.MarginLayoutParams，这样就不用考虑父布局是什么了</strong></p>
-<hr>
-<ul>
-<li><strong>scrollTo、scrollBy</strong></li>
-</ul>
-<p>在View中，系统还提供了scrollTo、scrollBy两种方式来改变一个View的位置。</p>
-<p>其中scrollTo表示移动到一个具体的坐标点，scrollBy表示移动的偏移量，其实在scrollBy内部也是调用的scrollTo。</p>
-<p>和前面的方式一样，获取到偏移量后调用scrollBy来移动view，可是当我们运行程序，拖动View，发现View并没有移动！这是因为scrollTo、scrollBy方法移动的是View的内容，如果在ViewGroup中使用scrollTo、scrollBy的滑，那么移动的就是View了，但是如果在View中使用，那么移动的将是View里面的内容，比如TextView，那么移动的就是文本了。</p>
-<p>所以通过上面的分析，我们把代码改为如下:</p>
-<pre><code>((View)getParent()).scrollBy(offsetX, offsetY);
-</code></pre><p>再次运行程序，我们会发现动是动了，但是在乱动。因为这里我们其实是在相反的方向移动（这里由于篇幅限制，感兴趣的同学自行查找一下资料），我们把偏移量改为负的之后就会发现滑动正常了。</p>
-<hr>
-<ul>
-<li><strong>Scroller</strong></li>
-</ul>
-<p>首先来想一个场景：我们需要让一个Button向右面移动100个像素，如果我们用scrollTo/scrollBy的话，那么该View就会很突兀的移动到该点，没有过程，而Scroller则是可以实现平滑的过渡效果的</p>
-<p>下面我们把上面跟随手指滑动的例子改一下，我们在松开手指后，View自动回到原点（屏幕左上角）。使用Scroller需要三个步骤</p>
-<ol>
-<li>初始化<ul>
-<li>通过构造方法即可   Scroller mScroller = new Scroller(context);</li>
+<p>在绘制View之前，要对整个View进行测量，这个过程就在onMeasure()方法中进行的。</p>
+<h4 id="测量的模式"><a href="#测量的模式" class="headerlink" title="测量的模式"></a>测量的模式</h4><ol>
+<li>EXACTLY<ul>
+<li>精确值模式，当控件的width和height设置为具体值或者match_parent时就是这个模式</li>
 </ul>
 </li>
-<li>重写computeScroll()方法，实现滑动</li>
-<li>startScroll()开启滑动</li>
+<li>UNSPECIFIED<ul>
+<li>这个属性不指定测量的模式，View想多大就多大</li>
+</ul>
+</li>
+<li>AT_MOST<ul>
+<li>最大值模式，当控件的width和height设置为wrap_context时就是这个模式，控件的大小随着子控件的大小而变化</li>
+</ul>
+</li>
 </ol>
-<p>代码如下：</p>
-<pre><code>        case MotionEvent.ACTION_UP:
-            View viewGroup = (View) getParent();
-            mScroller.startScroll(
-                    viewGroup.getScrollX(),
-                    viewGroup.getScrollY(),
-                    -viewGroup.getScrollX(),
-                    -viewGroup.getScrollY()
-            );
-            invalidate();
+<p>其中View类<strong>默认的</strong>onMeasure()方法<strong>只支持EXACTLY模式</strong>，所以说如果不重写onMeasure()方法的话就只能使用EXACTLY模式。</p>
+<p>一言不合上代码</p>
+<pre><code>public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+    setBackgroundColor(Color.BLUE);
+} 
+</code></pre><p>这里我只给当前自定义View设置了一个背景颜色，然后在XML中设置成wrap_content</p>
+<pre><code>&lt;com.github.wanglu1209.CustomView
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot; /&gt; 
+</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>运行起来就是这样全屏的，下面我们还是这个例子，重写onMeasure()方法</p>
+<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+    int specMode, specSize = 0;
+    int mWidth, mHeight;
+
+    /**
+     * Measure Width
+     */
+    specMode = MeasureSpec.getMode(widthMeasureSpec);
+    switch (specMode){
+        case MeasureSpec.AT_MOST:   //wrap_content
+            specSize = 200;
             break;
-
-  ----------------------------------------------------------------     
-
-        @Overrid  
-        public void computeScroll() {
-            super.computeScroll();
-            if (mScroller.computeScrollOffset()) {
-            ((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
-            invalidate();
+        case MeasureSpec.EXACTLY:   //math_content 和 精确值
+            specSize = MeasureSpec.getSize(widthMeasureSpec);
+            break;
+        case MeasureSpec.UNSPECIFIED:
+            specSize = 400;
+            break;
     }
+    mWidth = specSize;
+
+    /**
+     * Measure Height
+     */
+    specMode = MeasureSpec.getMode(heightMeasureSpec);
+    switch (specMode){
+        case MeasureSpec.AT_MOST:   //wrap_content
+            specSize = 200;
+            break;
+        case MeasureSpec.EXACTLY:   //math_content 和 精确值
+            specSize = MeasureSpec.getSize(heightMeasureSpec);
+            break;
+        case MeasureSpec.UNSPECIFIED:
+            specSize = 400;
+            break;
+    }
+    mHeight = specSize;
+
+    /**
+     * 最后调用setMeasuredDimension进行赋值
+     */
+    setMeasuredDimension(mWidth, mHeight);
 }
-</code></pre><p>当我们手指抬起来的时候开启Scroller滑动，获取到当前view的移动距离，然后我们把需要移动的偏移量设置为相反数就ok，最后调用invalidate来通知重绘，从而调用computeScroll()方法。运行程序如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2251dce7b4d1c1c7.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<p>现在就把这几种View的滑动都说完了，自己动手写一下，感触良多。</p>
+</code></pre><p>可以看到这里我们给wrap_content赋值200，我们XML代码不变还是wrap_content，运行一下程序</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0e9fc7b558921b74.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>可以看的出来大小确实变成了200，通过这个小例子就可以对View的测量有一个不错的认识了，并没有什么高深莫测的东西，一步一步来。</p>
 <hr>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-View的滑动/" data-id="cjfx8xufp0007qqfyeqnh0i72" class="article-share-link">Share</a>
+      <a data-url="http:/2016/03/12/Android/Android-View的测量/" data-id="cjfx95vd00004xafye69ywom7" class="article-share-link">Share</a>
       
       
     </footer>
@@ -861,7 +911,7 @@ setLayoutParams(params);
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
     </div>
   </div>
 
@@ -890,7 +940,7 @@ setLayoutParams(params);
           </li>
         
           <li>
-            <a href="/2018/04/13/Android/Android-各种情况下的『自动加载更多』/">Android-各种情况下的『自动加载更多』</a>
+            <a href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/">Android-Paint高级-PorterDuffXfermode</a>
           </li>
         
       </ul>
