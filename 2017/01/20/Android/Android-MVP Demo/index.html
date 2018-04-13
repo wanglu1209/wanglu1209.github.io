@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-MVP Demo | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="说在前面引用Rocko说过的一段话  MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关注，但在项目开发中选择一种这样的软件设计模式需保持慎重心态，一旦确定使用MVP作为你App的开发模式那么你就最好坚持做下去，如果在使用MVP模式开发过程中发现问题而且坑越来越大，这时你想用MVC等来重新设计的话基本上就等于推倒重来了。要知道在Android上MVP在现在为止并没有统一的标准或">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-MVP Demo">
+<meta property="og:url" content="http:/2017/01/20/Android/Android-MVP Demo/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="说在前面引用Rocko说过的一段话  MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关注，但在项目开发中选择一种这样的软件设计模式需保持慎重心态，一旦确定使用MVP作为你App的开发模式那么你就最好坚持做下去，如果在使用MVP模式开发过程中发现问题而且坑越来越大，这时你想用MVC等来重新设计的话基本上就等于推倒重来了。要知道在Android上MVP在现在为止并没有统一的标准或">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-bae3ec4f9c9b9fbc.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-64923baa8792aa17.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-04-13T01:24:49.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-MVP Demo">
+<meta name="twitter:description" content="说在前面引用Rocko说过的一段话  MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关注，但在项目开发中选择一种这样的软件设计模式需保持慎重心态，一旦确定使用MVP作为你App的开发模式那么你就最好坚持做下去，如果在使用MVP模式开发过程中发现问题而且坑越来越大，这时你想用MVC等来重新设计的话基本上就等于推倒重来了。要知道在Android上MVP在现在为止并没有统一的标准或">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-bae3ec4f9c9b9fbc.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-MVP Demo" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/01/20/Android/Android-MVP Demo/" class="article-date">
+  <time datetime="2017-01-20T11:10:00.000Z" itemprop="datePublished">2017-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-MVP Demo
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="说在前面"><a href="#说在前面" class="headerlink" title="说在前面"></a>说在前面</h2><p>引用<a href="http://rocko.xyz/" target="_blank" rel="noopener">Rocko</a>说过的一段话</p>
+<blockquote>
+<p>MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关注，但在项目开发中选择一种这样的软件设计模式需保持慎重心态，一旦确定使用MVP作为你App的开发模式那么你就最好坚持做下去，如果在使用MVP模式开发过程中发现问题而且坑越来越大，这时你想用MVC等来重新设计的话基本上就等于推倒重来了。要知道在Android上MVP在现在为止并没有统一的标准或者框架，不像SSH这三个成熟稳重强而有力的三剑客支持推动着Java EE的开发，所以在运用MVP时一定要做好自己的理解，并且尽量预知自己App各模块的需求以便提前做好充分的设计工作。</p>
+</blockquote>
+<p>其实关于MVP的文章已经很多了，我觉得我再去说一些理论性的东西显得有点“老套”，所以我直接上一个小的项目（知乎日报）。关于理论知识这里推荐两篇文章，我也是按照这个来自己学习的。仔细想一想，多写一写。</p>
+<p><a href="http://www.jianshu.com/p/9a6845b26856" target="_blank" rel="noopener">Android MVP 详解（上）</a></p>
+<p><a href="http://www.jianshu.com/p/0590f530c617" target="_blank" rel="noopener">Android MVP 详解（下）</a></p>
+<h2 id="关于知乎日报的实现"><a href="#关于知乎日报的实现" class="headerlink" title="关于知乎日报的实现"></a>关于知乎日报的实现</h2><blockquote>
+<p>我的MVP学的还不是很到位，所以有出错的地方请各位指正</p>
+</blockquote>
+<p><strong>MVP实现的是View和Model的解耦，View中只需要实现接口来接收数据显示界面即可</strong></p>
+<p>所以，当我们开始写一个界面的时候，我们就应该想这个界面需要“哪些数据”？我们就根据这个想法来定义接口，至于处理数据/提供数据就交给Presenter去处理。</p>
+<p>知乎日报大家都熟悉，我这里只写了一个首页，应该说很简单。</p>
+<p>如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-bae3ec4f9c9b9fbc.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>然后看一下工程的目录，如下</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-64923baa8792aa17.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>model就是我们的数据了，presenter就是我们的中间层，来处理数据，至于ui就更不用说了，我们的activity、fragment等都放在这。</p>
+<p>首先我们要构思一下，这个页面需要什么？</p>
+<ul>
+<li>banner</li>
+<li>ListView的数据</li>
+<li>拉倒最后加载更多的数据</li>
+<li>加载失败的回调</li>
+</ul>
+<p>根据这几个我们就可以定义出来一个view的接口<code>IZhiHuFgView</code>，接口如下：</p>
+<pre><code>public interface IZhiHuFgView {
+    /**
+     * 加载的的数据
+     */
+    void setStories(List&lt;Stories&gt; stories);
+
+    /**
+     * 设置banner的View
+     */
+    void setBanner(View bannerView);
+
+    /**
+     * 出错
+     */
+    void onError();
+}
+</code></pre><p>然后我们的<code>ZhiHuFragment</code>来实现这个接口，实现这些方法就可以来添加数据了</p>
+<pre><code>public class ZhiHuFragment extends Fragment implements IZhiHuFgView, AbsListView.OnScrollListener, SwipeRefreshLayout.OnRefreshListener {
+
+    @Bind(R.id.stories_list)
+    ListView storiesList;
+    @Bind(R.id.refresh_view)
+    SwipeRefreshLayout refreshView;
+
+    /**
+     * 持有presenter的对象来处理数据
+     */
+    private IZhiHuFgPresenter zhiHuFgPresenter;
+    private List&lt;Stories&gt; stories;
+    private StoriesAdapter storiesAdapter;
+    private boolean isRequest = false;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = LayoutInflater
+                .from(getContext())
+                .inflate(R.layout.fragment_zhihu, container, false);
+        ButterKnife.bind(this, view);
+
+        init();
+        return view;
+    }
+
+    /**
+     * 初始化一些view
+     */
+    private void init() {
+        zhiHuFgPresenter = new ZhiHuFgPresenter(getActivity(), this);
+        storiesAdapter = new StoriesAdapter(getContext());
+        storiesList.setAdapter(storiesAdapter);
+        stories = new ArrayList&lt;&gt;();
+
+        refreshView.setColorSchemeColors(
+                getActivity().getResources().getColor(R.color.colorPrimary));
+        refreshView.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshView.setRefreshing(true);
+            }
+        });
+        refreshView.setOnRefreshListener(this);
+        storiesList.setOnScrollListener(this);
+        zhiHuFgPresenter.getZhiHuStories();
+
+    }
+
+    /**
+     * 设置加载的数据
+     */
+    @Override
+    public void setStories(List&lt;Stories&gt; stories) {
+        isRequest = false;
+        this.stories.addAll(stories);
+        storiesAdapter.setData(this.stories);
+
+        refreshView.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshView.setRefreshing(false);
+            }
+        });
+    }
+
+    /**
+     * 设置banner
+     */
+    @Override
+    public void setBanner(View bannerView) {
+        storiesList.addHeaderView(bannerView);
+    }
+
+
+    /**
+     * 出错
+     */
+    @Override
+    public void onError() {
+        Toast.makeText(getContext(), &quot;error&quot;, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 加载更多滑动监听
+     */
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
+                &amp;&amp; view.getLastVisiblePosition() == (view.getCount() - 1) &amp;&amp; !isRequest) {
+            isRequest = true;
+            zhiHuFgPresenter.getBeforeStories();
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+
+    }
+
+    /**
+     * 刷新
+     */
+    @Override
+    public void onRefresh() {
+        stories.clear();
+        zhiHuFgPresenter.getZhiHuStories();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+}
+</code></pre><p>可以清楚的看到，我们的<strong>view层只是用来展示数据</strong>，调理是不是清晰了很多，剩下的就是用presenter这个中间层来处理数据回调给view层了，代码很简单，就不贴了，有需要的可以移步<a href="https://github.com/wanglu1209/ZhiHuDaily_MVP" target="_blank" rel="noopener">GitHub</a>查看详细代码</p>
+<hr>
+<h2 id="自我理解"><a href="#自我理解" class="headerlink" title="自我理解"></a>自我理解</h2><p>MVP最大的好处就是View和Model的解耦，方便单元测试等。但是代码量很多，会创建出很多的View层接口。</p>
+<p>我觉得写MVP的一个难点就是在于抽离，要思考这个页面需要什么，然后设计成接口</p>
+<p>文笔不佳，抱歉了各位</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2017/01/20/Android/Android-MVP Demo/" data-id="cjfx9tx6q0000lpfyspszfiyz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/02/09/Android/Android-同向滑动冲突/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-同向滑动冲突
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/01/10/Android/Android-RecyclerView拖拽排序和删除/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-RecyclerView拖拽排序和删除</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

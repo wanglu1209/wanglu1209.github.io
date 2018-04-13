@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-Activity启动模式详解 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。 Activity的LaunchMode 为啥子需要启动模式？  我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。举个例子，我们在当前Activit">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-Activity启动模式详解">
+<meta property="og:url" content="http:/2016/05/08/Android/Android-Activity启动模式详解/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。 Activity的LaunchMode 为啥子需要启动模式？  我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。举个例子，我们在当前Activit">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2016-05-08T14:10:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-Activity启动模式详解">
+<meta name="twitter:description" content="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。 Activity的LaunchMode 为啥子需要启动模式？  我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。举个例子，我们在当前Activit">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-Activity启动模式详解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/05/08/Android/Android-Activity启动模式详解/" class="article-date">
+  <time datetime="2016-05-08T14:10:00.000Z" itemprop="datePublished">2016-05-08</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-Activity启动模式详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"><a href="#最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。" class="headerlink" title="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"></a>最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。</h4><hr>
+<h2 id="Activity的LaunchMode"><a href="#Activity的LaunchMode" class="headerlink" title="Activity的LaunchMode"></a>Activity的LaunchMode</h2><blockquote>
+<p>为啥子需要启动模式？</p>
+</blockquote>
+<p>我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。<strong>举个例子</strong>，我们在当前Activity启动当前的Activity，那么任务栈里就全是当前Activity，这样当然很二逼了！所以启动模式就出来了，目前有四种启动模式</p>
+<ul>
+<li>standard</li>
+<li>singleTop</li>
+<li>singleTask</li>
+<li>singleInstance</li>
+</ul>
+<h4 id="standard"><a href="#standard" class="headerlink" title="standard"></a>standard</h4><p>standard是标准模式，也就是默认模式。每次启动一个Activity就会创建一个新的实例，不管这个实例是否已经存在，<strong>这就是典型的多实例实现。一个任务栈可以有多个实例，每个实例也可以属于不同的任务栈，谁启动了这个Activity，这个Activity就运行在启动它的那个任务栈中，</strong>当我们用ApplicationContext去启动一个standard模式的Activity会报错，因为standard的Activity会进入启动他的Activity任务栈中，但是由于非Activity类型的Context并没有任务栈，所以这样就出问题了</p>
+<h4 id="singleTop"><a href="#singleTop" class="headerlink" title="singleTop"></a>singleTop</h4><p>singleTop即栈顶复用模式，在这种模式下，如果新创建的Activity已经位于栈顶，那么就不会去创建新的实例，但是该Activity的onNewIntent会被调用，通过这个方法我们可以取出请求的信息。<strong>需要注意的是，该Activity的onCreate、onStart不会被调用，因为它没有发生改变。</strong>但是如果新的Activity不位于栈顶，那么就会创建一个新的实例。<strong>举个例子</strong>，比如现在一个任务栈有ABCD四个Activity，A位于栈底，D位于栈顶。这个时候如果去启动D，那么栈的情况还是ABCD四个实例，如果D的启动模式为standard，那么栈内就是ABCDD</p>
+<h4 id="singleTask"><a href="#singleTask" class="headerlink" title="singleTask"></a>singleTask</h4><p>栈内复用模式，在这种模式情况下，只要Activity在一个栈中存在，那么启动这个Activity都不会重新创建实例，也会调用onNewIntent。<strong>当一个singleTask模式的Activity『A』被请求启动，首先系统会寻找是否有A所需的任务栈，如果不存在，那就重新创建一个任务栈，然后创建A的实例放入栈中。如果存在A所需的任务栈，这时再看A是否在这个栈中有实例存在，如果存在，那么久回把A调到栈顶并调用onNewIntent方法。如果不存在，那么就创建A的实例并且压入栈中，举个例子</strong></p>
+<ul>
+<li>比如当前任务栈S1中有ABC三个实例，这个时候singleTask模式的D启动，但是其所需要的任务栈为S2，由于S2和D的实例都不存在，这个时候就会先创建S2任务栈，然后创建D的实例压栈到S2</li>
+<li>如果D需要的任务栈为S1，那么由于任务栈S1已经存在，所以直接会创建D的实例放到S1任务栈中</li>
+<li>如果D需要的任务栈为S1，并且S1的情况为ADBC，这时不会重新创建D的实例，会把D调用栈顶，同时<strong>singleTask默认具有clearTop效果，所以会导致D上面的Activity全部出栈</strong>，于是最终S1的情况为AD</li>
+</ul>
+<h4 id="singleInstance"><a href="#singleInstance" class="headerlink" title="singleInstance"></a>singleInstance</h4><p>单例模式，加强的singleTask，这种模式的Activity只能单独运行在一个单独的任务栈中，其他和singleTask一样</p>
+<blockquote>
+<p>所需的任务栈？</p>
+</blockquote>
+<p>在singleTask中提到『所需的任务栈』，什么是Activity所需的任务栈？这里就要提一个参数：TaskAffinity。这个参数标识了一个Activity所需的任务栈的名字，默认情况下所有的Activity所需的任务栈都是当前包名，当然我们也可以为每个Activity单独指定TaskAffinity，<strong>注意这个属性值必须不能和包名相同，</strong>TaskAffinity主要和singleTask配合使用，否则的话没什么意义。当启动一个被TaskAffinity标识了的Activity，那么该Activity就会运行在和TaskAffinity相同的任务栈中</p>
+<p>我们用两种方式设置Activity的启动模式</p>
+<ol>
+<li>在AndroidManifest里为Activity设置<br><code>android:launchMode=&quot;singleTop/singleTask/singleInstance&quot;</code></li>
+<li>通过Intent设置标志位来指定<br><code>intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</code></li>
+</ol>
+<p>这两种方式<strong>第二种的优先级要高于第一种，也就是说两者同时存在时，以第二种为准</strong></p>
+<hr>
+<h2 id="强行举个特殊的例子"><a href="#强行举个特殊的例子" class="headerlink" title="强行举个特殊的例子"></a>强行举个特殊的例子</h2><p>如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>首先我们看一下AndroidManifest里的配置</p>
+<pre><code>&lt;activity android:name=&quot;.MainActivity&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+
+&lt;activity
+    android:name=&quot;.SecondActivity&quot;
+    android:launchMode=&quot;singleTask&quot;
+    android:taskAffinity=&quot;com.task1&quot; /&gt;
+
+&lt;activity
+    android:name=&quot;.ThirdActivity&quot;
+    android:launchMode=&quot;singleTask&quot;
+    android:taskAffinity=&quot;com.task1&quot; /&gt;
+</code></pre><p>可以看到我们给SecondActivity和ThirdActivity设置了singleTask模式和taskAffinity，也就是所需的任务栈。从图里我们可以看出，首先由MainActivity启动SecondActivity，然后由SecondActivity启动ThirdActivity，再由ThirdActivity启动MainActivity，最后再启动SecondActivity。然后我们按两次回退键，发现回到了桌面了，这是为什么？</p>
+<p>首先我们把MainActivity设为A，SecondActivity为B，ThirdActivity为C。</p>
+<p>从Manifest文件中可以看到A为standard模式，任务栈为包名，而B和C是singleTask模式，任务栈为com.task1。</p>
+<p>所以当我们从A启动B的时候，系统会为我们新建一个任务栈，就是com.task1，从而把B进栈。</p>
+<p>从B启动C时，发现C所需要的任务栈com.task1已经存在，但是没有发现C的实例，这时候就创建C的实例并且进栈，这时com.task1里为BC</p>
+<p>然后我们又从C启动A，由于A为standard模式，所以A会进入到C的任务栈，这时有两个任务栈存在，一个是为包名的任务栈，一个是为com.task1的任务栈。包名的任务栈里只有一个A，而com.task1的任务栈里现在是BCA</p>
+<p>接着我们由A启动B，B是singleTask模式，而恰好当前栈里存在着B的实例，所以不会重新创建实例，而是把B调到栈顶，并且把前面的Activity通通出栈，此时com.task1的任务栈里就只剩下一个B了</p>
+<p>最后我们按下一次回退键，当前B被出栈，com.task1任务栈被销毁，调出包名任务栈，也就是A，然后再按一次就退出程序了，这也就间接的证明了切换singleTask模式的Activity会把在它之上的Activity出栈。</p>
+<hr>
+<p>写了这么多字累死我了</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2016/05/08/Android/Android-Activity启动模式详解/" data-id="cjfx9re4f0000j7fyd6if0qav" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/08/20/Android/Android-自定义控件PickerView/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-自定义控件PickerView
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/20/Android/Android-属性动画/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-属性动画</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

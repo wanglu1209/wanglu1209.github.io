@@ -128,7 +128,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/" data-id="cjfx95vdk000dxafy31snvr4p" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/" data-id="cjfx9re5m000dj7fytsbhcsck" class="article-share-link">Share</a>
       
       
     </footer>
@@ -183,7 +183,750 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Python/Python-记学习对象可变性/" data-id="cjfx95vdn000exafyvwt268vs" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Python/Python-记学习对象可变性/" data-id="cjfx9re5o000ej7fygxio1m6p" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-ThreadLocal解析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/10/Android/Android-ThreadLocal解析/" class="article-date">
+  <time datetime="2017-04-10T12:20:00.000Z" itemprop="datePublished">2017-04-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>ThreadLocal分析</strong></p>
+<p>Handler的运行需要MessageQueue和Looper的支持，如果您对这方面不是很熟悉，那么我推荐您阅读<a href="http://www.jianshu.com/p/e6dec5f39d09" target="_blank" rel="noopener">这个</a>，或者看<strong>Android开发艺术探索</strong>，而为了更好的理解Looper，那么ThreadLocal是避不过去的一项</p>
+<p>我们都知道，一个线程只能创建一个Looper，那么在这个线程中传递数据的就是ThreadLocal了</p>
+<p>ThreadLocal是一个线程内部的数据存储类，他可以在指定的线程中存储数据，然后当然也只能在存储数据的线程来获取数据，来看一个小demo</p>
+<p>首先我们定义一个ThreadLocal对象，然后分别在主线程和两个子线程中去设置数据和获取数据</p>
+<pre><code>private ThreadLocal&lt;Boolean&gt; mBooleanThreadLocal = new ThreadLocal&lt;&gt;();
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    mBooleanThreadLocal.set(true);
+    Log.d(&quot;112233&quot;, Thread.currentThread().getName()
+            + &quot; = &quot; + 
+            mBooleanThreadLocal.get());
+
+    new Thread(&quot;Thread #1&quot;){
+        @Override
+        public void run() {
+            super.run();
+            mBooleanThreadLocal.set(false);
+            Log.d(&quot;112233&quot;, Thread.currentThread().getName()
+                    + &quot; = &quot; + 
+                    mBooleanThreadLocal.get());
+        }
+    }.start();
+
+    new Thread(&quot;Thread #2&quot;){
+        @Override
+        public void run() {
+            super.run();
+            Log.d(&quot;112233&quot;, Thread.currentThread().getName()
+                    + &quot; = &quot; + 
+                    mBooleanThreadLocal.get());
+        }
+    }.start();
+}
+</code></pre><p>可以看到这里用的都是同一个LocalThread对象，然后运行程序，看一下log</p>
+<pre><code>D/112233: main = true
+D/112233: Thread #1 = false
+D/112233: Thread #2 = null
+</code></pre><p>我们会发现在不同的线程中获得的值是不同的，下面来分析一下源码，来看一下为什么返回的值不一样</p>
+<pre><code>public T get() {
+    Thread t = Thread.currentThread();//从这里获取当前线程
+    ThreadLocalMap map = getMap(t);//这里获取当前线程的Map
+    if (map != null) {
+        //这里取出由当前threadLocal为key的entry
+        ThreadLocalMap.Entry e = map.getEntry(this);
+        if (e != null)
+            return (T)e.value;//返回value
+    }
+    return setInitialValue();//如果为空，那么初始化
+}
+
+-------------------------------------------
+
+ThreadLocalMap getMap(Thread t) {
+    return t.threadLocals;//这里返回多个threadLocal的对象
+}
+
+-------------------------------------------
+
+private T setInitialValue() {
+    T value = initialValue();//这个方法返回null
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);//如果map存在，则替换掉数据
+    else
+        createMap(t, value);//如果map不存在，则创建一个map，数据为null
+    return value;//最后返回null
+}
+</code></pre><p>从get方法我们可以看得出来获取数据是用Thread为参数的，所以说每个线程的数据都不一样。既然这样我们就再来看看set方法</p>
+<pre><code>public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+</code></pre><p>我们会发现和上面的setInitialValue()方法差不多，都是调用的map.set()方法，这个方法其实就是一个以当前ThreadLocal为key存储的过程，我们就不细细的去研究了，有兴趣的可以去看一下</p>
+<p>至此这个ThreadLocal我们也就研究的差不多了，其实的就是<strong>在不同的线程存储不同的数据</strong></p>
+<hr>
+<p><strong>ThreadLocal和InheritableThreadLocal</strong></p>
+<p>我第一次写那个小demo的时候犯了一个小错误，new对象的时候new成了InheritableThreadLocal，从名字我们也可以看得出来这是一个继承了table的ThreadLocal，关于这两个有什么区别，我推荐您看<a href="http://blog.csdn.net/jiafu1115/article/details/7548605" target="_blank" rel="noopener">这个</a></p>
+<hr>
+<p><strong>爱小丽，爱Android</strong></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2017/04/10/Android/Android-ThreadLocal解析/" data-id="cjfx9tx710003lpfyovwgenqo" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-同向滑动冲突" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/02/09/Android/Android-同向滑动冲突/" class="article-date">
+  <time datetime="2017-02-09T11:20:00.000Z" itemprop="datePublished">2017-02-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>惯例上图</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-04a50bb5c151f136.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>好久没写文章了，最近弄了一个小需求，就是ScrollView里嵌套ListView，当然ListView是固定高度并且要求能上下滑动，而且在滑动到顶部或者底部的时候由ScrollView来拦截滑动事件。这也就是我们说的<strong>同向滑动冲突。</strong></p>
+<h2 id="什么时候拦截？"><a href="#什么时候拦截？" class="headerlink" title="什么时候拦截？"></a>什么时候拦截？</h2><p>上面我们已经说了，<strong>滑动到顶部或者底部的时候拦截</strong></p>
+<p><strong>如何判断已经滑动到了顶部或者底部？</strong></p>
+<p>我们知道无论是ListView还是RecyclerView都是复用机制，啥是复用机制都不知道那我推荐你看看关于这类的文章。由于是复用，那么我们就不能直接用ListView.getChildAt(X)来获取，所以我们要根据系统提供给我们的方法来获取顶部和底部的View，然后通过这两个View来判断是否达到了顶部或者底部</p>
+<p><strong>获取顶部和底部的View</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">lv.setOnScrollListener(<span class="keyword">new</span> AbsListView.OnScrollListener() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScrollStateChanged</span><span class="params">(AbsListView view, <span class="keyword">int</span> scrollState)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScroll</span><span class="params">(AbsListView view, <span class="keyword">int</span> firstVisibleItem,</span></span></span><br><span class="line"><span class="function"><span class="params">                         <span class="keyword">int</span> visibleItemCount, <span class="keyword">int</span> totalItemCount)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/**</span></span><br><span class="line"><span class="comment">         * 从这里获取最后一个item的View和第一个item的View</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        lastView = view.getChildAt(totalItemCount - firstVisibleItem - <span class="number">1</span>);</span><br><span class="line">        firstView = view.getChildAt(firstVisibleItem);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><strong>判断是否达到顶端或者底端</strong></p>
+<pre><code>int action = motionEvent.getAction();
+if (action == MotionEvent.ACTION_DOWN) {
+    lastY = (int) motionEvent.getY();
+} else if (action == MotionEvent.ACTION_MOVE) {
+    /**
+     * 这里判断是向下还是向上滑动
+     */
+    if (lastY &gt; motionEvent.getY()) {
+        isDown = true;
+        isUp = false;
+    } else {
+        isDown = false;
+        isUp = true;
+    }
+}
+
+if (lv != null) {
+    if (firstView != null &amp;&amp; isUp) {
+        /**
+         * 如果ListView已经初始化并且firstView不为空
+         * 而且不是第一次加载视图（因为第一次加载视图getTop肯定为0）并且向上滑动
+         *
+         */
+        if (firstView.getTop() == 0) {
+            flag = true;
+        } else {
+            flag = false;
+        }
+    }
+    if (lastView != null &amp;&amp; isDown) {
+        /**
+         * 这里判断坐标，如果lastView的Bottom等于这个ListView的高度并且是往下滑
+         * 则把flag设置为true，当然这里还有一个坑，因为ListView是固定高度，所以所有的item高度之和都没有达到ListView的高度，那么这个也需要判断一下
+         */
+
+        int childHeight = lv.getChildAt(0).getHeight();
+        int childCount = lv.getChildCount();
+        int totalChildHeight = childHeight * childCount;
+
+        if ((lastView.getBottom()) == view.getHeight() || totalChildHeight &lt; view.getHeight()) {
+            flag = true;
+        } else {
+            flag = false;
+        }
+        isFirst = false;
+    }
+}
+</code></pre><p>这里我们还需要判断一下手势，达到了顶端并且是往上滑，达到了底部并且往下滑。</p>
+<p>当然这里还有一个坑，那就是我们刚家在布局的时候getTop()是肯定等于0的，所以我们要判断一下是否是第一次加载</p>
+<p>最后我们通过flag来判断一下是否让ScrollView来拦截事件</p>
+<pre><code>/**
+ * flag 为 true的时候 ScrollView开始获得事件
+ */
+if (flag &amp;&amp; !isFirst) {
+    sv.requestDisallowInterceptTouchEvent(false);
+} else {
+    sv.requestDisallowInterceptTouchEvent(true);
+}
+</code></pre><p>这样一来也就结束了，放上全部代码</p>
+<pre><code>public class MainActivity extends AppCompatActivity {
+
+    List&lt;String&gt; mData;
+    ListView lv;
+    ArrayAdapter&lt;String&gt; adapter;
+    ScrollView sv;
+    boolean flag, isFirst = true;
+    boolean isUp, isDown;
+    int lastY;
+    View lastView, firstView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mData = new ArrayList&lt;&gt;();
+        for (int i = 0; i &lt; 10; i++) {
+            mData.add(&quot;ad &quot; + i);
+        }
+
+        tv1 = (TextView) findViewById(R.id.tv1);
+        sv = (ScrollView) findViewById(R.id.sv);
+        lv = (ListView) findViewById(R.id.lv);
+        adapter = new ArrayAdapter&lt;&gt;(this, android.R.layout.simple_expandable_list_item_1, mData);
+        lv.setAdapter(adapter);
+
+        lv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                sv.requestDisallowInterceptTouchEvent(true);
+
+            int action = motionEvent.getAction();
+            if (action == MotionEvent.ACTION_DOWN) {
+                lastY = (int) motionEvent.getY();
+            } else if (action == MotionEvent.ACTION_MOVE) {
+                /**
+                 * 这里判断是向下还是向上滑动
+                 */
+                if (lastY &gt; motionEvent.getY()) {
+                    isDown = true;
+                    isUp = false;
+                } else {
+                    isDown = false;
+                    isUp = true;
+                }
+            }
+
+            if (lv != null) {
+                if (firstView != null &amp;&amp; isUp) {
+                    /**
+                     * 如果ListView已经初始化并且firstView不为空
+                     * 而且不是第一次加载视图（因为第一次加载视图getTop肯定为0）并且向上滑动
+                     *
+                     */
+                    if (firstView.getTop() == 0) {
+                        flag = true;
+                    } else {
+                        flag = false;
+                    }
+                }
+                if (lastView != null &amp;&amp; isDown) {
+                    /**
+                     * 这里判断坐标，如果lastView的Bottom等于这个ListView的高度并且是往下滑
+                     * 则把flag设置为true
+                     */
+
+                    int childHeight = lv.getChildAt(0).getHeight();
+                    int childCount = lv.getChildCount();
+                    int totalChildHeight = childHeight * childCount;
+
+                    if ((lastView.getBottom()) == view.getHeight() || totalChildHeight &lt; view.getHeight()) {
+                        flag = true;
+                    } else {
+                        flag = false;
+                    }
+                    isFirst = false;
+                }
+            }
+
+
+                /**
+                 * flag 为 true的时候 ScrollView开始获得事件
+                 */
+                if (flag &amp;&amp; !isFirst) {
+                    sv.requestDisallowInterceptTouchEvent(false);
+                } else {
+                    sv.requestDisallowInterceptTouchEvent(true);
+                }
+
+
+                return false;
+            }
+        });
+
+        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+
+            }
+
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+
+                /**
+                 * 从这里获取最后一个item的View和第一个item的View
+                 */
+                lastView = view.getChildAt(totalItemCount - firstVisibleItem - 1);
+                firstView = view.getChildAt(firstVisibleItem);
+
+
+            }
+        });
+    }
+}
+</code></pre><hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2017/02/09/Android/Android-同向滑动冲突/" data-id="cjfx9tx700002lpfyvem8wpl1" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-MVP Demo" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/01/20/Android/Android-MVP Demo/" class="article-date">
+  <time datetime="2017-01-20T11:10:00.000Z" itemprop="datePublished">2017-01-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="说在前面"><a href="#说在前面" class="headerlink" title="说在前面"></a>说在前面</h2><p>引用<a href="http://rocko.xyz/" target="_blank" rel="noopener">Rocko</a>说过的一段话</p>
+<blockquote>
+<p>MVP作为一种MVC的演化版本在Android开发中受到了越来越多的关注，但在项目开发中选择一种这样的软件设计模式需保持慎重心态，一旦确定使用MVP作为你App的开发模式那么你就最好坚持做下去，如果在使用MVP模式开发过程中发现问题而且坑越来越大，这时你想用MVC等来重新设计的话基本上就等于推倒重来了。要知道在Android上MVP在现在为止并没有统一的标准或者框架，不像SSH这三个成熟稳重强而有力的三剑客支持推动着Java EE的开发，所以在运用MVP时一定要做好自己的理解，并且尽量预知自己App各模块的需求以便提前做好充分的设计工作。</p>
+</blockquote>
+<p>其实关于MVP的文章已经很多了，我觉得我再去说一些理论性的东西显得有点“老套”，所以我直接上一个小的项目（知乎日报）。关于理论知识这里推荐两篇文章，我也是按照这个来自己学习的。仔细想一想，多写一写。</p>
+<p><a href="http://www.jianshu.com/p/9a6845b26856" target="_blank" rel="noopener">Android MVP 详解（上）</a></p>
+<p><a href="http://www.jianshu.com/p/0590f530c617" target="_blank" rel="noopener">Android MVP 详解（下）</a></p>
+<h2 id="关于知乎日报的实现"><a href="#关于知乎日报的实现" class="headerlink" title="关于知乎日报的实现"></a>关于知乎日报的实现</h2><blockquote>
+<p>我的MVP学的还不是很到位，所以有出错的地方请各位指正</p>
+</blockquote>
+<p><strong>MVP实现的是View和Model的解耦，View中只需要实现接口来接收数据显示界面即可</strong></p>
+<p>所以，当我们开始写一个界面的时候，我们就应该想这个界面需要“哪些数据”？我们就根据这个想法来定义接口，至于处理数据/提供数据就交给Presenter去处理。</p>
+<p>知乎日报大家都熟悉，我这里只写了一个首页，应该说很简单。</p>
+<p>如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-bae3ec4f9c9b9fbc.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>然后看一下工程的目录，如下</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-64923baa8792aa17.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>model就是我们的数据了，presenter就是我们的中间层，来处理数据，至于ui就更不用说了，我们的activity、fragment等都放在这。</p>
+<p>首先我们要构思一下，这个页面需要什么？</p>
+<ul>
+<li>banner</li>
+<li>ListView的数据</li>
+<li>拉倒最后加载更多的数据</li>
+<li>加载失败的回调</li>
+</ul>
+<p>根据这几个我们就可以定义出来一个view的接口<code>IZhiHuFgView</code>，接口如下：</p>
+<pre><code>public interface IZhiHuFgView {
+    /**
+     * 加载的的数据
+     */
+    void setStories(List&lt;Stories&gt; stories);
+
+    /**
+     * 设置banner的View
+     */
+    void setBanner(View bannerView);
+
+    /**
+     * 出错
+     */
+    void onError();
+}
+</code></pre><p>然后我们的<code>ZhiHuFragment</code>来实现这个接口，实现这些方法就可以来添加数据了</p>
+<pre><code>public class ZhiHuFragment extends Fragment implements IZhiHuFgView, AbsListView.OnScrollListener, SwipeRefreshLayout.OnRefreshListener {
+
+    @Bind(R.id.stories_list)
+    ListView storiesList;
+    @Bind(R.id.refresh_view)
+    SwipeRefreshLayout refreshView;
+
+    /**
+     * 持有presenter的对象来处理数据
+     */
+    private IZhiHuFgPresenter zhiHuFgPresenter;
+    private List&lt;Stories&gt; stories;
+    private StoriesAdapter storiesAdapter;
+    private boolean isRequest = false;
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = LayoutInflater
+                .from(getContext())
+                .inflate(R.layout.fragment_zhihu, container, false);
+        ButterKnife.bind(this, view);
+
+        init();
+        return view;
+    }
+
+    /**
+     * 初始化一些view
+     */
+    private void init() {
+        zhiHuFgPresenter = new ZhiHuFgPresenter(getActivity(), this);
+        storiesAdapter = new StoriesAdapter(getContext());
+        storiesList.setAdapter(storiesAdapter);
+        stories = new ArrayList&lt;&gt;();
+
+        refreshView.setColorSchemeColors(
+                getActivity().getResources().getColor(R.color.colorPrimary));
+        refreshView.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshView.setRefreshing(true);
+            }
+        });
+        refreshView.setOnRefreshListener(this);
+        storiesList.setOnScrollListener(this);
+        zhiHuFgPresenter.getZhiHuStories();
+
+    }
+
+    /**
+     * 设置加载的数据
+     */
+    @Override
+    public void setStories(List&lt;Stories&gt; stories) {
+        isRequest = false;
+        this.stories.addAll(stories);
+        storiesAdapter.setData(this.stories);
+
+        refreshView.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshView.setRefreshing(false);
+            }
+        });
+    }
+
+    /**
+     * 设置banner
+     */
+    @Override
+    public void setBanner(View bannerView) {
+        storiesList.addHeaderView(bannerView);
+    }
+
+
+    /**
+     * 出错
+     */
+    @Override
+    public void onError() {
+        Toast.makeText(getContext(), &quot;error&quot;, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 加载更多滑动监听
+     */
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
+                &amp;&amp; view.getLastVisiblePosition() == (view.getCount() - 1) &amp;&amp; !isRequest) {
+            isRequest = true;
+            zhiHuFgPresenter.getBeforeStories();
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView absListView, int i, int i1, int i2) {
+
+    }
+
+    /**
+     * 刷新
+     */
+    @Override
+    public void onRefresh() {
+        stories.clear();
+        zhiHuFgPresenter.getZhiHuStories();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+}
+</code></pre><p>可以清楚的看到，我们的<strong>view层只是用来展示数据</strong>，调理是不是清晰了很多，剩下的就是用presenter这个中间层来处理数据回调给view层了，代码很简单，就不贴了，有需要的可以移步<a href="https://github.com/wanglu1209/ZhiHuDaily_MVP" target="_blank" rel="noopener">GitHub</a>查看详细代码</p>
+<hr>
+<h2 id="自我理解"><a href="#自我理解" class="headerlink" title="自我理解"></a>自我理解</h2><p>MVP最大的好处就是View和Model的解耦，方便单元测试等。但是代码量很多，会创建出很多的View层接口。</p>
+<p>我觉得写MVP的一个难点就是在于抽离，要思考这个页面需要什么，然后设计成接口</p>
+<p>文笔不佳，抱歉了各位</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2017/01/20/Android/Android-MVP Demo/" data-id="cjfx9tx6q0000lpfyspszfiyz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-RecyclerView拖拽排序和删除" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/01/10/Android/Android-RecyclerView拖拽排序和删除/" class="article-date">
+  <time datetime="2017-01-10T10:20:00.000Z" itemprop="datePublished">2017-01-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/10/Android/Android-RecyclerView拖拽排序和删除/">Android-RecyclerView拖拽排序和删除</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://upload-images.jianshu.io/upload_images/1822424-1c7186c79c7c3176.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<h3 id="ItemTouchHelper"><a href="#ItemTouchHelper" class="headerlink" title="ItemTouchHelper"></a>ItemTouchHelper</h3><p>最近看其他项目中总会看到这个效果，『拖拽排序，拖拽删除』，其实这个效果放在以前的话是比较难做的，现在Google在support-v7包中添加了这个Helper，使得现在做这个效果很简单</p>
+<p>可以看到我工程名字起的就是RecyclerViewDrag，所以就可以看的出来这个Helper是和RecyclerView一起工作的，从Google官方文档我们也可以看到这样两句话：</p>
+<p>『This is a utility class to add swipe to dismiss and drag &amp; drop support to RecyclerView.』</p>
+<p>『Depending on which functionality you support, you should override onMove(RecyclerView, ViewHolder, ViewHolder) and / or onSwiped(ViewHolder, int).』</p>
+<p>大致意思就是这个工具类可以支持RecyclerView的拖拽和消除，根据你的需求应该要重写onMove或者onSwiped这两个方法，所以根据剧情需要，我们来重写这两个方法。</p>
+<p>但是在重写这两个方法之前我们首先应该看一下onMove()和onSwiped()这两个方法，而这两个方法是在ItemTouchHelper的内部类Callback中，所以我们跟进官方文档，可以看到下面这段话：</p>
+<p>『If user drags an item, ItemTouchHelper will call onMove(recyclerView, dragged, target). Upon receiving this callback, you should move the item from the old position (dragged.getAdapterPosition()) to new position (target.getAdapterPosition()) in your adapter and also call notifyItemMoved(int, int)』</p>
+<p>这么长一大段，我以小学英语水平大致看了一下，差不多的意思就是说『如果用户拖动了某一个Item，那么就会回调onMove这个方法，而在收到这个回调的时候我们应该让RecyclerView做一些事情，比如从旧的位置(dragged.getAdapterPosition())到新的位置（target.getAdapterPosition()），然后在你的adapter中调用notifyItemMoved(int, int)方法』</p>
+<p><strong>大致就是这个意思，反正我看不太懂</strong></p>
+<p>所以我们应该能有点思路，就是拖动的时候要回调onMove()方法，然后我们根据这个方法来回调参数进行我们的操作，这首先就想到了接口，所以我们定义一个接口：</p>
+<pre><code>public interface OnItemCallbackListener {
+    /**
+     * @param fromPosition 起始位置
+     * @param toPosition 移动的位置
+     */
+    void onMove(int fromPosition, int toPosition);
+    void onSwipe(int position);
+}
+</code></pre><p>然后在onMove()/onSwiped()方法中回调</p>
+<pre><code>/**
+ * Item是否能被Swipe到dismiss
+ * 也就是删除这条数据
+ */
+@Override
+public boolean isItemViewSwipeEnabled() {
+    return true;
+}
+
+/**
+ * Item长按是否可以拖拽
+ */
+@Override
+public boolean isLongPressDragEnabled() {
+    return true;
+}
+
+/**
+ * 设置Drag/Swipe的Flag
+ * 这里我们把滑动(Drag)的四个方向全都设置上了,说明Item可以随意移动
+ * 然后把删除(暂且叫删除/swipe)的方向设置为Start和End,说明可以水平拖动删除
+ */
+@Override
+public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+    int dragFlag = ItemTouchHelper.LEFT | ItemTouchHelper.DOWN | ItemTouchHelper.UP | ItemTouchHelper.RIGHT;
+    int swipeFlag = ItemTouchHelper.START | ItemTouchHelper.END;
+
+    return makeMovementFlags(dragFlag, swipeFlag);
+}
+
+@Override
+public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+    /**
+     * 回调
+     */
+    adapter.onMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+    return true;
+}
+
+@Override
+public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+    /**
+     * 回调
+     */
+    adapter.onSwipe(viewHolder.getAdapterPosition());
+}
+</code></pre><p>然后我们定义一个自己的adapter来实现这个接口，代码如下：</p>
+<pre><code>public class MyAdapter extends  RecyclerView.Adapter&lt;MyAdapter.Holder&gt; implements OnItemCallbackListener{
+
+    private List&lt;String&gt; mData;
+    private Context mContext;
+
+    public MyAdapter(Context mContext) {
+        this.mContext = mContext;
+        mData = new ArrayList&lt;&gt;();
+        mData.add(&quot;one&quot;);
+        mData.add(&quot;two&quot;);
+        mData.add(&quot;three&quot;);
+        mData.add(&quot;four&quot;);
+        mData.add(&quot;five&quot;);
+        mData.add(&quot;six&quot;);
+        mData.add(&quot;seven&quot;);
+    }
+
+    @Override
+    public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(mContext).inflate(R.layout.adapter_test, parent, false);
+        return new Holder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(final Holder holder, int position) {
+        holder.tv.setText(mData.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return mData.size();
+    }
+
+    @Override
+    public void onMove(int fromPosition, int toPosition) {
+        /**
+         * 在这里进行给原数组数据的移动
+         */
+        Collections.swap(mData, fromPosition, toPosition);
+        /**
+         * 通知数据移动
+         */
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void onSwipe(int position) {
+        /**
+         * 原数据移除数据
+         */
+        mData.remove(position);
+        /**
+         * 通知移除
+         */
+        notifyItemRemoved(position);
+    }
+
+    class Holder extends RecyclerView.ViewHolder {
+        TextView tv;
+        public Holder(View itemView) {
+            super(itemView);
+            tv = (TextView) itemView.findViewById(R.id.tv);
+        }
+    }
+}
+</code></pre><p>最后在Activity中：</p>
+<pre><code>@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    RecyclerView rv = (RecyclerView) findViewById(R.id.rv);
+    rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+    final MyAdapter adapter = new MyAdapter(this);
+    rv.setAdapter(adapter);
+
+    ItemTouchHelper.Callback callback = new OnItemCallbackHelper(adapter);
+
+    /**
+     * 实例化ItemTouchHelper对象,然后添加到RecyclerView
+     */
+    ItemTouchHelper helper = new ItemTouchHelper(callback);
+    helper.attachToRecyclerView(rv);
+}
+</code></pre><p>这样一个最简单的拖拽滑动、删除的效果就完成了，其实还可以设置RecyclerView的其他LayoutManager，这里就不过多做解释了，有兴趣的可以试试</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2017/01/10/Android/Android-RecyclerView拖拽排序和删除/" data-id="cjfx9tx6w0001lpfyxj65lr2s" class="article-share-link">Share</a>
       
       
     </footer>
@@ -195,8 +938,8 @@
   
     <article id="post-Android/Android-自定义banner实现" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-自定义banner实现/" class="article-date">
-  <time datetime="2018-04-13T00:48:55.000Z" itemprop="datePublished">2018-04-13</time>
+    <a href="/2016/11/20/Android/Android-自定义banner实现/" class="article-date">
+  <time datetime="2016-11-20T13:15:00.000Z" itemprop="datePublished">2016-11-20</time>
 </a>
     
   </div>
@@ -207,7 +950,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+      <a class="article-title" href="/2016/11/20/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
     </h1>
   
 
@@ -387,330 +1130,7 @@ banner.setDot(R.drawable.no_selected_dot, R.drawable.selected_dot).
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-自定义banner实现/" data-id="cjfx95vdh000bxafyqfq3myal" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-自定义View" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-自定义View/" class="article-date">
-  <time datetime="2018-04-13T00:40:13.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="Android-自定义View"><a href="#Android-自定义View" class="headerlink" title="Android - 自定义View"></a>Android - 自定义View</h3><hr>
-<p>在自定义View的时候一般我们会重写onDraw(Canvas canvas)方法，然后在系统给定的canvas画布上绘画就可以了。如果需要使用wrap_content属性，那么还需要重写onMeasure()方法</p>
-<blockquote>
-<p>对现有的控件来进行扩展</p>
-</blockquote>
-<p>这里以TextView为例，要实现这样的一个效果</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-f3394b37f9c32fd1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>只是在原有的TextView上加了一层框，其实就是绘制一个空心的矩形，理解这个我们就可以着手写代码了</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    /**
-     * 在调用super之前，这里也就是在绘制文本内容前来处理自己的逻辑
-     */
-    Paint p = new Paint();    
-    p.setStyle(Paint.Style.STROKE);    //设置为空心
-    p.setStrokeWidth(5);                //设置外框线的宽度
-    p.setColor(Color.YELLOW);            //设置线的颜色
-    /**
-     * 绘制矩形，起始x坐标，起始y坐标，终点x坐标，终点y坐标，用来绘画的paint
-     */
-    canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), p);
-
-    super.onDraw(canvas);
-
-    /**
-     * 在绘制完文本后处理自己的逻辑
-     */
-}
-</code></pre><p>这时候就完成了对现有的控件的扩展，我们在XML中使用我们自定义的控件</p>
-<pre><code>&lt;com.github.wanglu1209.MyTextViewDemo
-    android:layout_width=&quot;wrap_content&quot;
-    android:layout_height=&quot;wrap_content&quot;
-    android:layout_margin=&quot;20dp&quot;
-    android:text=&quot;My Android TextView&quot; /&gt;
-</code></pre><p>这里和使用正常的TextView没有什么区别，现在运行一下程序就是我们上面看到的效果了</p>
-<hr>
-<blockquote>
-<p>定义全新的控件</p>
-</blockquote>
-<p>有的时候系统给定的控件不能满足我们的需求，那么这个时候就需要重新自定义一个控件。这里我们就需要重写onMeasure()和onDraw()方法等方法来实现逻辑了，通过重写onTouchEvent()来实现触控的事件</p>
-<p>来写一个实例，大约就长这个样子</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-7cc5ae38e23d1af6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>首先来分析一下，无非就是两个部分，中间的圆和外面的弧线，只要在onDraw()中依次绘制就可以了。</p>
-<p>在构造中初始化参数</p>
-<pre><code>private void initView() {
-    mCirclePaint = new Paint();
-    mCirclePaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));
-    mCirclePaint.setAntiAlias(true);    //设置抗锯齿
-
-    mArcPaint = new Paint();
-    mArcPaint.setAntiAlias(true);
-    mArcPaint.setStyle(Paint.Style.STROKE);     //设置为空心
-    mArcPaint.setStrokeWidth(40);
-    mArcPaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));
-
-}
-</code></pre><p>然后在onMeasure()中获取宽度，这里为了简单，直接就是屏幕的宽度</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    int length = MeasureSpec.getSize(widthMeasureSpec);
-    mCircleXY = length / 2;
-    mRadius = mCircleXY / 2;
-    mRectF = new RectF(
-            (float) (length * 0.1),
-            (float) (length * 0.1),
-            (float) (length * 0.9),
-            (float) (length * 0.9)
-    );
-}
-</code></pre><p>最后在onDraw()中绘制这两个图形即可</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    /**
-     * 绘制圆形,参数依次为 圆的中心x坐标,圆的中心y坐标,圆的半径,画圆的笔
-     */
-    canvas.drawCircle(mCircleXY, mCircleXY, mRadius, mCirclePaint);
-    /**
-     * 绘制扇形,参数依次为 扇形的大小,起始角度,角度,是否与半径连线,画笔
-     */
-    canvas.drawArc(mRectF, 270, 240, false, mArcPaint);
-}
-</code></pre><p>现在运行程序，就可以看到我们最开始的效果啦</p>
-<hr>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-自定义View/" data-id="cjfx95vde0009xafy46npyigs" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-Paint高级-PorterDuffXfermode" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/">Android-Paint高级-PorterDuffXfermode</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>其实在前面的文章中也都用到了画笔（Paint），了解了一些常用的属性，比如抗锯齿，带边框，空心，宽度等，这些都是最基本的属性，下面来说一个高级属性『PorterDuffXfermode』</p>
-<h2 id="PorterDuffXfermode"><a href="#PorterDuffXfermode" class="headerlink" title="PorterDuffXfermode"></a>PorterDuffXfermode</h2><p>首先看一张图</p>
-<p><img src="http://pic4.zhongsou.com/img?id=522984b61da05c120fd" alt=""></p>
-<p>PoerterDuffXfermode设置的是两个图层交集区域的显示方式，其中dst是先画的图形，src是后画的图形。</p>
-<p>这里列举了16种，当然有的都不怎么经常使用，最常用的就是DST_IN、SRC_IN来将矩形图片变成圆角图片或者圆形图片了。下面就来进行一个实例CircleImageView（好久之前就看过鸿神的这个View，一直不怎么理解，书看到这一章节就忽然想起来了，自己重新写一遍），完成图如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-7c5ffb9fe73e0d27.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<h4 id="分如下几步"><a href="#分如下几步" class="headerlink" title="分如下几步"></a>分如下几步</h4><ol>
-<li>获得图片</li>
-<li>测量宽高</li>
-<li>创建画布</li>
-<li>画一个圆</li>
-<li>使用PerterDuffXfermode来控制下一个图片和刚才的圆交集</li>
-<li>画图片</li>
-<li>完事</li>
-</ol>
-<p>首先我们在构造函数中获得图片：</p>
-<pre><code>public CircleImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-
-    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CircleImageView, defStyleAttr, 0);
-    try {
-        mBitmap = BitmapFactory.decodeResource(getResources(), a.getResourceId(R.styleable.CircleImageView_src, -1));
-        if (mBitmap == null) {
-            throw new RuntimeException(&quot;src Null!&quot;);
-        }
-    } finally {
-        a.recycle();
-    }
-}
-</code></pre><p>然后我们在onMeasure()中控制图片的宽高</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    mWidth = measureWidthAndHeight(MeasureSpec.getSize(widthMeasureSpec));
-    mHeight = measureWidthAndHeight(MeasureSpec.getSize(heightMeasureSpec));
-    setMeasuredDimension(mWidth, mHeight);
-}
-
-private int measureWidthAndHeight(int size) {
-    int mode = MeasureSpec.getMode(size);
-    switch (mode) {
-        case MeasureSpec.UNSPECIFIED:
-        case MeasureSpec.AT_MOST:
-            return 200;
-        case MeasureSpec.EXACTLY:
-        default:
-            return size;
-    }
-}
-</code></pre><p>这里我们给wrap_content设置了一个200的值，然后我们在onDraw()方法中完成我们剩下的工作：</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    canvas.drawBitmap(createBitmap(), 0, 0, null);
-}
-
-private Bitmap createBitmap() {
-    /**
-     * 获取宽高最小值,重新生成一个Bitmap
-     */
-    int min = Math.min(mHeight, mWidth);
-    mBitmap = Bitmap.createScaledBitmap(mBitmap, min, min, false);
-
-    /**
-     * 根据原有的Bitmap再生成一个Bitmap,当做Canvas的参数
-     * 如果在Canvas的构造中带入一个Bitmap的话,那么后续在画布上画的东西就等于在Bitmap上画的
-     */
-    Bitmap b = Bitmap.createBitmap(min, min, Bitmap.Config.ARGB_8888);
-    Canvas canvas = new Canvas(b);
-
-    /**
-     * 初始化画笔,设置抗锯齿
-     */
-    mPaint = new Paint();
-    mPaint.setAntiAlias(true);
-
-    /**
-     * 首先画一个圆,和画布一样大
-     */
-    canvas.drawCircle(min / 2, min / 2, min / 2, mPaint);
-
-    /**
-     * 设置PoerterDuffXfermode参数,使后面画的和前面画的交集
-     * 这样就等于在一个圆上画我们的图片,所以看到的就是一个圆形的图片了
-     */
-    mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-    canvas.drawBitmap(mBitmap, 0, 0, mPaint);
-    return b;
-}
-</code></pre><p>这样就好啦，运行程序就可以看到我们开始的效果啦~</p>
-<p><strong>感谢鸿洋大神</strong></p>
-<p><a href="http://blog.csdn.net/lmj623565791/article/details/42094215" target="_blank" rel="noopener">原文地址</a></p>
-<hr>
-<h2 id="第二个实例-刮刮卡"><a href="#第二个实例-刮刮卡" class="headerlink" title="第二个实例  刮刮卡"></a>第二个实例  刮刮卡</h2><p>相信大家都玩过刮刮卡，记得没错好像是支付宝也弄过这个效果（好像是在支付成功后）</p>
-<p>刮刮卡有两个图层，上面一层和下面的图片，上面的主要用来被刮掉，在初始状态下，上面的图层会掩盖住下面的图层，当用手刮上面的图层时，下面的会慢慢显示出来，这就需要用到DST_IN了。效果图如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-11f99be96020f64f.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<h4 id="分如下几步-1"><a href="#分如下几步-1" class="headerlink" title="分如下几步"></a>分如下几步</h4><ol>
-<li>初始化Paint和图片等</li>
-<li>在onDraw()方法中绘制两个图片，首先绘制背景图，然后绘制遮罩层</li>
-<li>在onTouchEvent()方法中绘制路径</li>
-<li>使用DST_IN模式绘制在上图层就ok</li>
-</ol>
-<p>首先初始化，代码如下：</p>
-<pre><code>private void init() {
-    mPaint = new Paint();
-    /**
-     * 设置画笔透明度为0,设置PoerterDuffXfermode为DST_IN模式
-     */
-    mPaint.setAlpha(0);
-    mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-    mPaint.setStyle(Paint.Style.STROKE);
-    mPaint.setStrokeJoin(Paint.Join.ROUND); //设置画笔图形样式
-    mPaint.setStrokeCap(Paint.Cap.ROUND);   //设置画笔转弯连接处的风格
-    mPaint.setStrokeWidth(50);  //设置宽度
-
-    mPath = new Path();
-    /**
-     * 获取背景图片
-     */
-    mBgBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.a1);
-
-    /**
-     * 创建遮罩层Bitmap和背景图片一样大小,画上灰色
-     */
-    mFgBitmap = Bitmap.createBitmap(mBgBitmap.getWidth(), mBgBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-    mCanvas = new Canvas(mFgBitmap);
-    mCanvas.drawColor(Color.GRAY);
-}
-</code></pre><p>然后绘制两个图层：</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    /**
-     * 首先绘制背景图,然后绘制遮罩层,这样遮罩层才会在背景图上面
-     */
-    canvas.drawBitmap(mBgBitmap, 0, 0, null);
-    canvas.drawBitmap(mFgBitmap, 0, 0, null);
-}
-</code></pre><p>最后在onTouchEvent()方法中绘制路径：</p>
-<pre><code>public boolean onTouchEvent(MotionEvent event) {
-    switch (event.getAction()) {
-        /**
-         * 重置一下路径,移动到该点
-         */
-        case MotionEvent.ACTION_DOWN:
-            mPath.reset();
-            mPath.moveTo(event.getX(), event.getY());
-            break;
-        /**
-         * 路径的点
-         */
-        case MotionEvent.ACTION_MOVE:
-            mPath.lineTo(event.getX(), event.getY());
-            break;
-    }
-
-    /**
-     * 绘制路径,其实是在mFgBitmap上绘制
-     * 并且由于DST_IN模式,取交集,透明度为0,所以就能实现刮刮卡的效果
-     */
-    mCanvas.drawPath(mPath, mPaint);
-
-    /**
-     * 通知重绘
-     */
-    invalidate();
-    return true;
-}
-</code></pre><p>这样一个刮刮卡的效果就完成了，是不是很简单。</p>
-<p><strong>需要注意的一点：在使用PorterDuffXfermode时，最好把硬件加速关闭，因为有的模式不支持硬件加速</strong></p>
-<hr>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/" data-id="cjfx95vcj0000xafyb8vljbnd" class="article-share-link">Share</a>
+      <a data-url="http:/2016/11/20/Android/Android-自定义banner实现/" data-id="cjfx9re5e0008j7fya0yflrn3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -722,8 +1142,8 @@ private Bitmap createBitmap() {
   
     <article id="post-Android/Android-各种情况下的『自动加载更多』" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-各种情况下的『自动加载更多』/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+    <a href="/2016/10/10/Android/Android-各种情况下的『自动加载更多』/" class="article-date">
+  <time datetime="2016-10-10T13:15:00.000Z" itemprop="datePublished">2016-10-10</time>
 </a>
     
   </div>
@@ -734,7 +1154,7 @@ private Bitmap createBitmap() {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-各种情况下的『自动加载更多』/">Android-各种情况下的『自动加载更多』</a>
+      <a class="article-title" href="/2016/10/10/Android/Android-各种情况下的『自动加载更多』/">Android-各种情况下的『自动加载更多』</a>
     </h1>
   
 
@@ -809,453 +1229,7 @@ protected void onScrollChanged(int l, int t, int oldl, int oldt) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-各种情况下的『自动加载更多』/" data-id="cjfx95vd50005xafyplhwm5sy" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-属性动画" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-属性动画/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-属性动画/">Android-属性动画</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在Android3.0以前的动画框架Animation存在着局限性：只能改变显示的位置，但是不能真正的更改View的位置，所以在Android3.0以后Google就推出了<strong>属性动画（Animator）</strong></p>
-<p>在Animator框架动画中使用最多的就是ObjectAnimator和AnimatorSet。使用ObjectAnimator来进行控制，一个ObjectAnimator只能控制一个对象的一个值，而使用多个ObjectAnimator组合到一个AnimatorSet当中形成一个动画的集合。其中<strong>最重要的是属性动画通过调用属性的get/set方法来真实的控制一个View的属性</strong>，所以基本的的动画都可以用属性动画来实现</p>
-<h2 id="ObjectAnimator"><a href="#ObjectAnimator" class="headerlink" title="ObjectAnimator"></a>ObjectAnimator</h2><p>创建一个ObjectAnimor只需要调用ObjectAnimator的静态工厂方法就可以直接返回一个ObjectAnimator对象，其属性有需要控制的对象，和对象的属性名（动画的名称），但是这个属性必须要有get、set方法，因为在内部会调用Java的反射机制来调用set函数修改属性值</p>
-<h4 id="看一个小实例"><a href="#看一个小实例" class="headerlink" title="看一个小实例"></a>看一个小实例</h4><p>把一个Button向右方平移300，如图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-9118622cec9694b9.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<p>代码如下：</p>
-<pre><code>btn.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        /**
-         * 创建ObjectAnimator对象
-         * 设置对象和对象属性还有值
-         */
-        ObjectAnimator oa = ObjectAnimator.ofFloat(btn, &quot;translationX&quot;, 300);
-        oa.setDuration(300);    //设置时间为300ms
-        oa.start();
-    }
-});
-</code></pre><p>这里我们首先通过ObjectAnimator的静态工厂方法创建了一个对象，这里的三个参数：第一个参数则是需要曹工的对象，第二个是要操纵的属性，第三个是一个可变数组，这里我们只给了一个参数300，最后调用start()方法就可以看到动画啦。</p>
-<h2 id="常用的可以直接使用的属性动画的值"><a href="#常用的可以直接使用的属性动画的值" class="headerlink" title="常用的可以直接使用的属性动画的值"></a>常用的可以直接使用的属性动画的值</h2><ul>
-<li>translationX/translationY    ：作为一种增量来控制对象从它的父布局的左上角偏移的位置</li>
-<li>rotation、rotationX、rotationY：控制对象围绕支点来进行2D和3D旋转</li>
-<li>pivotX、pivotY：这两个属性控制着对象的支点位置，围绕着这个支点进行旋转和缩放，在默认情况下支点就是该对象的中心点</li>
-<li>x、y：这两个属性描述了对象在他容器中的最终位置，他是最初的左上角坐标和translationX、translationY值的累积和</li>
-<li>alpha：透明度，默认值是1（不透明），0代表完全透明</li>
-</ul>
-<p>可以看的出来大部分的动画都包含了，但是如果说有的属性没有get/set方法，那是不是就不能更改了呢？我们可以写一个自定义的属性类或者包装类来间接的给这个属性添加get/set方法。</p>
-<p>来看一下包装类，代码如下：</p>
-<pre><code>public class WrapperView {
-    private View mTarget;
-
-    public WrapperView(View mTarget) {
-        this.mTarget = mTarget;
-    }
-
-    public int getWidth(){
-        return mTarget.getLayoutParams().width;
-    }
-
-    public void setWidth(int width){
-        mTarget.getLayoutParams().width = width;
-        mTarget.requestLayout();
-    }
-}
-</code></pre><p>通过以上的代码就给一个width属性进行了包装，等到使用的时候只需要通过包装类就可以间接的调用到get/set方法了，如下：</p>
-<pre><code>btn.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        /**
-         * 创建ObjectAnimator对象
-         * 设置对象和对象属性还有值
-         */
-        ObjectAnimator oa = ObjectAnimator.ofInt(new WrapperView(btn), &quot;width&quot;, 500);
-        oa.setDuration(300);
-        oa.start();
-    }
-});
-</code></pre><p>还是熟悉的配方，还是原来的味道！这里只不过我们换了一下创建ObjectAnimator对象的方法，因为我们的setWidth方法里的参数是int类型的，所以我们的静态工厂方法需要使用ofInt()方法，如果还是使用ofFloat()的话会提示<code>W/PropertyValuesHolder: Method setWidth() with type float not found on target class class com.androidqunyingzhuan.WrapperView</code>。没有找到类型为float的set方法，运行一下程序：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-38e42ab877d3ddfc.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<hr>
-<h2 id="PropertyValuesHolder"><a href="#PropertyValuesHolder" class="headerlink" title="PropertyValuesHolder"></a>PropertyValuesHolder</h2><p>这个属性类似于AnimationSet，在属性动画中，如果针对同一个对象的多个属性并且同时作用多种动画就可以使用PropertyValuesHolder实现。比如在平移的过程中同时改变X、Y轴的缩放，代码如下：</p>
-<pre><code>PropertyValuesHolder p1 = PropertyValuesHolder.ofFloat(&quot;translationX&quot;, 300);
-PropertyValuesHolder p2 = PropertyValuesHolder.ofFloat(&quot;scaleX&quot;, 1, 0, 1);
-PropertyValuesHolder p3 = PropertyValuesHolder.ofFloat(&quot;scaleY&quot;, 1, 0, 1);
-ObjectAnimator.ofPropertyValuesHolder(btn, p1, p2, p3).setDuration(1000).start();
-</code></pre><p>这样我们就把这三个动画同时作用在一个对象上了，运行程序：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-dcda53da332406d2.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<hr>
-<h2 id="ValueAnimator"><a href="#ValueAnimator" class="headerlink" title="ValueAnimator"></a>ValueAnimator</h2><p>ValueAnimator在属性动画中是非常重要的，它是属性动画的核心所在，ObjectAnimator也是继承的ValueAnimator</p>
-<p>ValueAnimator不提供任何动画的实现，他像是一个数值发生器，用来产生具有一定规律的数字，来让调用者控制动画的实现过程，通常情况下在ValueAnimator的AnimatorUpdateListener中监听数值的变化，来完成动画的变换</p>
-<pre><code>ValueAnimator va = ValueAnimator.ofFloat(0, 100);
-va.setDuration(2000).start();
-va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-    @Override
-    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-        btn.setText(valueAnimator.getAnimatedValue() + &quot;&quot;);
-    }
-});
-</code></pre><p>我们通过ofFloat()方法来创建了一个ValueAnimator对象，设置值的变换是从0f到100f，设置时间为2秒，然后我们在AnimatorUpdateListener中获取当前值让btn来显示，效果如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-5b58a04d86733d96.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<h4 id="动画事件的监听"><a href="#动画事件的监听" class="headerlink" title="动画事件的监听"></a>动画事件的监听</h4><p>Android提供给我们了一个接口，可以很方便的监听到一个动画的所有过程：</p>
-<pre><code>mAnimator.addListener(new Animator.AnimatorListener() {
-    @Override
-    public void onAnimationStart(Animator animator) {
-
-    }
-
-    @Override
-    public void onAnimationEnd(Animator animator) {
-
-    }
-
-    @Override
-    public void onAnimationCancel(Animator animator) {
-
-    }
-
-    @Override
-    public void onAnimationRepeat(Animator animator) {
-
-    }
-});
-</code></pre><p>但是大部分的时候我们只会关心动画完成之后我们需要做些什么，所以Android还提供了一个适配器来让我们选择</p>
-<pre><code>oa.addListener(new AnimatorListenerAdapter() {
-    @Override
-    public void onAnimationEnd(Animator animation) {
-        super.onAnimationEnd(animation);
-    }
-});
-</code></pre><hr>
-<h2 id="AnimatorSet"><a href="#AnimatorSet" class="headerlink" title="AnimatorSet"></a>AnimatorSet</h2><p>对于在一个对象同一时间作用多个属性动画效果前面已经用PropertyValuesHolder实现了这样的效果，但是AnimatorSet不仅能实现这样的效果，同时能实现更为精确的顺序控制，下面我们用AnimatorSet来实现上面PropertyValuesHolder演示的动画。代码如下：</p>
-<pre><code>ObjectAnimator a1 = ObjectAnimator.ofFloat(btn, &quot;translationX&quot;, 300);
-ObjectAnimator a2 = ObjectAnimator.ofFloat(btn, &quot;scaleX&quot;, 1, 0, 1);
-ObjectAnimator a3 = ObjectAnimator.ofFloat(btn, &quot;scaleY&quot;, 1, 0, 1);
-AnimatorSet set = new AnimatorSet();
-set.setDuration(1000);
-set.playTogether(a1, a2, a3);
-set.start();
-</code></pre><p>这里我们只是想要和用PropertyValuesHolder演示的动画一样，所以我们使用了playTogether()方法来进行控制动画同时进行，当然还可以使用别的方法，例如playSequentially()，with()，before()，after()等方法来控制多个动画的工作方式，从而做到对动画播放顺序的精确控制，这里的动画和上面的一样，就不放图片了</p>
-<hr>
-<h2 id="animate方法"><a href="#animate方法" class="headerlink" title="animate方法"></a>animate方法</h2><p>Google在Android3.0以后，给View添加了一个animate方法来直接驱动属性动画，这可以认为是属性动画的简写形式，代码如下：</p>
-<pre><code>btn.animate()
-        .translationX(300)
-        .y(300)
-        .setDuration(1000)
-        .withStartAction(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }).withEndAction(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }
-).start();
-</code></pre><p>设置了两个动画，这里是同时进行的，还有两个回调方法，开始和结束</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-5f721d3886a0442e.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<p><strong>这样一来，简单的属性动画效果就都说完啦</strong></p>
-<hr>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-属性动画/" data-id="cjfx95vd60006xafyhdq0z02b" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-Activity启动模式详解" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-Activity启动模式详解/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-Activity启动模式详解/">Android-Activity启动模式详解</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"><a href="#最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。" class="headerlink" title="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"></a>最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。</h4><hr>
-<h2 id="Activity的LaunchMode"><a href="#Activity的LaunchMode" class="headerlink" title="Activity的LaunchMode"></a>Activity的LaunchMode</h2><blockquote>
-<p>为啥子需要启动模式？</p>
-</blockquote>
-<p>我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。<strong>举个例子</strong>，我们在当前Activity启动当前的Activity，那么任务栈里就全是当前Activity，这样当然很二逼了！所以启动模式就出来了，目前有四种启动模式</p>
-<ul>
-<li>standard</li>
-<li>singleTop</li>
-<li>singleTask</li>
-<li>singleInstance</li>
-</ul>
-<h4 id="standard"><a href="#standard" class="headerlink" title="standard"></a>standard</h4><p>standard是标准模式，也就是默认模式。每次启动一个Activity就会创建一个新的实例，不管这个实例是否已经存在，<strong>这就是典型的多实例实现。一个任务栈可以有多个实例，每个实例也可以属于不同的任务栈，谁启动了这个Activity，这个Activity就运行在启动它的那个任务栈中，</strong>当我们用ApplicationContext去启动一个standard模式的Activity会报错，因为standard的Activity会进入启动他的Activity任务栈中，但是由于非Activity类型的Context并没有任务栈，所以这样就出问题了</p>
-<h4 id="singleTop"><a href="#singleTop" class="headerlink" title="singleTop"></a>singleTop</h4><p>singleTop即栈顶复用模式，在这种模式下，如果新创建的Activity已经位于栈顶，那么就不会去创建新的实例，但是该Activity的onNewIntent会被调用，通过这个方法我们可以取出请求的信息。<strong>需要注意的是，该Activity的onCreate、onStart不会被调用，因为它没有发生改变。</strong>但是如果新的Activity不位于栈顶，那么就会创建一个新的实例。<strong>举个例子</strong>，比如现在一个任务栈有ABCD四个Activity，A位于栈底，D位于栈顶。这个时候如果去启动D，那么栈的情况还是ABCD四个实例，如果D的启动模式为standard，那么栈内就是ABCDD</p>
-<h4 id="singleTask"><a href="#singleTask" class="headerlink" title="singleTask"></a>singleTask</h4><p>栈内复用模式，在这种模式情况下，只要Activity在一个栈中存在，那么启动这个Activity都不会重新创建实例，也会调用onNewIntent。<strong>当一个singleTask模式的Activity『A』被请求启动，首先系统会寻找是否有A所需的任务栈，如果不存在，那就重新创建一个任务栈，然后创建A的实例放入栈中。如果存在A所需的任务栈，这时再看A是否在这个栈中有实例存在，如果存在，那么久回把A调到栈顶并调用onNewIntent方法。如果不存在，那么就创建A的实例并且压入栈中，举个例子</strong></p>
-<ul>
-<li>比如当前任务栈S1中有ABC三个实例，这个时候singleTask模式的D启动，但是其所需要的任务栈为S2，由于S2和D的实例都不存在，这个时候就会先创建S2任务栈，然后创建D的实例压栈到S2</li>
-<li>如果D需要的任务栈为S1，那么由于任务栈S1已经存在，所以直接会创建D的实例放到S1任务栈中</li>
-<li>如果D需要的任务栈为S1，并且S1的情况为ADBC，这时不会重新创建D的实例，会把D调用栈顶，同时<strong>singleTask默认具有clearTop效果，所以会导致D上面的Activity全部出栈</strong>，于是最终S1的情况为AD</li>
-</ul>
-<h4 id="singleInstance"><a href="#singleInstance" class="headerlink" title="singleInstance"></a>singleInstance</h4><p>单例模式，加强的singleTask，这种模式的Activity只能单独运行在一个单独的任务栈中，其他和singleTask一样</p>
-<blockquote>
-<p>所需的任务栈？</p>
-</blockquote>
-<p>在singleTask中提到『所需的任务栈』，什么是Activity所需的任务栈？这里就要提一个参数：TaskAffinity。这个参数标识了一个Activity所需的任务栈的名字，默认情况下所有的Activity所需的任务栈都是当前包名，当然我们也可以为每个Activity单独指定TaskAffinity，<strong>注意这个属性值必须不能和包名相同，</strong>TaskAffinity主要和singleTask配合使用，否则的话没什么意义。当启动一个被TaskAffinity标识了的Activity，那么该Activity就会运行在和TaskAffinity相同的任务栈中</p>
-<p>我们用两种方式设置Activity的启动模式</p>
-<ol>
-<li>在AndroidManifest里为Activity设置<br><code>android:launchMode=&quot;singleTop/singleTask/singleInstance&quot;</code></li>
-<li>通过Intent设置标志位来指定<br><code>intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</code></li>
-</ol>
-<p>这两种方式<strong>第二种的优先级要高于第一种，也就是说两者同时存在时，以第二种为准</strong></p>
-<hr>
-<h2 id="强行举个特殊的例子"><a href="#强行举个特殊的例子" class="headerlink" title="强行举个特殊的例子"></a>强行举个特殊的例子</h2><p>如图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<p>首先我们看一下AndroidManifest里的配置</p>
-<pre><code>&lt;activity android:name=&quot;.MainActivity&quot;&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-
-        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-    &lt;/intent-filter&gt;
-&lt;/activity&gt;
-
-&lt;activity
-    android:name=&quot;.SecondActivity&quot;
-    android:launchMode=&quot;singleTask&quot;
-    android:taskAffinity=&quot;com.task1&quot; /&gt;
-
-&lt;activity
-    android:name=&quot;.ThirdActivity&quot;
-    android:launchMode=&quot;singleTask&quot;
-    android:taskAffinity=&quot;com.task1&quot; /&gt;
-</code></pre><p>可以看到我们给SecondActivity和ThirdActivity设置了singleTask模式和taskAffinity，也就是所需的任务栈。从图里我们可以看出，首先由MainActivity启动SecondActivity，然后由SecondActivity启动ThirdActivity，再由ThirdActivity启动MainActivity，最后再启动SecondActivity。然后我们按两次回退键，发现回到了桌面了，这是为什么？</p>
-<p>首先我们把MainActivity设为A，SecondActivity为B，ThirdActivity为C。</p>
-<p>从Manifest文件中可以看到A为standard模式，任务栈为包名，而B和C是singleTask模式，任务栈为com.task1。</p>
-<p>所以当我们从A启动B的时候，系统会为我们新建一个任务栈，就是com.task1，从而把B进栈。</p>
-<p>从B启动C时，发现C所需要的任务栈com.task1已经存在，但是没有发现C的实例，这时候就创建C的实例并且进栈，这时com.task1里为BC</p>
-<p>然后我们又从C启动A，由于A为standard模式，所以A会进入到C的任务栈，这时有两个任务栈存在，一个是为包名的任务栈，一个是为com.task1的任务栈。包名的任务栈里只有一个A，而com.task1的任务栈里现在是BCA</p>
-<p>接着我们由A启动B，B是singleTask模式，而恰好当前栈里存在着B的实例，所以不会重新创建实例，而是把B调到栈顶，并且把前面的Activity通通出栈，此时com.task1的任务栈里就只剩下一个B了</p>
-<p>最后我们按下一次回退键，当前B被出栈，com.task1任务栈被销毁，调出包名任务栈，也就是A，然后再按一次就退出程序了，这也就间接的证明了切换singleTask模式的Activity会把在它之上的Activity出栈。</p>
-<hr>
-<p>写了这么多字累死我了</p>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-Activity启动模式详解/" data-id="cjfx95vcq0001xafyvsgt6wbv" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-View的滑动" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-View的滑动/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-View的滑动/">Android-View的滑动</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>滑动效果是如何产生的？</p>
-</blockquote>
-<p>滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。</p>
-<h2 id="Android中的坐标体系"><a href="#Android中的坐标体系" class="headerlink" title="Android中的坐标体系"></a>Android中的坐标体系</h2><p>Android中的坐标体系分为两种：</p>
-<ol>
-<li>Android坐标系</li>
-<li>视图坐标系</li>
-</ol>
-<blockquote>
-<p>Android坐标系</p>
-</blockquote>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0ea610d2436d0fe0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Android坐标系"></p>
-<p>从图中我们可以看的出来<strong>在Android坐标系中以屏幕的左上方作为坐标系的原点，从原点向右为X轴的正方向，向下为Y轴的正方向</strong>。在触控事件中使用<strong>getRawX()、getRawY()</strong>来获得Android坐标系的坐标</p>
-<blockquote>
-<p>视图坐标系</p>
-</blockquote>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-a6921068bc9cf072?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="视图坐标系"></p>
-<p>视图坐标系主要描述的是该View和该View在父视图中的位置关系，和Android坐标系一样，也是以原点右方为X正方向，以原点下方为Y轴正方向，不过这里不是以屏幕的左上角为原点，而是<strong>以父视图的左上角为原点</strong>。在触控事件中使用<strong>getX()、getY()</strong>来获得视图坐标系的坐标</p>
-<h2 id="触控事件"><a href="#触控事件" class="headerlink" title="触控事件"></a>触控事件</h2><p>在上一篇文章中我们使用到了MotionEvent，这个就是触控事件的封装，首先看一下MotionEvent中封装的事件常量</p>
-<ul>
-<li>public static final int ACTION_DOWN = 0;    //单点触摸按下动作</li>
-<li>public static final int ACTION_UP = 1;    //单点触摸离开动作</li>
-<li>public static final int ACTION_MOVE = 2;    //单点触摸移动动作</li>
-<li>public static final int ACTION_CANCEL = 3;    //触摸动作取消</li>
-<li>public staiic final int ACTION_OUTSIDE = 4;    //触摸动作超出边界</li>
-<li>public static final int ACTION_POINTER_DOWN = 5; //多点触摸按下动作</li>
-<li>public static final int ACTION_POINTER_UP = 6; 多点离开动作</li>
-</ul>
-<p>通常情况下我们会在onTouchEvent(MotionEvent event)方法中通过event.getAction()来获取触控事件的类型。知道Android中的坐标系和触控事件之后我们就可以来实现View的滑动了</p>
-<hr>
-<h1 id="滑动实现"><a href="#滑动实现" class="headerlink" title="滑动实现"></a>滑动实现</h1><blockquote>
-<p>实现滑动有好多种方法，但是其思想都是一样的。当触摸到View时，记录当前触摸点的坐标，然后当手指移动时，获取到相对于前一个点的偏移量，这样我们就可以通过这个偏移量来进行修改View的坐标，这样不断的重复，就能实现View的滑动</p>
-</blockquote>
-<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>我们自定义一个View，让他来跟随我们手指的移动来移动，如图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-82d4117c39eaf270.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<ul>
-<li><strong>layout方法</strong></li>
-</ul>
-<p>我们知道在View进行绘制的时候会通过onLayout()方法来设置View的显示位置，这里我们通过修改View的left, top, right, bottom四个值来控制View的坐标</p>
-<pre><code>public boolean onTouchEvent(MotionEvent event) {
-    int x = (int) event.getX();
-    int y = (int) event.getY();
-
-    switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-            //记录触摸点的坐标
-            lastX = x;
-            lastY = y;
-            break;
-        case MotionEvent.ACTION_MOVE:
-            //计算偏移量
-            int offsetX = x - lastX;
-            int offsetY = y - lastY;
-
-            //在当前位置基础加上偏移量
-            layout(
-                    getLeft() + offsetX,
-                    getTop() + offsetY,
-                    getRight() + offsetX,
-                    getBottom() + offsetY
-            );
-            break;
-    }
-    return true;
-}
-</code></pre><hr>
-<ul>
-<li><strong>offsetLeftAndRight()和offsetTopAndBottom</strong></li>
-</ul>
-<p>这个方法就是相当于系统提供的一个对左右、上下移动的API的封装，计算好偏移量后，调用方法即可：</p>
-<pre><code>offsetLeftAndRight(offsetX);
-offsetTopAndBottom(offsetY);
-</code></pre><hr>
-<ul>
-<li><strong>LayoutParams</strong></li>
-</ul>
-<p>LayoutParams保存了View的布局参数，所以我们可以改变LayoutParams来动态的改变布局的位置来达到滑动的效果。在程序中使用getLayoutParams()来获取当前View的LayoutParams，这里就和上面一样，获取到偏移量后通过setLayoutParams来设置该View的LayoutParams：</p>
-<pre><code>RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) getLayoutParams();
-params.leftMargin = getLeft() + offsetX;
-params.topMargin = getTop() + offsetY;
-setLayoutParams(params);
-</code></pre><p><strong>需要注意一点，通过getLayoutParams()获取LayoutParams的时候，要根据View的父布局的类型来设置，当然前提还要有一个父布局。还有就是我们可以使用ViewGroup.MarginLayoutParams，这样就不用考虑父布局是什么了</strong></p>
-<hr>
-<ul>
-<li><strong>scrollTo、scrollBy</strong></li>
-</ul>
-<p>在View中，系统还提供了scrollTo、scrollBy两种方式来改变一个View的位置。</p>
-<p>其中scrollTo表示移动到一个具体的坐标点，scrollBy表示移动的偏移量，其实在scrollBy内部也是调用的scrollTo。</p>
-<p>和前面的方式一样，获取到偏移量后调用scrollBy来移动view，可是当我们运行程序，拖动View，发现View并没有移动！这是因为scrollTo、scrollBy方法移动的是View的内容，如果在ViewGroup中使用scrollTo、scrollBy的滑，那么移动的就是View了，但是如果在View中使用，那么移动的将是View里面的内容，比如TextView，那么移动的就是文本了。</p>
-<p>所以通过上面的分析，我们把代码改为如下:</p>
-<pre><code>((View)getParent()).scrollBy(offsetX, offsetY);
-</code></pre><p>再次运行程序，我们会发现动是动了，但是在乱动。因为这里我们其实是在相反的方向移动（这里由于篇幅限制，感兴趣的同学自行查找一下资料），我们把偏移量改为负的之后就会发现滑动正常了。</p>
-<hr>
-<ul>
-<li><strong>Scroller</strong></li>
-</ul>
-<p>首先来想一个场景：我们需要让一个Button向右面移动100个像素，如果我们用scrollTo/scrollBy的话，那么该View就会很突兀的移动到该点，没有过程，而Scroller则是可以实现平滑的过渡效果的</p>
-<p>下面我们把上面跟随手指滑动的例子改一下，我们在松开手指后，View自动回到原点（屏幕左上角）。使用Scroller需要三个步骤</p>
-<ol>
-<li>初始化<ul>
-<li>通过构造方法即可   Scroller mScroller = new Scroller(context);</li>
-</ul>
-</li>
-<li>重写computeScroll()方法，实现滑动</li>
-<li>startScroll()开启滑动</li>
-</ol>
-<p>代码如下：</p>
-<pre><code>        case MotionEvent.ACTION_UP:
-            View viewGroup = (View) getParent();
-            mScroller.startScroll(
-                    viewGroup.getScrollX(),
-                    viewGroup.getScrollY(),
-                    -viewGroup.getScrollX(),
-                    -viewGroup.getScrollY()
-            );
-            invalidate();
-            break;
-
-  ----------------------------------------------------------------     
-
-        @Overrid  
-        public void computeScroll() {
-            super.computeScroll();
-            if (mScroller.computeScrollOffset()) {
-            ((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
-            invalidate();
-    }
-}
-</code></pre><p>当我们手指抬起来的时候开启Scroller滑动，获取到当前view的移动距离，然后我们把需要移动的偏移量设置为相反数就ok，最后调用invalidate来通知重绘，从而调用computeScroll()方法。运行程序如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2251dce7b4d1c1c7.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<p>现在就把这几种View的滑动都说完了，自己动手写一下，感触良多。</p>
-<hr>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-View的滑动/" data-id="cjfx95vda0008xafyymgh1xgg" class="article-share-link">Share</a>
+      <a data-url="http:/2016/10/10/Android/Android-各种情况下的『自动加载更多』/" data-id="cjfx9re590006j7fyvc4f1x37" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1267,8 +1241,8 @@ setLayoutParams(params);
   
     <article id="post-Android/Android-Android性能优化" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-Android性能优化/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+    <a href="/2016/09/10/Android/Android-Android性能优化/" class="article-date">
+  <time datetime="2016-09-10T14:30:00.000Z" itemprop="datePublished">2016-09-10</time>
 </a>
     
   </div>
@@ -1279,7 +1253,7 @@ setLayoutParams(params);
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-Android性能优化/">Android-Android性能优化</a>
+      <a class="article-title" href="/2016/09/10/Android/Android-Android性能优化/">Android-Android性能优化</a>
     </h1>
   
 
@@ -1383,7 +1357,206 @@ setLayoutParams(params);
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-Android性能优化/" data-id="cjfx95vcx0002xafyg4mmek8h" class="article-share-link">Share</a>
+      <a data-url="http:/2016/09/10/Android/Android-Android性能优化/" data-id="cjfx9re500003j7fywfn157hb" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-自定义控件PickerView" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/08/20/Android/Android-自定义控件PickerView/" class="article-date">
+  <time datetime="2016-08-20T04:15:00.000Z" itemprop="datePublished">2016-08-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/08/20/Android/Android-自定义控件PickerView/">Android-自定义控件PickerView</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前段时间在公司总是有需求『滚动的选择器』，那时候总是用别人写好的来用，感觉心里不是很舒服，最近有时间了自己来写一写，上图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-6d1e3f570799130a.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>首先分析一下需求：</p>
+<ol>
+<li>可以滑动</li>
+<li>滑到两条线里的数据变色</li>
+<li>滑动完成后必须要把选中的数据放到中间</li>
+</ol>
+<h3 id="滑动"><a href="#滑动" class="headerlink" title="滑动"></a>滑动</h3><p>首先说到滑动而且还是自定义的View，我们就会想到各种『scrollBy/scrollTo』等，但是这里有个更简单的方法就是<strong>继承自ScrollView</strong>，这样就简单了不少，并且还有滚动的监听『只不过少了一个停止滑动的状态』，然而对于这个需求，我们只需要创建一个ViewGroup来放入数据（也就是很多TextView），然后addView()就OK，代码如下：</p>
+<pre><code>/**
+ * 初始化数据,首先添加Group
+ */
+mTextGroup = new LinearLayout(context);
+mTextGroup.setOrientation(LinearLayout.VERTICAL);
+mTextGroup.setGravity(Gravity.CENTER);
+addView(mTextGroup);
+
+
+/**
+ * 由于我们需要给自身的数据在选中的框里显示
+ * 所以这里需要添加前面和后面的空数据
+ */
+mTextGroup.addView(createTextView(&quot;&quot;));
+for (int i = 0; i &lt; mData.size(); i++) {
+    mTextGroup.addView(createTextView(&quot;&quot; + mData.get(i)));
+}
+mTextGroup.addView(createTextView(&quot;&quot;));
+
+------------------------------------------------------------
+
+/**
+ * 动态创建TextView
+ */
+private TextView createTextView(String s) {
+    TextView tv = new TextView(context);
+    tv.setText(s);
+    tv.setTextColor(getResources().getColor(android.R.color.darker_gray));
+    tv.setTextSize(mTextSize);
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, mTextHeight);
+
+    params.bottomMargin = mTextHeight / 2;
+    params.topMargin = mTextHeight / 2;
+    tv.setLayoutParams(params);
+    return tv;
+}
+</code></pre><p>可以看到我们在数据的前后都加了两条空数据，因为这里需要在滑动到底部或者顶部的时候确保第一条或者最后一条数据是在我们的两条线之内，这样运行一下程序就会发现我们的数据已经可以滑动了，只不过这个时候还没有中间的两条线。这里需要思考一下，如果我们添加两条线上去的话，滑动的时候线也会跟着滑动，所以这个时候就想到了背景，我们自己来画一个背景。代码如下：</p>
+<pre><code>/**
+ * 设置背景,这里选择画一个,两条线
+ */
+setBackground(new Drawable() {
+    @Override
+    public void draw(Canvas canvas) {
+        /**
+         * 这里把两条线之间的距离设置为了两个TextView的高度
+         */
+        canvas.drawLine(
+                mWidth * 0.1f,
+                mHeight / 2 - mTextHeight,
+                mWidth * 0.9f,
+                mHeight / 2 - mTextHeight,
+                mLinePaint
+        );
+        canvas.drawLine(
+                mWidth * 0.1f,
+                mHeight / 2 + mTextHeight,
+                mWidth * 0.9f,
+                mHeight / 2 + mTextHeight,
+                mLinePaint
+        );
+    }
+
+    @Override
+    public void setAlpha(int i) {
+
+    }
+
+    @Override
+    public void setColorFilter(ColorFilter colorFilter) {
+
+    }
+
+    @Override
+    public int getOpacity() {
+        return 0;
+    }
+});
+</code></pre><p>这时候我们的背景和数据都弄好了</p>
+<h3 id="在线内的数据变颜色"><a href="#在线内的数据变颜色" class="headerlink" title="在线内的数据变颜色"></a>在线内的数据变颜色</h3><p>先考虑一下，因为我们使用的是TextView，所以我们直接就可以设置TextView的字体颜色。很简单，我们在onScrollChanged()方法中用小学除法来算一下当前滚动到了哪个TextView『也就是position』，我们就把哪个改变颜色，代码如下：</p>
+<pre><code>/**
+ * ScrollView的滑动事件监听
+ */
+@Override
+protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+    super.onScrollChanged(l, t, oldl, oldt);
+
+    /**
+     * 计算出当前在两条线里的position
+     */
+    position = (t + mTextHeight) / (mTextHeight * 2);
+    /**
+     * 因为此方法会在滑动的时候不停的调用,所以这里设置一个临时的变量来控制
+     */
+    if (tempPosition != position) {
+        int size = mTextGroup.getChildCount();
+        for (int i = 0; i &lt; size; i++) {
+            TextView tv = (TextView) mTextGroup.getChildAt(i);
+            /**
+             * 因为我们在数据开头添加了一个空的数据,所以这里position要+1
+             */
+            if (position + 1 == i) {
+                tv.setTextColor(getResources().
+                        getColor(android.R.color.holo_blue_dark));
+            } else {
+                tv.setTextColor(getResources().
+                        getColor(android.R.color.darker_gray));
+            }
+        }
+    }
+    tempPosition = position;
+}
+</code></pre><h3 id="滑动结束后把当前数据放在中间（其实我不知道怎么表达了）"><a href="#滑动结束后把当前数据放在中间（其实我不知道怎么表达了）" class="headerlink" title="滑动结束后把当前数据放在中间（其实我不知道怎么表达了）"></a>滑动结束后把当前数据放在中间（其实我不知道怎么表达了）</h3><p>ScrollView没有滑动结束的监听，所以我们只好取巧来弄一个。我们在手指离开屏幕的30ms后来判断当前的scrollY和离开屏幕时候的scrollY是否一样，一样则认定是滑动结束了，如果不一样，我们强行给弄成一样的来结束滑动</p>
+<pre><code>@Override
+public boolean onTouchEvent(MotionEvent ev) {
+    /**
+     * 因为ScrollView没有停止滑动的监听,所以这里取巧
+     * 在手指离开屏幕的30ms后判断是否和原来的scrollY一样
+     * 如果一样则进入,如果不一样则设置为一样
+     */
+    if (ev.getAction() == MotionEvent.ACTION_UP) {
+        scrollY = getScrollY();
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (scrollY == getScrollY()) {
+                    /**
+                     * 获得每次松手后scrollY相对于TextView高度的偏移量
+                     */
+                    int offset = scrollY % (mTextHeight * 2);
+
+                    /**
+                     * 如果偏移量大于TextView高度的一半
+                     * 则进入到下一个
+                     */
+                    if (offset &gt; mTextHeight) {
+                        smoothScrollTo(0, scrollY - offset + (mTextHeight * 2));
+                    } else {
+                        smoothScrollTo(0, scrollY - offset);
+                    }
+                } else {
+                    scrollY = getScrollY();
+                    post(this);
+                }
+            }
+        }, 30);
+    }
+    return super.onTouchEvent(ev);
+}
+</code></pre><p>到这里就结束了，其实还是蛮简单的，只不过功能甚少，只能实现基本的选择数据，所以我起名为PickerView，当然以后还会对这个项目进行维护，已经上传github，地址<a href="https://github.com/wanglu1209/PickerView" target="_blank" rel="noopener">PickerView</a>，欢迎大家来star或者提bug</p>
+<hr>
+<h4 id="感谢"><a href="#感谢" class="headerlink" title="感谢"></a>感谢</h4><p>感谢wangjiegulu的WheelView给的启发，放上地址</p>
+<p><a href="https://github.com/wangjiegulu/WheelView" target="_blank" rel="noopener">WheelView</a></p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2016/08/20/Android/Android-自定义控件PickerView/" data-id="cjfx9re5g0009j7fy4wgadv3f" class="article-share-link">Share</a>
       
       
     </footer>
@@ -1416,7 +1589,7 @@ setLayoutParams(params);
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
     </div>
   </div>
 
@@ -1437,15 +1610,15 @@ setLayoutParams(params);
           </li>
         
           <li>
-            <a href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
           </li>
         
           <li>
-            <a href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
           </li>
         
           <li>
-            <a href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/">Android-Paint高级-PorterDuffXfermode</a>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
           </li>
         
       </ul>

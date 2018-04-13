@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-触摸事件的分发和处理 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="首先想要了解事件的分发和处理，就要先了解什么是触摸事件  什么是触摸事件？  顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件  按下        Action_Down 如果滑动    Action_Move 抬起        Action_Up  这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-触摸事件的分发和处理">
+<meta property="og:url" content="http:/2016/03/16/Android/Android-触摸事件的分发和处理/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="首先想要了解事件的分发和处理，就要先了解什么是触摸事件  什么是触摸事件？  顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件  按下        Action_Down 如果滑动    Action_Move 抬起        Action_Up  这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2016-03-16T14:30:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-触摸事件的分发和处理">
+<meta name="twitter:description" content="首先想要了解事件的分发和处理，就要先了解什么是触摸事件  什么是触摸事件？  顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件  按下        Action_Down 如果滑动    Action_Move 抬起        Action_Up  这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-触摸事件的分发和处理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/16/Android/Android-触摸事件的分发和处理/" class="article-date">
+  <time datetime="2016-03-16T14:30:00.000Z" itemprop="datePublished">2016-03-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-触摸事件的分发和处理
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"><a href="#首先想要了解事件的分发和处理，就要先了解什么是触摸事件" class="headerlink" title="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"></a>首先想要了解事件的分发和处理，就要先了解什么是触摸事件</h3><hr>
+<blockquote>
+<p>什么是触摸事件？</p>
+</blockquote>
+<p>顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件</p>
+<ol>
+<li>按下        Action_Down</li>
+<li>如果滑动    Action_Move</li>
+<li>抬起        Action_Up</li>
+</ol>
+<p>这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参数就是一个MotionEvent对象。在MotionEvent里不止有这几个事件，还可以取出当前触摸的坐标点等等。</p>
+<hr>
+<p>当然，这只是在一个View中，但是我们知道，Android的View结构是树形的，View可以放在一个ViewGroup当中，然后这个ViewGroup当中又嵌套一个ViewGroup。所以当我触摸屏幕的时候到底是谁来执行这个事件？这样就引出了『事件拦截』</p>
+<p><strong>我们想象一下场景</strong></p>
+<p>一个总经理，一个技术经理，然后干活的你。总经理把任务布置给技术经理，然后技术经理把任务安排给了你。过了一会你把任务完成，交给技术经理，技术经理觉的不错，就交给了总经理，这样这个任务就完成了</p>
+<p>了解了这个流程之后，对于事件拦截也就理解了小半了，下面来一个实例看一下</p>
+<hr>
+<p>首先我们自定义两个ViewGroup和一个View分别对应一个总经理一个技术经理和一个干活的。</p>
+<p>在两个ViewGroup中我们主要重写三个方法</p>
+<ol>
+<li>dispatchTouchEvent()</li>
+<li>onInterceptTouchEvent()</li>
+<li>onTouchEvent()</li>
+</ol>
+<p>然后在View中重写两个方法</p>
+<ol>
+<li>dispatchTouchEvent()</li>
+<li>onTouchEvent()</li>
+</ol>
+<p>然后我们在这几个方法中什么都不改，只是在里面打印Log日志来看一下执行的顺序。</p>
+<p>XML布局如下：</p>
+<pre><code>&lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupA
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupB
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;&gt;
+
+        &lt;com.github.wanglu1209.androidqunyingzhuan.MyView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot; /&gt;
+
+    &lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupB&gt;
+
+&lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupA&gt;
+</code></pre><p>现在运行程序，查看Log，如下：</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>可以看的出来，正常情况下事件的传递顺序为：</p>
+<p>ViewGroupA -&gt; ViewGroupB -&gt; View</p>
+<p>事件的处理顺序为：</p>
+<p>View -&gt; ViewGroupB -&gt; ViewGroupA</p>
+<p>其中事件传递的返回值：</p>
+<ol>
+<li>True 拦截，不继续传递</li>
+<li>False 不拦截，传递</li>
+</ol>
+<p>事件处理的返回值：</p>
+<ol>
+<li>True 处理完毕，不交给上级</li>
+<li>False 交给上级</li>
+</ol>
+<blockquote>
+<p>事件分发</p>
+</blockquote>
+<p><strong>现在我们给代码做一些改动，把ViewGroupA的onInterceptTouchEvent()的返回值改为True，查看一下log</strong></p>
+<p>log如下：</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>这里我们直接在最外侧的ViewGroupA中把事件拦截了下来，所以后面的ViewGroupB和View都没有接收到触摸事件。如果我们在ViewGroupB中拦截事件，那么log如下；</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>这样把Log打印出来就对事件的拦截和传递有了一个清晰的认识，下面来看一下事件的处理</p>
+<hr>
+<blockquote>
+<p>事件处理</p>
+</blockquote>
+<p>开始的时候我们说过，当你完成了任务之后会像你的项目经理报告，需要上级的确认，所以你的事件处理返回false，如果有一天你不干了，那么你也就不用给上级报告了，返回了true，来看一下log</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent</p>
+</blockquote>
+<p>事件传递和以前一样依次的传递下来，但是处理事件到View这里就结束了，没有向上级传递，如果给ViewGroupB的onTouchEvent的返回值true，那么事件处理到ViewGroupB就结束了。</p>
+<p>这样一来，事件的分发和处理就了解了</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2016/03/16/Android/Android-触摸事件的分发和处理/" data-id="cjfx9re5k000cj7fyd6t6m7pe" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/07/Android/Android-ViewDragHelper/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-ViewDragHelper
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/15/Android/Android-自定义ViewGroup/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">自定义ViewGroup</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

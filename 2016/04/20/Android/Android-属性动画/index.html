@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-属性动画 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在Android3.0以前的动画框架Animation存在着局限性：只能改变显示的位置，但是不能真正的更改View的位置，所以在Android3.0以后Google就推出了属性动画（Animator） 在Animator框架动画中使用最多的就是ObjectAnimator和AnimatorSet。使用ObjectAnimator来进行控制，一个ObjectAnimator只能控制一个对象的一个值，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-属性动画">
+<meta property="og:url" content="http:/2016/04/20/Android/Android-属性动画/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="在Android3.0以前的动画框架Animation存在着局限性：只能改变显示的位置，但是不能真正的更改View的位置，所以在Android3.0以后Google就推出了属性动画（Animator） 在Animator框架动画中使用最多的就是ObjectAnimator和AnimatorSet。使用ObjectAnimator来进行控制，一个ObjectAnimator只能控制一个对象的一个值，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-9118622cec9694b9.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-38e42ab877d3ddfc.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-dcda53da332406d2.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-5b58a04d86733d96.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-5f721d3886a0442e.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2016-04-20T14:30:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-属性动画">
+<meta name="twitter:description" content="在Android3.0以前的动画框架Animation存在着局限性：只能改变显示的位置，但是不能真正的更改View的位置，所以在Android3.0以后Google就推出了属性动画（Animator） 在Animator框架动画中使用最多的就是ObjectAnimator和AnimatorSet。使用ObjectAnimator来进行控制，一个ObjectAnimator只能控制一个对象的一个值，">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-9118622cec9694b9.gif?imageMogr2/auto-orient/strip">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-属性动画" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/20/Android/Android-属性动画/" class="article-date">
+  <time datetime="2016-04-20T14:30:00.000Z" itemprop="datePublished">2016-04-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-属性动画
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在Android3.0以前的动画框架Animation存在着局限性：只能改变显示的位置，但是不能真正的更改View的位置，所以在Android3.0以后Google就推出了<strong>属性动画（Animator）</strong></p>
+<p>在Animator框架动画中使用最多的就是ObjectAnimator和AnimatorSet。使用ObjectAnimator来进行控制，一个ObjectAnimator只能控制一个对象的一个值，而使用多个ObjectAnimator组合到一个AnimatorSet当中形成一个动画的集合。其中<strong>最重要的是属性动画通过调用属性的get/set方法来真实的控制一个View的属性</strong>，所以基本的的动画都可以用属性动画来实现</p>
+<h2 id="ObjectAnimator"><a href="#ObjectAnimator" class="headerlink" title="ObjectAnimator"></a>ObjectAnimator</h2><p>创建一个ObjectAnimor只需要调用ObjectAnimator的静态工厂方法就可以直接返回一个ObjectAnimator对象，其属性有需要控制的对象，和对象的属性名（动画的名称），但是这个属性必须要有get、set方法，因为在内部会调用Java的反射机制来调用set函数修改属性值</p>
+<h4 id="看一个小实例"><a href="#看一个小实例" class="headerlink" title="看一个小实例"></a>看一个小实例</h4><p>把一个Button向右方平移300，如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-9118622cec9694b9.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>代码如下：</p>
+<pre><code>btn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        /**
+         * 创建ObjectAnimator对象
+         * 设置对象和对象属性还有值
+         */
+        ObjectAnimator oa = ObjectAnimator.ofFloat(btn, &quot;translationX&quot;, 300);
+        oa.setDuration(300);    //设置时间为300ms
+        oa.start();
+    }
+});
+</code></pre><p>这里我们首先通过ObjectAnimator的静态工厂方法创建了一个对象，这里的三个参数：第一个参数则是需要曹工的对象，第二个是要操纵的属性，第三个是一个可变数组，这里我们只给了一个参数300，最后调用start()方法就可以看到动画啦。</p>
+<h2 id="常用的可以直接使用的属性动画的值"><a href="#常用的可以直接使用的属性动画的值" class="headerlink" title="常用的可以直接使用的属性动画的值"></a>常用的可以直接使用的属性动画的值</h2><ul>
+<li>translationX/translationY    ：作为一种增量来控制对象从它的父布局的左上角偏移的位置</li>
+<li>rotation、rotationX、rotationY：控制对象围绕支点来进行2D和3D旋转</li>
+<li>pivotX、pivotY：这两个属性控制着对象的支点位置，围绕着这个支点进行旋转和缩放，在默认情况下支点就是该对象的中心点</li>
+<li>x、y：这两个属性描述了对象在他容器中的最终位置，他是最初的左上角坐标和translationX、translationY值的累积和</li>
+<li>alpha：透明度，默认值是1（不透明），0代表完全透明</li>
+</ul>
+<p>可以看的出来大部分的动画都包含了，但是如果说有的属性没有get/set方法，那是不是就不能更改了呢？我们可以写一个自定义的属性类或者包装类来间接的给这个属性添加get/set方法。</p>
+<p>来看一下包装类，代码如下：</p>
+<pre><code>public class WrapperView {
+    private View mTarget;
+
+    public WrapperView(View mTarget) {
+        this.mTarget = mTarget;
+    }
+
+    public int getWidth(){
+        return mTarget.getLayoutParams().width;
+    }
+
+    public void setWidth(int width){
+        mTarget.getLayoutParams().width = width;
+        mTarget.requestLayout();
+    }
+}
+</code></pre><p>通过以上的代码就给一个width属性进行了包装，等到使用的时候只需要通过包装类就可以间接的调用到get/set方法了，如下：</p>
+<pre><code>btn.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        /**
+         * 创建ObjectAnimator对象
+         * 设置对象和对象属性还有值
+         */
+        ObjectAnimator oa = ObjectAnimator.ofInt(new WrapperView(btn), &quot;width&quot;, 500);
+        oa.setDuration(300);
+        oa.start();
+    }
+});
+</code></pre><p>还是熟悉的配方，还是原来的味道！这里只不过我们换了一下创建ObjectAnimator对象的方法，因为我们的setWidth方法里的参数是int类型的，所以我们的静态工厂方法需要使用ofInt()方法，如果还是使用ofFloat()的话会提示<code>W/PropertyValuesHolder: Method setWidth() with type float not found on target class class com.androidqunyingzhuan.WrapperView</code>。没有找到类型为float的set方法，运行一下程序：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-38e42ab877d3ddfc.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<hr>
+<h2 id="PropertyValuesHolder"><a href="#PropertyValuesHolder" class="headerlink" title="PropertyValuesHolder"></a>PropertyValuesHolder</h2><p>这个属性类似于AnimationSet，在属性动画中，如果针对同一个对象的多个属性并且同时作用多种动画就可以使用PropertyValuesHolder实现。比如在平移的过程中同时改变X、Y轴的缩放，代码如下：</p>
+<pre><code>PropertyValuesHolder p1 = PropertyValuesHolder.ofFloat(&quot;translationX&quot;, 300);
+PropertyValuesHolder p2 = PropertyValuesHolder.ofFloat(&quot;scaleX&quot;, 1, 0, 1);
+PropertyValuesHolder p3 = PropertyValuesHolder.ofFloat(&quot;scaleY&quot;, 1, 0, 1);
+ObjectAnimator.ofPropertyValuesHolder(btn, p1, p2, p3).setDuration(1000).start();
+</code></pre><p>这样我们就把这三个动画同时作用在一个对象上了，运行程序：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-dcda53da332406d2.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<hr>
+<h2 id="ValueAnimator"><a href="#ValueAnimator" class="headerlink" title="ValueAnimator"></a>ValueAnimator</h2><p>ValueAnimator在属性动画中是非常重要的，它是属性动画的核心所在，ObjectAnimator也是继承的ValueAnimator</p>
+<p>ValueAnimator不提供任何动画的实现，他像是一个数值发生器，用来产生具有一定规律的数字，来让调用者控制动画的实现过程，通常情况下在ValueAnimator的AnimatorUpdateListener中监听数值的变化，来完成动画的变换</p>
+<pre><code>ValueAnimator va = ValueAnimator.ofFloat(0, 100);
+va.setDuration(2000).start();
+va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    @Override
+    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+        btn.setText(valueAnimator.getAnimatedValue() + &quot;&quot;);
+    }
+});
+</code></pre><p>我们通过ofFloat()方法来创建了一个ValueAnimator对象，设置值的变换是从0f到100f，设置时间为2秒，然后我们在AnimatorUpdateListener中获取当前值让btn来显示，效果如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-5b58a04d86733d96.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<h4 id="动画事件的监听"><a href="#动画事件的监听" class="headerlink" title="动画事件的监听"></a>动画事件的监听</h4><p>Android提供给我们了一个接口，可以很方便的监听到一个动画的所有过程：</p>
+<pre><code>mAnimator.addListener(new Animator.AnimatorListener() {
+    @Override
+    public void onAnimationStart(Animator animator) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animator) {
+
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animator) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animator) {
+
+    }
+});
+</code></pre><p>但是大部分的时候我们只会关心动画完成之后我们需要做些什么，所以Android还提供了一个适配器来让我们选择</p>
+<pre><code>oa.addListener(new AnimatorListenerAdapter() {
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        super.onAnimationEnd(animation);
+    }
+});
+</code></pre><hr>
+<h2 id="AnimatorSet"><a href="#AnimatorSet" class="headerlink" title="AnimatorSet"></a>AnimatorSet</h2><p>对于在一个对象同一时间作用多个属性动画效果前面已经用PropertyValuesHolder实现了这样的效果，但是AnimatorSet不仅能实现这样的效果，同时能实现更为精确的顺序控制，下面我们用AnimatorSet来实现上面PropertyValuesHolder演示的动画。代码如下：</p>
+<pre><code>ObjectAnimator a1 = ObjectAnimator.ofFloat(btn, &quot;translationX&quot;, 300);
+ObjectAnimator a2 = ObjectAnimator.ofFloat(btn, &quot;scaleX&quot;, 1, 0, 1);
+ObjectAnimator a3 = ObjectAnimator.ofFloat(btn, &quot;scaleY&quot;, 1, 0, 1);
+AnimatorSet set = new AnimatorSet();
+set.setDuration(1000);
+set.playTogether(a1, a2, a3);
+set.start();
+</code></pre><p>这里我们只是想要和用PropertyValuesHolder演示的动画一样，所以我们使用了playTogether()方法来进行控制动画同时进行，当然还可以使用别的方法，例如playSequentially()，with()，before()，after()等方法来控制多个动画的工作方式，从而做到对动画播放顺序的精确控制，这里的动画和上面的一样，就不放图片了</p>
+<hr>
+<h2 id="animate方法"><a href="#animate方法" class="headerlink" title="animate方法"></a>animate方法</h2><p>Google在Android3.0以后，给View添加了一个animate方法来直接驱动属性动画，这可以认为是属性动画的简写形式，代码如下：</p>
+<pre><code>btn.animate()
+        .translationX(300)
+        .y(300)
+        .setDuration(1000)
+        .withStartAction(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        }).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        }
+).start();
+</code></pre><p>设置了两个动画，这里是同时进行的，还有两个回调方法，开始和结束</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-5f721d3886a0442e.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p><strong>这样一来，简单的属性动画效果就都说完啦</strong></p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2016/04/20/Android/Android-属性动画/" data-id="cjfx9re5c0007j7fy6785drfs" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/05/08/Android/Android-Activity启动模式详解/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-Activity启动模式详解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/10/Android/Android-Paint高级-PorterDuffXfermode/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-Paint高级-PorterDuffXfermode</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

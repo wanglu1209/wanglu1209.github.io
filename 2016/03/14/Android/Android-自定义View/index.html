@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android - 自定义View | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Android - 自定义View 在自定义View的时候一般我们会重写onDraw(Canvas canvas)方法，然后在系统给定的canvas画布上绘画就可以了。如果需要使用wrap_content属性，那么还需要重写onMeasure()方法  对现有的控件来进行扩展  这里以TextView为例，要实现这样的一个效果  只是在原有的TextView上加了一层框，其实就是绘制一个空心的矩形">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - 自定义View">
+<meta property="og:url" content="http:/2016/03/14/Android/Android-自定义View/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="Android - 自定义View 在自定义View的时候一般我们会重写onDraw(Canvas canvas)方法，然后在系统给定的canvas画布上绘画就可以了。如果需要使用wrap_content属性，那么还需要重写onMeasure()方法  对现有的控件来进行扩展  这里以TextView为例，要实现这样的一个效果  只是在原有的TextView上加了一层框，其实就是绘制一个空心的矩形">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-f3394b37f9c32fd1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-7cc5ae38e23d1af6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2016-03-14T14:34:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android - 自定义View">
+<meta name="twitter:description" content="Android - 自定义View 在自定义View的时候一般我们会重写onDraw(Canvas canvas)方法，然后在系统给定的canvas画布上绘画就可以了。如果需要使用wrap_content属性，那么还需要重写onMeasure()方法  对现有的控件来进行扩展  这里以TextView为例，要实现这样的一个效果  只是在原有的TextView上加了一层框，其实就是绘制一个空心的矩形">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-f3394b37f9c32fd1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-自定义View" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/03/14/Android/Android-自定义View/" class="article-date">
+  <time datetime="2016-03-14T14:34:00.000Z" itemprop="datePublished">2016-03-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android - 自定义View
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="Android-自定义View"><a href="#Android-自定义View" class="headerlink" title="Android - 自定义View"></a>Android - 自定义View</h3><hr>
+<p>在自定义View的时候一般我们会重写onDraw(Canvas canvas)方法，然后在系统给定的canvas画布上绘画就可以了。如果需要使用wrap_content属性，那么还需要重写onMeasure()方法</p>
+<blockquote>
+<p>对现有的控件来进行扩展</p>
+</blockquote>
+<p>这里以TextView为例，要实现这样的一个效果</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-f3394b37f9c32fd1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>只是在原有的TextView上加了一层框，其实就是绘制一个空心的矩形，理解这个我们就可以着手写代码了</p>
+<pre><code>protected void onDraw(Canvas canvas) {
+    /**
+     * 在调用super之前，这里也就是在绘制文本内容前来处理自己的逻辑
+     */
+    Paint p = new Paint();    
+    p.setStyle(Paint.Style.STROKE);    //设置为空心
+    p.setStrokeWidth(5);                //设置外框线的宽度
+    p.setColor(Color.YELLOW);            //设置线的颜色
+    /**
+     * 绘制矩形，起始x坐标，起始y坐标，终点x坐标，终点y坐标，用来绘画的paint
+     */
+    canvas.drawRect(0, 0, getMeasuredWidth(), getMeasuredHeight(), p);
+
+    super.onDraw(canvas);
+
+    /**
+     * 在绘制完文本后处理自己的逻辑
+     */
+}
+</code></pre><p>这时候就完成了对现有的控件的扩展，我们在XML中使用我们自定义的控件</p>
+<pre><code>&lt;com.github.wanglu1209.MyTextViewDemo
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:layout_margin=&quot;20dp&quot;
+    android:text=&quot;My Android TextView&quot; /&gt;
+</code></pre><p>这里和使用正常的TextView没有什么区别，现在运行一下程序就是我们上面看到的效果了</p>
+<hr>
+<blockquote>
+<p>定义全新的控件</p>
+</blockquote>
+<p>有的时候系统给定的控件不能满足我们的需求，那么这个时候就需要重新自定义一个控件。这里我们就需要重写onMeasure()和onDraw()方法等方法来实现逻辑了，通过重写onTouchEvent()来实现触控的事件</p>
+<p>来写一个实例，大约就长这个样子</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-7cc5ae38e23d1af6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>首先来分析一下，无非就是两个部分，中间的圆和外面的弧线，只要在onDraw()中依次绘制就可以了。</p>
+<p>在构造中初始化参数</p>
+<pre><code>private void initView() {
+    mCirclePaint = new Paint();
+    mCirclePaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));
+    mCirclePaint.setAntiAlias(true);    //设置抗锯齿
+
+    mArcPaint = new Paint();
+    mArcPaint.setAntiAlias(true);
+    mArcPaint.setStyle(Paint.Style.STROKE);     //设置为空心
+    mArcPaint.setStrokeWidth(40);
+    mArcPaint.setColor(getResources().getColor(android.R.color.holo_blue_bright));
+
+}
+</code></pre><p>然后在onMeasure()中获取宽度，这里为了简单，直接就是屏幕的宽度</p>
+<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    int length = MeasureSpec.getSize(widthMeasureSpec);
+    mCircleXY = length / 2;
+    mRadius = mCircleXY / 2;
+    mRectF = new RectF(
+            (float) (length * 0.1),
+            (float) (length * 0.1),
+            (float) (length * 0.9),
+            (float) (length * 0.9)
+    );
+}
+</code></pre><p>最后在onDraw()中绘制这两个图形即可</p>
+<pre><code>protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    /**
+     * 绘制圆形,参数依次为 圆的中心x坐标,圆的中心y坐标,圆的半径,画圆的笔
+     */
+    canvas.drawCircle(mCircleXY, mCircleXY, mRadius, mCirclePaint);
+    /**
+     * 绘制扇形,参数依次为 扇形的大小,起始角度,角度,是否与半径连线,画笔
+     */
+    canvas.drawArc(mRectF, 270, 240, false, mArcPaint);
+}
+</code></pre><p>现在运行程序，就可以看到我们最开始的效果啦</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2016/03/14/Android/Android-自定义View/" data-id="cjfx9re5j000bj7fycet055h4" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/03/15/Android/Android-自定义ViewGroup/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          自定义ViewGroup
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/13/Android/Android-View的滑动/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-View的滑动</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

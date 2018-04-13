@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-ThreadLocal解析 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ThreadLocal分析 Handler的运行需要MessageQueue和Looper的支持，如果您对这方面不是很熟悉，那么我推荐您阅读这个，或者看Android开发艺术探索，而为了更好的理解Looper，那么ThreadLocal是避不过去的一项 我们都知道，一个线程只能创建一个Looper，那么在这个线程中传递数据的就是ThreadLocal了 ThreadLocal是一个线程内部的数据存">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-ThreadLocal解析">
+<meta property="og:url" content="http:/2017/04/10/Android/Android-ThreadLocal解析/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="ThreadLocal分析 Handler的运行需要MessageQueue和Looper的支持，如果您对这方面不是很熟悉，那么我推荐您阅读这个，或者看Android开发艺术探索，而为了更好的理解Looper，那么ThreadLocal是避不过去的一项 我们都知道，一个线程只能创建一个Looper，那么在这个线程中传递数据的就是ThreadLocal了 ThreadLocal是一个线程内部的数据存">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-04-13T01:25:39.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-ThreadLocal解析">
+<meta name="twitter:description" content="ThreadLocal分析 Handler的运行需要MessageQueue和Looper的支持，如果您对这方面不是很熟悉，那么我推荐您阅读这个，或者看Android开发艺术探索，而为了更好的理解Looper，那么ThreadLocal是避不过去的一项 我们都知道，一个线程只能创建一个Looper，那么在这个线程中传递数据的就是ThreadLocal了 ThreadLocal是一个线程内部的数据存">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-ThreadLocal解析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/10/Android/Android-ThreadLocal解析/" class="article-date">
+  <time datetime="2017-04-10T12:20:00.000Z" itemprop="datePublished">2017-04-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-ThreadLocal解析
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><strong>ThreadLocal分析</strong></p>
+<p>Handler的运行需要MessageQueue和Looper的支持，如果您对这方面不是很熟悉，那么我推荐您阅读<a href="http://www.jianshu.com/p/e6dec5f39d09" target="_blank" rel="noopener">这个</a>，或者看<strong>Android开发艺术探索</strong>，而为了更好的理解Looper，那么ThreadLocal是避不过去的一项</p>
+<p>我们都知道，一个线程只能创建一个Looper，那么在这个线程中传递数据的就是ThreadLocal了</p>
+<p>ThreadLocal是一个线程内部的数据存储类，他可以在指定的线程中存储数据，然后当然也只能在存储数据的线程来获取数据，来看一个小demo</p>
+<p>首先我们定义一个ThreadLocal对象，然后分别在主线程和两个子线程中去设置数据和获取数据</p>
+<pre><code>private ThreadLocal&lt;Boolean&gt; mBooleanThreadLocal = new ThreadLocal&lt;&gt;();
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    mBooleanThreadLocal.set(true);
+    Log.d(&quot;112233&quot;, Thread.currentThread().getName()
+            + &quot; = &quot; + 
+            mBooleanThreadLocal.get());
+
+    new Thread(&quot;Thread #1&quot;){
+        @Override
+        public void run() {
+            super.run();
+            mBooleanThreadLocal.set(false);
+            Log.d(&quot;112233&quot;, Thread.currentThread().getName()
+                    + &quot; = &quot; + 
+                    mBooleanThreadLocal.get());
+        }
+    }.start();
+
+    new Thread(&quot;Thread #2&quot;){
+        @Override
+        public void run() {
+            super.run();
+            Log.d(&quot;112233&quot;, Thread.currentThread().getName()
+                    + &quot; = &quot; + 
+                    mBooleanThreadLocal.get());
+        }
+    }.start();
+}
+</code></pre><p>可以看到这里用的都是同一个LocalThread对象，然后运行程序，看一下log</p>
+<pre><code>D/112233: main = true
+D/112233: Thread #1 = false
+D/112233: Thread #2 = null
+</code></pre><p>我们会发现在不同的线程中获得的值是不同的，下面来分析一下源码，来看一下为什么返回的值不一样</p>
+<pre><code>public T get() {
+    Thread t = Thread.currentThread();//从这里获取当前线程
+    ThreadLocalMap map = getMap(t);//这里获取当前线程的Map
+    if (map != null) {
+        //这里取出由当前threadLocal为key的entry
+        ThreadLocalMap.Entry e = map.getEntry(this);
+        if (e != null)
+            return (T)e.value;//返回value
+    }
+    return setInitialValue();//如果为空，那么初始化
+}
+
+-------------------------------------------
+
+ThreadLocalMap getMap(Thread t) {
+    return t.threadLocals;//这里返回多个threadLocal的对象
+}
+
+-------------------------------------------
+
+private T setInitialValue() {
+    T value = initialValue();//这个方法返回null
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);//如果map存在，则替换掉数据
+    else
+        createMap(t, value);//如果map不存在，则创建一个map，数据为null
+    return value;//最后返回null
+}
+</code></pre><p>从get方法我们可以看得出来获取数据是用Thread为参数的，所以说每个线程的数据都不一样。既然这样我们就再来看看set方法</p>
+<pre><code>public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+</code></pre><p>我们会发现和上面的setInitialValue()方法差不多，都是调用的map.set()方法，这个方法其实就是一个以当前ThreadLocal为key存储的过程，我们就不细细的去研究了，有兴趣的可以去看一下</p>
+<p>至此这个ThreadLocal我们也就研究的差不多了，其实的就是<strong>在不同的线程存储不同的数据</strong></p>
+<hr>
+<p><strong>ThreadLocal和InheritableThreadLocal</strong></p>
+<p>我第一次写那个小demo的时候犯了一个小错误，new对象的时候new成了InheritableThreadLocal，从名字我们也可以看得出来这是一个继承了table的ThreadLocal，关于这两个有什么区别，我推荐您看<a href="http://blog.csdn.net/jiafu1115/article/details/7548605" target="_blank" rel="noopener">这个</a></p>
+<hr>
+<p><strong>爱小丽，爱Android</strong></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2017/04/10/Android/Android-ThreadLocal解析/" data-id="cjfx9tx710003lpfyovwgenqo" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/13/Python/Python-记学习对象可变性/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Python-记学习对象可变性
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/02/09/Android/Android-同向滑动冲突/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-同向滑动冲突</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

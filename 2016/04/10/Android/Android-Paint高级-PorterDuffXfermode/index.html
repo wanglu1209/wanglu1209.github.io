@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-Paint高级-PorterDuffXfermode | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="其实在前面的文章中也都用到了画笔（Paint），了解了一些常用的属性，比如抗锯齿，带边框，空心，宽度等，这些都是最基本的属性，下面来说一个高级属性『PorterDuffXfermode』 PorterDuffXfermode首先看一张图  PoerterDuffXfermode设置的是两个图层交集区域的显示方式，其中dst是先画的图形，src是后画的图形。 这里列举了16种，当然有的都不怎么经常使">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-Paint高级-PorterDuffXfermode">
+<meta property="og:url" content="http:/2016/04/10/Android/Android-Paint高级-PorterDuffXfermode/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="其实在前面的文章中也都用到了画笔（Paint），了解了一些常用的属性，比如抗锯齿，带边框，空心，宽度等，这些都是最基本的属性，下面来说一个高级属性『PorterDuffXfermode』 PorterDuffXfermode首先看一张图  PoerterDuffXfermode设置的是两个图层交集区域的显示方式，其中dst是先画的图形，src是后画的图形。 这里列举了16种，当然有的都不怎么经常使">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://pic4.zhongsou.com/img?id=522984b61da05c120fd">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-7c5ffb9fe73e0d27.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-11f99be96020f64f.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2016-04-10T14:10:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-Paint高级-PorterDuffXfermode">
+<meta name="twitter:description" content="其实在前面的文章中也都用到了画笔（Paint），了解了一些常用的属性，比如抗锯齿，带边框，空心，宽度等，这些都是最基本的属性，下面来说一个高级属性『PorterDuffXfermode』 PorterDuffXfermode首先看一张图  PoerterDuffXfermode设置的是两个图层交集区域的显示方式，其中dst是先画的图形，src是后画的图形。 这里列举了16种，当然有的都不怎么经常使">
+<meta name="twitter:image" content="http://pic4.zhongsou.com/img?id=522984b61da05c120fd">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-Paint高级-PorterDuffXfermode" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/10/Android/Android-Paint高级-PorterDuffXfermode/" class="article-date">
+  <time datetime="2016-04-10T14:10:00.000Z" itemprop="datePublished">2016-04-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-Paint高级-PorterDuffXfermode
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>其实在前面的文章中也都用到了画笔（Paint），了解了一些常用的属性，比如抗锯齿，带边框，空心，宽度等，这些都是最基本的属性，下面来说一个高级属性『PorterDuffXfermode』</p>
+<h2 id="PorterDuffXfermode"><a href="#PorterDuffXfermode" class="headerlink" title="PorterDuffXfermode"></a>PorterDuffXfermode</h2><p>首先看一张图</p>
+<p><img src="http://pic4.zhongsou.com/img?id=522984b61da05c120fd" alt=""></p>
+<p>PoerterDuffXfermode设置的是两个图层交集区域的显示方式，其中dst是先画的图形，src是后画的图形。</p>
+<p>这里列举了16种，当然有的都不怎么经常使用，最常用的就是DST_IN、SRC_IN来将矩形图片变成圆角图片或者圆形图片了。下面就来进行一个实例CircleImageView（好久之前就看过鸿神的这个View，一直不怎么理解，书看到这一章节就忽然想起来了，自己重新写一遍），完成图如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-7c5ffb9fe73e0d27.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h4 id="分如下几步"><a href="#分如下几步" class="headerlink" title="分如下几步"></a>分如下几步</h4><ol>
+<li>获得图片</li>
+<li>测量宽高</li>
+<li>创建画布</li>
+<li>画一个圆</li>
+<li>使用PerterDuffXfermode来控制下一个图片和刚才的圆交集</li>
+<li>画图片</li>
+<li>完事</li>
+</ol>
+<p>首先我们在构造函数中获得图片：</p>
+<pre><code>public CircleImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+
+    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CircleImageView, defStyleAttr, 0);
+    try {
+        mBitmap = BitmapFactory.decodeResource(getResources(), a.getResourceId(R.styleable.CircleImageView_src, -1));
+        if (mBitmap == null) {
+            throw new RuntimeException(&quot;src Null!&quot;);
+        }
+    } finally {
+        a.recycle();
+    }
+}
+</code></pre><p>然后我们在onMeasure()中控制图片的宽高</p>
+<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    mWidth = measureWidthAndHeight(MeasureSpec.getSize(widthMeasureSpec));
+    mHeight = measureWidthAndHeight(MeasureSpec.getSize(heightMeasureSpec));
+    setMeasuredDimension(mWidth, mHeight);
+}
+
+private int measureWidthAndHeight(int size) {
+    int mode = MeasureSpec.getMode(size);
+    switch (mode) {
+        case MeasureSpec.UNSPECIFIED:
+        case MeasureSpec.AT_MOST:
+            return 200;
+        case MeasureSpec.EXACTLY:
+        default:
+            return size;
+    }
+}
+</code></pre><p>这里我们给wrap_content设置了一个200的值，然后我们在onDraw()方法中完成我们剩下的工作：</p>
+<pre><code>protected void onDraw(Canvas canvas) {
+    super.onDraw(canvas);
+    canvas.drawBitmap(createBitmap(), 0, 0, null);
+}
+
+private Bitmap createBitmap() {
+    /**
+     * 获取宽高最小值,重新生成一个Bitmap
+     */
+    int min = Math.min(mHeight, mWidth);
+    mBitmap = Bitmap.createScaledBitmap(mBitmap, min, min, false);
+
+    /**
+     * 根据原有的Bitmap再生成一个Bitmap,当做Canvas的参数
+     * 如果在Canvas的构造中带入一个Bitmap的话,那么后续在画布上画的东西就等于在Bitmap上画的
+     */
+    Bitmap b = Bitmap.createBitmap(min, min, Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(b);
+
+    /**
+     * 初始化画笔,设置抗锯齿
+     */
+    mPaint = new Paint();
+    mPaint.setAntiAlias(true);
+
+    /**
+     * 首先画一个圆,和画布一样大
+     */
+    canvas.drawCircle(min / 2, min / 2, min / 2, mPaint);
+
+    /**
+     * 设置PoerterDuffXfermode参数,使后面画的和前面画的交集
+     * 这样就等于在一个圆上画我们的图片,所以看到的就是一个圆形的图片了
+     */
+    mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+    canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+    return b;
+}
+</code></pre><p>这样就好啦，运行程序就可以看到我们开始的效果啦~</p>
+<p><strong>感谢鸿洋大神</strong></p>
+<p><a href="http://blog.csdn.net/lmj623565791/article/details/42094215" target="_blank" rel="noopener">原文地址</a></p>
+<hr>
+<h2 id="第二个实例-刮刮卡"><a href="#第二个实例-刮刮卡" class="headerlink" title="第二个实例  刮刮卡"></a>第二个实例  刮刮卡</h2><p>相信大家都玩过刮刮卡，记得没错好像是支付宝也弄过这个效果（好像是在支付成功后）</p>
+<p>刮刮卡有两个图层，上面一层和下面的图片，上面的主要用来被刮掉，在初始状态下，上面的图层会掩盖住下面的图层，当用手刮上面的图层时，下面的会慢慢显示出来，这就需要用到DST_IN了。效果图如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-11f99be96020f64f.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<h4 id="分如下几步-1"><a href="#分如下几步-1" class="headerlink" title="分如下几步"></a>分如下几步</h4><ol>
+<li>初始化Paint和图片等</li>
+<li>在onDraw()方法中绘制两个图片，首先绘制背景图，然后绘制遮罩层</li>
+<li>在onTouchEvent()方法中绘制路径</li>
+<li>使用DST_IN模式绘制在上图层就ok</li>
+</ol>
+<p>首先初始化，代码如下：</p>
+<pre><code>private void init() {
+    mPaint = new Paint();
+    /**
+     * 设置画笔透明度为0,设置PoerterDuffXfermode为DST_IN模式
+     */
+    mPaint.setAlpha(0);
+    mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+    mPaint.setStyle(Paint.Style.STROKE);
+    mPaint.setStrokeJoin(Paint.Join.ROUND); //设置画笔图形样式
+    mPaint.setStrokeCap(Paint.Cap.ROUND);   //设置画笔转弯连接处的风格
+    mPaint.setStrokeWidth(50);  //设置宽度
+
+    mPath = new Path();
+    /**
+     * 获取背景图片
+     */
+    mBgBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.a1);
+
+    /**
+     * 创建遮罩层Bitmap和背景图片一样大小,画上灰色
+     */
+    mFgBitmap = Bitmap.createBitmap(mBgBitmap.getWidth(), mBgBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    mCanvas = new Canvas(mFgBitmap);
+    mCanvas.drawColor(Color.GRAY);
+}
+</code></pre><p>然后绘制两个图层：</p>
+<pre><code>protected void onDraw(Canvas canvas) {
+    /**
+     * 首先绘制背景图,然后绘制遮罩层,这样遮罩层才会在背景图上面
+     */
+    canvas.drawBitmap(mBgBitmap, 0, 0, null);
+    canvas.drawBitmap(mFgBitmap, 0, 0, null);
+}
+</code></pre><p>最后在onTouchEvent()方法中绘制路径：</p>
+<pre><code>public boolean onTouchEvent(MotionEvent event) {
+    switch (event.getAction()) {
+        /**
+         * 重置一下路径,移动到该点
+         */
+        case MotionEvent.ACTION_DOWN:
+            mPath.reset();
+            mPath.moveTo(event.getX(), event.getY());
+            break;
+        /**
+         * 路径的点
+         */
+        case MotionEvent.ACTION_MOVE:
+            mPath.lineTo(event.getX(), event.getY());
+            break;
+    }
+
+    /**
+     * 绘制路径,其实是在mFgBitmap上绘制
+     * 并且由于DST_IN模式,取交集,透明度为0,所以就能实现刮刮卡的效果
+     */
+    mCanvas.drawPath(mPath, mPaint);
+
+    /**
+     * 通知重绘
+     */
+    invalidate();
+    return true;
+}
+</code></pre><p>这样一个刮刮卡的效果就完成了，是不是很简单。</p>
+<p><strong>需要注意的一点：在使用PorterDuffXfermode时，最好把硬件加速关闭，因为有的模式不支持硬件加速</strong></p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2016/04/10/Android/Android-Paint高级-PorterDuffXfermode/" data-id="cjfx9re4y0002j7fyc365xjfg" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/20/Android/Android-属性动画/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-属性动画
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/07/Android/Android-ViewDragHelper/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-ViewDragHelper</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/02/">二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/10/">十月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/10/Android/Android-ThreadLocal解析/">Android-ThreadLocal解析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/02/09/Android/Android-同向滑动冲突/">Android-同向滑动冲突</a>
+          </li>
+        
+          <li>
+            <a href="/2017/01/20/Android/Android-MVP Demo/">Android-MVP Demo</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
