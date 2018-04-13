@@ -62,451 +62,6 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-Android/Android-View的测量" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-View的测量/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-View的测量/">Android View的测量</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <blockquote>
-<p>Android View的测量</p>
-</blockquote>
-<p>在绘制View之前，要对整个View进行测量，这个过程就在onMeasure()方法中进行的。</p>
-<h4 id="测量的模式"><a href="#测量的模式" class="headerlink" title="测量的模式"></a>测量的模式</h4><ol>
-<li>EXACTLY<ul>
-<li>精确值模式，当控件的width和height设置为具体值或者match_parent时就是这个模式</li>
-</ul>
-</li>
-<li>UNSPECIFIED<ul>
-<li>这个属性不指定测量的模式，View想多大就多大</li>
-</ul>
-</li>
-<li>AT_MOST<ul>
-<li>最大值模式，当控件的width和height设置为wrap_context时就是这个模式，控件的大小随着子控件的大小而变化</li>
-</ul>
-</li>
-</ol>
-<p>其中View类<strong>默认的</strong>onMeasure()方法<strong>只支持EXACTLY模式</strong>，所以说如果不重写onMeasure()方法的话就只能使用EXACTLY模式。</p>
-<p>一言不合上代码</p>
-<pre><code>public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-    setBackgroundColor(Color.BLUE);
-} 
-</code></pre><p>这里我只给当前自定义View设置了一个背景颜色，然后在XML中设置成wrap_content</p>
-<pre><code>&lt;com.github.wanglu1209.CustomView
-    android:layout_width=&quot;wrap_content&quot;
-    android:layout_height=&quot;wrap_content&quot; /&gt; 
-</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>运行起来就是这样全屏的，下面我们还是这个例子，重写onMeasure()方法</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
-    int specMode, specSize = 0;
-    int mWidth, mHeight;
-
-    /**
-     * Measure Width
-     */
-    specMode = MeasureSpec.getMode(widthMeasureSpec);
-    switch (specMode){
-        case MeasureSpec.AT_MOST:   //wrap_content
-            specSize = 200;
-            break;
-        case MeasureSpec.EXACTLY:   //math_content 和 精确值
-            specSize = MeasureSpec.getSize(widthMeasureSpec);
-            break;
-        case MeasureSpec.UNSPECIFIED:
-            specSize = 400;
-            break;
-    }
-    mWidth = specSize;
-
-    /**
-     * Measure Height
-     */
-    specMode = MeasureSpec.getMode(heightMeasureSpec);
-    switch (specMode){
-        case MeasureSpec.AT_MOST:   //wrap_content
-            specSize = 200;
-            break;
-        case MeasureSpec.EXACTLY:   //math_content 和 精确值
-            specSize = MeasureSpec.getSize(heightMeasureSpec);
-            break;
-        case MeasureSpec.UNSPECIFIED:
-            specSize = 400;
-            break;
-    }
-    mHeight = specSize;
-
-    /**
-     * 最后调用setMeasuredDimension进行赋值
-     */
-    setMeasuredDimension(mWidth, mHeight);
-}
-</code></pre><p>可以看到这里我们给wrap_content赋值200，我们XML代码不变还是wrap_content，运行一下程序</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0e9fc7b558921b74.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>可以看的出来大小确实变成了200，通过这个小例子就可以对View的测量有一个不错的认识了，并没有什么高深莫测的东西，一步一步来。</p>
-<hr>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-View的测量/" data-id="cjfx8rwzb0005i4fysjgk1ifp" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-Paint高级-PorterDuffXfermode" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/">Android-Paint高级-PorterDuffXfermode</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>其实在前面的文章中也都用到了画笔（Paint），了解了一些常用的属性，比如抗锯齿，带边框，空心，宽度等，这些都是最基本的属性，下面来说一个高级属性『PorterDuffXfermode』</p>
-<h2 id="PorterDuffXfermode"><a href="#PorterDuffXfermode" class="headerlink" title="PorterDuffXfermode"></a>PorterDuffXfermode</h2><p>首先看一张图</p>
-<p><img src="http://pic4.zhongsou.com/img?id=522984b61da05c120fd" alt=""></p>
-<p>PoerterDuffXfermode设置的是两个图层交集区域的显示方式，其中dst是先画的图形，src是后画的图形。</p>
-<p>这里列举了16种，当然有的都不怎么经常使用，最常用的就是DST_IN、SRC_IN来将矩形图片变成圆角图片或者圆形图片了。下面就来进行一个实例CircleImageView（好久之前就看过鸿神的这个View，一直不怎么理解，书看到这一章节就忽然想起来了，自己重新写一遍），完成图如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-7c5ffb9fe73e0d27.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<h4 id="分如下几步"><a href="#分如下几步" class="headerlink" title="分如下几步"></a>分如下几步</h4><ol>
-<li>获得图片</li>
-<li>测量宽高</li>
-<li>创建画布</li>
-<li>画一个圆</li>
-<li>使用PerterDuffXfermode来控制下一个图片和刚才的圆交集</li>
-<li>画图片</li>
-<li>完事</li>
-</ol>
-<p>首先我们在构造函数中获得图片：</p>
-<pre><code>public CircleImageView(Context context, AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-
-    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CircleImageView, defStyleAttr, 0);
-    try {
-        mBitmap = BitmapFactory.decodeResource(getResources(), a.getResourceId(R.styleable.CircleImageView_src, -1));
-        if (mBitmap == null) {
-            throw new RuntimeException(&quot;src Null!&quot;);
-        }
-    } finally {
-        a.recycle();
-    }
-}
-</code></pre><p>然后我们在onMeasure()中控制图片的宽高</p>
-<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    mWidth = measureWidthAndHeight(MeasureSpec.getSize(widthMeasureSpec));
-    mHeight = measureWidthAndHeight(MeasureSpec.getSize(heightMeasureSpec));
-    setMeasuredDimension(mWidth, mHeight);
-}
-
-private int measureWidthAndHeight(int size) {
-    int mode = MeasureSpec.getMode(size);
-    switch (mode) {
-        case MeasureSpec.UNSPECIFIED:
-        case MeasureSpec.AT_MOST:
-            return 200;
-        case MeasureSpec.EXACTLY:
-        default:
-            return size;
-    }
-}
-</code></pre><p>这里我们给wrap_content设置了一个200的值，然后我们在onDraw()方法中完成我们剩下的工作：</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-    canvas.drawBitmap(createBitmap(), 0, 0, null);
-}
-
-private Bitmap createBitmap() {
-    /**
-     * 获取宽高最小值,重新生成一个Bitmap
-     */
-    int min = Math.min(mHeight, mWidth);
-    mBitmap = Bitmap.createScaledBitmap(mBitmap, min, min, false);
-
-    /**
-     * 根据原有的Bitmap再生成一个Bitmap,当做Canvas的参数
-     * 如果在Canvas的构造中带入一个Bitmap的话,那么后续在画布上画的东西就等于在Bitmap上画的
-     */
-    Bitmap b = Bitmap.createBitmap(min, min, Bitmap.Config.ARGB_8888);
-    Canvas canvas = new Canvas(b);
-
-    /**
-     * 初始化画笔,设置抗锯齿
-     */
-    mPaint = new Paint();
-    mPaint.setAntiAlias(true);
-
-    /**
-     * 首先画一个圆,和画布一样大
-     */
-    canvas.drawCircle(min / 2, min / 2, min / 2, mPaint);
-
-    /**
-     * 设置PoerterDuffXfermode参数,使后面画的和前面画的交集
-     * 这样就等于在一个圆上画我们的图片,所以看到的就是一个圆形的图片了
-     */
-    mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-    canvas.drawBitmap(mBitmap, 0, 0, mPaint);
-    return b;
-}
-</code></pre><p>这样就好啦，运行程序就可以看到我们开始的效果啦~</p>
-<p><strong>感谢鸿洋大神</strong></p>
-<p><a href="http://blog.csdn.net/lmj623565791/article/details/42094215" target="_blank" rel="noopener">原文地址</a></p>
-<hr>
-<h2 id="第二个实例-刮刮卡"><a href="#第二个实例-刮刮卡" class="headerlink" title="第二个实例  刮刮卡"></a>第二个实例  刮刮卡</h2><p>相信大家都玩过刮刮卡，记得没错好像是支付宝也弄过这个效果（好像是在支付成功后）</p>
-<p>刮刮卡有两个图层，上面一层和下面的图片，上面的主要用来被刮掉，在初始状态下，上面的图层会掩盖住下面的图层，当用手刮上面的图层时，下面的会慢慢显示出来，这就需要用到DST_IN了。效果图如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-11f99be96020f64f.gif?imageMogr2/auto-orient/strip" alt=""></p>
-<h4 id="分如下几步-1"><a href="#分如下几步-1" class="headerlink" title="分如下几步"></a>分如下几步</h4><ol>
-<li>初始化Paint和图片等</li>
-<li>在onDraw()方法中绘制两个图片，首先绘制背景图，然后绘制遮罩层</li>
-<li>在onTouchEvent()方法中绘制路径</li>
-<li>使用DST_IN模式绘制在上图层就ok</li>
-</ol>
-<p>首先初始化，代码如下：</p>
-<pre><code>private void init() {
-    mPaint = new Paint();
-    /**
-     * 设置画笔透明度为0,设置PoerterDuffXfermode为DST_IN模式
-     */
-    mPaint.setAlpha(0);
-    mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-    mPaint.setStyle(Paint.Style.STROKE);
-    mPaint.setStrokeJoin(Paint.Join.ROUND); //设置画笔图形样式
-    mPaint.setStrokeCap(Paint.Cap.ROUND);   //设置画笔转弯连接处的风格
-    mPaint.setStrokeWidth(50);  //设置宽度
-
-    mPath = new Path();
-    /**
-     * 获取背景图片
-     */
-    mBgBitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.a1);
-
-    /**
-     * 创建遮罩层Bitmap和背景图片一样大小,画上灰色
-     */
-    mFgBitmap = Bitmap.createBitmap(mBgBitmap.getWidth(), mBgBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-    mCanvas = new Canvas(mFgBitmap);
-    mCanvas.drawColor(Color.GRAY);
-}
-</code></pre><p>然后绘制两个图层：</p>
-<pre><code>protected void onDraw(Canvas canvas) {
-    /**
-     * 首先绘制背景图,然后绘制遮罩层,这样遮罩层才会在背景图上面
-     */
-    canvas.drawBitmap(mBgBitmap, 0, 0, null);
-    canvas.drawBitmap(mFgBitmap, 0, 0, null);
-}
-</code></pre><p>最后在onTouchEvent()方法中绘制路径：</p>
-<pre><code>public boolean onTouchEvent(MotionEvent event) {
-    switch (event.getAction()) {
-        /**
-         * 重置一下路径,移动到该点
-         */
-        case MotionEvent.ACTION_DOWN:
-            mPath.reset();
-            mPath.moveTo(event.getX(), event.getY());
-            break;
-        /**
-         * 路径的点
-         */
-        case MotionEvent.ACTION_MOVE:
-            mPath.lineTo(event.getX(), event.getY());
-            break;
-    }
-
-    /**
-     * 绘制路径,其实是在mFgBitmap上绘制
-     * 并且由于DST_IN模式,取交集,透明度为0,所以就能实现刮刮卡的效果
-     */
-    mCanvas.drawPath(mPath, mPaint);
-
-    /**
-     * 通知重绘
-     */
-    invalidate();
-    return true;
-}
-</code></pre><p>这样一个刮刮卡的效果就完成了，是不是很简单。</p>
-<p><strong>需要注意的一点：在使用PorterDuffXfermode时，最好把硬件加速关闭，因为有的模式不支持硬件加速</strong></p>
-<hr>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/" data-id="cjfx8rwz40003i4fy3dlnb01b" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-Android/Android-触摸事件的分发和处理" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-触摸事件的分发和处理/" class="article-date">
-  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-触摸事件的分发和处理/">Android-触摸事件的分发和处理</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"><a href="#首先想要了解事件的分发和处理，就要先了解什么是触摸事件" class="headerlink" title="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"></a>首先想要了解事件的分发和处理，就要先了解什么是触摸事件</h3><hr>
-<blockquote>
-<p>什么是触摸事件？</p>
-</blockquote>
-<p>顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件</p>
-<ol>
-<li>按下        Action_Down</li>
-<li>如果滑动    Action_Move</li>
-<li>抬起        Action_Up</li>
-</ol>
-<p>这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参数就是一个MotionEvent对象。在MotionEvent里不止有这几个事件，还可以取出当前触摸的坐标点等等。</p>
-<hr>
-<p>当然，这只是在一个View中，但是我们知道，Android的View结构是树形的，View可以放在一个ViewGroup当中，然后这个ViewGroup当中又嵌套一个ViewGroup。所以当我触摸屏幕的时候到底是谁来执行这个事件？这样就引出了『事件拦截』</p>
-<p><strong>我们想象一下场景</strong></p>
-<p>一个总经理，一个技术经理，然后干活的你。总经理把任务布置给技术经理，然后技术经理把任务安排给了你。过了一会你把任务完成，交给技术经理，技术经理觉的不错，就交给了总经理，这样这个任务就完成了</p>
-<p>了解了这个流程之后，对于事件拦截也就理解了小半了，下面来一个实例看一下</p>
-<hr>
-<p>首先我们自定义两个ViewGroup和一个View分别对应一个总经理一个技术经理和一个干活的。</p>
-<p>在两个ViewGroup中我们主要重写三个方法</p>
-<ol>
-<li>dispatchTouchEvent()</li>
-<li>onInterceptTouchEvent()</li>
-<li>onTouchEvent()</li>
-</ol>
-<p>然后在View中重写两个方法</p>
-<ol>
-<li>dispatchTouchEvent()</li>
-<li>onTouchEvent()</li>
-</ol>
-<p>然后我们在这几个方法中什么都不改，只是在里面打印Log日志来看一下执行的顺序。</p>
-<p>XML布局如下：</p>
-<pre><code>&lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupA
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;&gt;
-
-    &lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupB
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;match_parent&quot;&gt;
-
-        &lt;com.github.wanglu1209.androidqunyingzhuan.MyView
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;match_parent&quot; /&gt;
-
-    &lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupB&gt;
-
-&lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupA&gt;
-</code></pre><p>现在运行程序，查看Log，如下：</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
-</blockquote>
-<p>可以看的出来，正常情况下事件的传递顺序为：</p>
-<p>ViewGroupA -&gt; ViewGroupB -&gt; View</p>
-<p>事件的处理顺序为：</p>
-<p>View -&gt; ViewGroupB -&gt; ViewGroupA</p>
-<p>其中事件传递的返回值：</p>
-<ol>
-<li>True 拦截，不继续传递</li>
-<li>False 不拦截，传递</li>
-</ol>
-<p>事件处理的返回值：</p>
-<ol>
-<li>True 处理完毕，不交给上级</li>
-<li>False 交给上级</li>
-</ol>
-<blockquote>
-<p>事件分发</p>
-</blockquote>
-<p><strong>现在我们给代码做一些改动，把ViewGroupA的onInterceptTouchEvent()的返回值改为True，查看一下log</strong></p>
-<p>log如下：</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupA onTouchEvent</p>
-</blockquote>
-<p>这里我们直接在最外侧的ViewGroupA中把事件拦截了下来，所以后面的ViewGroupB和View都没有接收到触摸事件。如果我们在ViewGroupB中拦截事件，那么log如下；</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
-</blockquote>
-<p>这样把Log打印出来就对事件的拦截和传递有了一个清晰的认识，下面来看一下事件的处理</p>
-<hr>
-<blockquote>
-<p>事件处理</p>
-</blockquote>
-<p>开始的时候我们说过，当你完成了任务之后会像你的项目经理报告，需要上级的确认，所以你的事件处理返回false，如果有一天你不干了，那么你也就不用给上级报告了，返回了true，来看一下log</p>
-<blockquote>
-<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent</p>
-</blockquote>
-<p>事件传递和以前一样依次的传递下来，但是处理事件到View这里就结束了，没有向上级传递，如果给ViewGroupB的onTouchEvent的返回值true，那么事件处理到ViewGroupB就结束了。</p>
-<p>这样一来，事件的分发和处理就了解了</p>
-<hr>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-触摸事件的分发和处理/" data-id="cjfx8rwzy000ci4fyoo0v49nu" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-Android/Android-自定义控件PickerView" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/04/13/Android/Android-自定义控件PickerView/" class="article-date">
@@ -696,7 +251,7 @@ public boolean onTouchEvent(MotionEvent ev) {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-自定义控件PickerView/" data-id="cjfx8rx00000di4fye4hafayk" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Android/Android-自定义控件PickerView/" data-id="cjfx8xufu000aqqfyn5bmwylh" class="article-share-link">Share</a>
       
       
     </footer>
@@ -706,9 +261,9 @@ public boolean onTouchEvent(MotionEvent ev) {
 
 
   
-    <article id="post-Android/Android-Android性能优化" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Android/Android-触摸事件的分发和处理" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/13/Android/Android-Android性能优化/" class="article-date">
+    <a href="/2018/04/13/Android/Android-触摸事件的分发和处理/" class="article-date">
   <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
 </a>
     
@@ -720,7 +275,7 @@ public boolean onTouchEvent(MotionEvent ev) {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/Android/Android-Android性能优化/">Android-Android性能优化</a>
+      <a class="article-title" href="/2018/04/13/Android/Android-触摸事件的分发和处理/">Android-触摸事件的分发和处理</a>
     </h1>
   
 
@@ -728,103 +283,100 @@ public boolean onTouchEvent(MotionEvent ev) {
     
     <div class="article-entry" itemprop="articleBody">
       
-        <blockquote>
-<p>其实关于性能优化这个我也只是学到个皮毛，我是按照书上说的加上自己理解的来写，<strong>如果有不对的地方，请指正，我也是个菜鸟。谢谢</strong></p>
+        <h3 id="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"><a href="#首先想要了解事件的分发和处理，就要先了解什么是触摸事件" class="headerlink" title="首先想要了解事件的分发和处理，就要先了解什么是触摸事件"></a>首先想要了解事件的分发和处理，就要先了解什么是触摸事件</h3><hr>
+<blockquote>
+<p>什么是触摸事件？</p>
 </blockquote>
-<p>Android性能的优化主要分为两点</p>
+<p>顾名思义，触摸事件就是我们触碰屏幕之后产生的事件，一般触碰到屏幕之后会触发两个或者三个事件</p>
 <ol>
-<li>布局优化</li>
-<li>内存优化</li>
+<li>按下        Action_Down</li>
+<li>如果滑动    Action_Move</li>
+<li>抬起        Action_Up</li>
 </ol>
-<h2 id="布局优化"><a href="#布局优化" class="headerlink" title="布局优化"></a>布局优化</h2><p>首先来看一下布局优化，系统在渲染UI的时候会消耗大量的资源，所以，对布局的优化就显得尤为重要</p>
-<h4 id="避免Overdraw"><a href="#避免Overdraw" class="headerlink" title="避免Overdraw"></a>避免Overdraw</h4><p>也就是避免过度的绘制，过度的绘制会浪费更多的资源，<strong>举个例子，Android系统会默认绘制Activity的背景，这时候我们再设置一个背景，这样默认的背景就属于过度绘制了，</strong>在『开发者工具』中有一个『调试GPU过度绘制』的选项，我们打开就可以通过颜色来判断过度绘制的次数，如图：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0cf8e3b06aa8b4ce.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<p>所以说我们尽可能的<strong>增大蓝色区域，减少红色区域</strong></p>
-<h4 id="优化布局层级"><a href="#优化布局层级" class="headerlink" title="优化布局层级"></a>优化布局层级</h4><p>在Android系统中，系统对View进行测量、布局、绘制的时候，都是通过对View树的遍历来进行的，所以说<strong>一个布局的层级太多，就会严重影响测量、布局、绘制的速度，所以要降低View树的高度，Google在文档中建议布局的层级不超过10层，所以还要避免嵌套没有用的布局</strong></p>
-<h4 id="使用include标签"><a href="#使用include标签" class="headerlink" title="使用include标签"></a>使用include标签</h4><p>相信大家都会在项目的时候遇到toolbar，或者一个UI在多个界面使用的问题，遇到这种问题的时候我们一般都会用include（毕竟郭神『第一行代码』教的好），这样就减少了代码冗余，而且还利于后期更改</p>
-<h4 id="使用ViewStub实现View的延时加载"><a href="#使用ViewStub实现View的延时加载" class="headerlink" title="使用ViewStub实现View的延时加载"></a>使用ViewStub实现View的延时加载</h4><p>ViewStub标签和View.GONE的方式差不多，但是ViewStub只会在显示的时候去渲染，而GONE在初始化的时候就已经渲染完毕了，所以相比来说ViewStub的效率更高。下面来通过代码使用一下ViewStub</p>
-<p>首先我们定义一个布局文件</p>
-<pre><code>&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:orientation=&quot;vertical&quot; android:layout_width=&quot;match_parent&quot;
+<p>这些事件封装成了一个类『MotionEvent』，如果重写onTouchEvent()方法，该方法的参数就是一个MotionEvent对象。在MotionEvent里不止有这几个事件，还可以取出当前触摸的坐标点等等。</p>
+<hr>
+<p>当然，这只是在一个View中，但是我们知道，Android的View结构是树形的，View可以放在一个ViewGroup当中，然后这个ViewGroup当中又嵌套一个ViewGroup。所以当我触摸屏幕的时候到底是谁来执行这个事件？这样就引出了『事件拦截』</p>
+<p><strong>我们想象一下场景</strong></p>
+<p>一个总经理，一个技术经理，然后干活的你。总经理把任务布置给技术经理，然后技术经理把任务安排给了你。过了一会你把任务完成，交给技术经理，技术经理觉的不错，就交给了总经理，这样这个任务就完成了</p>
+<p>了解了这个流程之后，对于事件拦截也就理解了小半了，下面来一个实例看一下</p>
+<hr>
+<p>首先我们自定义两个ViewGroup和一个View分别对应一个总经理一个技术经理和一个干活的。</p>
+<p>在两个ViewGroup中我们主要重写三个方法</p>
+<ol>
+<li>dispatchTouchEvent()</li>
+<li>onInterceptTouchEvent()</li>
+<li>onTouchEvent()</li>
+</ol>
+<p>然后在View中重写两个方法</p>
+<ol>
+<li>dispatchTouchEvent()</li>
+<li>onTouchEvent()</li>
+</ol>
+<p>然后我们在这几个方法中什么都不改，只是在里面打印Log日志来看一下执行的顺序。</p>
+<p>XML布局如下：</p>
+<pre><code>&lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupA
+    android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;&gt;
 
-    &lt;TextView
-        android:id=&quot;@+id/tv&quot;
-        android:layout_width=&quot;wrap_content&quot;
-        android:layout_height=&quot;wrap_content&quot; /&gt;
+    &lt;com.github.wanglu1209.androidqunyingzhuan.ViewGroupB
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;&gt;
 
-&lt;/LinearLayout&gt;
-</code></pre><p>这里面只放了一个TextView，然后我们在自己的布局中通过ViewStub来引用他</p>
-<pre><code>&lt;Button
-   android:id=&quot;@+id/btn&quot;
-   android:layout_width=&quot;wrap_content&quot;
-   android:layout_height=&quot;wrap_content&quot; /&gt;
+        &lt;com.github.wanglu1209.androidqunyingzhuan.MyView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot; /&gt;
 
-&lt;ViewStub
-   android:id=&quot;@+id/vs&quot;
-   android:layout_width=&quot;wrap_content&quot;
-   android:layout_height=&quot;wrap_content&quot;
-   android:layout=&quot;@layout/view_stub&quot;/&gt;
-</code></pre><p>这里的逻辑是点击按钮然后出现ViewStub引用的布局（也就是我们上面写的那个布局文件）</p>
-<pre><code>findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View view) {
-        ViewStub vs = (ViewStub) findViewById(R.id.vs);
-        View vsView = vs.inflate();
-        TextView tv = (TextView) vsView.findViewById(R.id.tv);
-        tv.setText(&quot;hahaha&quot;);
+    &lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupB&gt;
 
-    }
-});
-</code></pre><p>这里想要把ViewStub引用的布局显示出来有两种办法，一种是ViewStub.setVisibility();另一种就是ViewStub.inflate();这两种方法的区别就是inflate()能返回引用的布局，然后可以通过这个布局来找到里面的子View来进行操作</p>
-<p>运行程序点击按钮，就可以看到TextView已经显示出来了，并且已经赋值『hahaha』</p>
-<h4 id="Hierarchy-Viewer"><a href="#Hierarchy-Viewer" class="headerlink" title="Hierarchy Viewer"></a>Hierarchy Viewer</h4><p>这个工具可以显示我们的布局，但是只可以在模拟器和工厂的Demo机上用，不过Google的大神提供了一个开源的项目ViewServer，有兴趣的可以看一下，地址：<a href="https://github.com/romainguy/ViewServer" target="_blank" rel="noopener">ViewServer</a></p>
-<p>这个就不过多阐述了，有兴趣的可以自行查看一下相关的资料</p>
-<h2 id="内存优化"><a href="#内存优化" class="headerlink" title="内存优化"></a>内存优化</h2><p>我们都知道，最近Android的厂商就是在拼配置，其中我们最关注的就是内存几个G，但是Android手机有的内存很大，但是很卡，这是因为有的手机软件在手机内存低的情况下不能被杀死，也就是我们说的『防杀』</p>
-<p>我们知道内存一般分为这几个部分</p>
-<ul>
-<li>寄存器</li>
-<li>栈</li>
-<li>堆</li>
-<li>静态存储区</li>
-<li>常量池</li>
-</ul>
-<p>其中寄存器运算速度最快，但是我们在程序里无法控制</p>
-<p>栈里存放基本数据类型</p>
-<p>堆里存放对象和数组，在堆中的一般由Java的GC还管理</p>
-<p>静态存储区在固定的位置存放应用程序中运行时一直存在的数据，Java专门划分了一个区域来管理静态变量</p>
-<p>常量池就是该类型所使用到的常量的集合</p>
-<h4 id="Bitmap的优化"><a href="#Bitmap的优化" class="headerlink" title="Bitmap的优化"></a>Bitmap的优化</h4><p>我们都知道在Android中是造成OOM的最大威胁，因为它占用的内存特别多，所以我们应该：</p>
-<ul>
-<li>使用适当分辨率大小的图片<ul>
-<li>由于Android在做适配的时候会对不同分辨率的文件夹下的图片来进行缩放适配，如果图片的分辨率与资源分辨率不匹配的话就会导致消耗更多的资源</li>
-</ul>
-</li>
-<li>使用缓存<ul>
-<li>一般有内存缓存和硬盘缓存</li>
-</ul>
-</li>
-</ul>
-<h4 id="代码优化"><a href="#代码优化" class="headerlink" title="代码优化"></a>代码优化</h4><ul>
-<li>对常量使用static</li>
-<li>使用静态方法，静态方法比普通方法提高15%左右的访问速度</li>
-<li>减少没有必要的成员变量，如果能定义成局部变量就最好定义成局部变量</li>
-<li>减少不必要的对象</li>
-<li>少用枚举、迭代器</li>
-<li>对Cursor、Receiver、File等对象，要注意回收和取消注册</li>
-<li>使用SurfaceView来代替View进行大量并且频繁的绘图操作</li>
-<li>尽量使用视图缓存，不是每次都执行inflate()来解析视图</li>
-<li>避免使用反射</li>
-<li>使用RenderScript、OpenGL来进行非常复杂的绘图操作</li>
-</ul>
-<p>以上就是对Android性能优化的一些点，如果你用AndroidStudio的话，AndroidStudio提供了一个内存监视的工具，还是很好用的，如果你没用AndroidStudio，那么我建议你使用AndroidStudio~</p>
+&lt;/com.github.wanglu1209.androidqunyingzhuan.ViewGroupA&gt;
+</code></pre><p>现在运行程序，查看Log，如下：</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>可以看的出来，正常情况下事件的传递顺序为：</p>
+<p>ViewGroupA -&gt; ViewGroupB -&gt; View</p>
+<p>事件的处理顺序为：</p>
+<p>View -&gt; ViewGroupB -&gt; ViewGroupA</p>
+<p>其中事件传递的返回值：</p>
+<ol>
+<li>True 拦截，不继续传递</li>
+<li>False 不拦截，传递</li>
+</ol>
+<p>事件处理的返回值：</p>
+<ol>
+<li>True 处理完毕，不交给上级</li>
+<li>False 交给上级</li>
+</ol>
+<blockquote>
+<p>事件分发</p>
+</blockquote>
+<p><strong>现在我们给代码做一些改动，把ViewGroupA的onInterceptTouchEvent()的返回值改为True，查看一下log</strong></p>
+<p>log如下：</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>这里我们直接在最外侧的ViewGroupA中把事件拦截了下来，所以后面的ViewGroupB和View都没有接收到触摸事件。如果我们在ViewGroupB中拦截事件，那么log如下；</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>ViewGroupB onTouchEvent<br>ViewGroupA onTouchEvent</p>
+</blockquote>
+<p>这样把Log打印出来就对事件的拦截和传递有了一个清晰的认识，下面来看一下事件的处理</p>
 <hr>
-<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+<blockquote>
+<p>事件处理</p>
+</blockquote>
+<p>开始的时候我们说过，当你完成了任务之后会像你的项目经理报告，需要上级的确认，所以你的事件处理返回false，如果有一天你不干了，那么你也就不用给上级报告了，返回了true，来看一下log</p>
+<blockquote>
+<p>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent<br>ViewGroupA dispatchTouchEvent<br>ViewGroupA onInterceptTouchEvent<br>ViewGroupB dispatchTouchEvent<br>ViewGroupB onInterceptTouchEvent<br>View dispatchTouchEvent<br>View onTouchEvent</p>
+</blockquote>
+<p>事件传递和以前一样依次的传递下来，但是处理事件到View这里就结束了，没有向上级传递，如果给ViewGroupB的onTouchEvent的返回值true，那么事件处理到ViewGroupB就结束了。</p>
+<p>这样一来，事件的分发和处理就了解了</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/Android/Android-Android性能优化/" data-id="cjfx8rwz20002i4fy3hhpdyb7" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Android/Android-触摸事件的分发和处理/" data-id="cjfx8xufw000bqqfy5cupuqp2" class="article-share-link">Share</a>
       
       
     </footer>
@@ -834,10 +386,10 @@ public boolean onTouchEvent(MotionEvent ev) {
 
 
   
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Android/Android-Activity启动模式详解" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2018/04/13/hello-world/" class="article-date">
-  <time datetime="2018-04-13T00:19:02.000Z" itemprop="datePublished">2018-04-13</time>
+    <a href="/2018/04/13/Android/Android-Activity启动模式详解/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
 </a>
     
   </div>
@@ -848,7 +400,7 @@ public boolean onTouchEvent(MotionEvent ev) {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/13/hello-world/">Hello World</a>
+      <a class="article-title" href="/2018/04/13/Android/Android-Activity启动模式详解/">Android-Activity启动模式详解</a>
     </h1>
   
 
@@ -856,20 +408,427 @@ public boolean onTouchEvent(MotionEvent ev) {
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h4 id="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"><a href="#最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。" class="headerlink" title="最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。"></a>最近在写一个小Demo（然而现在也没写出来）。几天没更新，不知道有没有人还有一点点的小期待（估计没有）。让我边写文章边哭一会。。。</h4><hr>
+<h2 id="Activity的LaunchMode"><a href="#Activity的LaunchMode" class="headerlink" title="Activity的LaunchMode"></a>Activity的LaunchMode</h2><blockquote>
+<p>为啥子需要启动模式？</p>
+</blockquote>
+<p>我们知道启动Activity时会把Activity放入一个任务栈，所以当我们按back键时就会从Activity从任务栈里清除，当任务栈里为空时，系统就会回收这个任务栈。<strong>举个例子</strong>，我们在当前Activity启动当前的Activity，那么任务栈里就全是当前Activity，这样当然很二逼了！所以启动模式就出来了，目前有四种启动模式</p>
+<ul>
+<li>standard</li>
+<li>singleTop</li>
+<li>singleTask</li>
+<li>singleInstance</li>
+</ul>
+<h4 id="standard"><a href="#standard" class="headerlink" title="standard"></a>standard</h4><p>standard是标准模式，也就是默认模式。每次启动一个Activity就会创建一个新的实例，不管这个实例是否已经存在，<strong>这就是典型的多实例实现。一个任务栈可以有多个实例，每个实例也可以属于不同的任务栈，谁启动了这个Activity，这个Activity就运行在启动它的那个任务栈中，</strong>当我们用ApplicationContext去启动一个standard模式的Activity会报错，因为standard的Activity会进入启动他的Activity任务栈中，但是由于非Activity类型的Context并没有任务栈，所以这样就出问题了</p>
+<h4 id="singleTop"><a href="#singleTop" class="headerlink" title="singleTop"></a>singleTop</h4><p>singleTop即栈顶复用模式，在这种模式下，如果新创建的Activity已经位于栈顶，那么就不会去创建新的实例，但是该Activity的onNewIntent会被调用，通过这个方法我们可以取出请求的信息。<strong>需要注意的是，该Activity的onCreate、onStart不会被调用，因为它没有发生改变。</strong>但是如果新的Activity不位于栈顶，那么就会创建一个新的实例。<strong>举个例子</strong>，比如现在一个任务栈有ABCD四个Activity，A位于栈底，D位于栈顶。这个时候如果去启动D，那么栈的情况还是ABCD四个实例，如果D的启动模式为standard，那么栈内就是ABCDD</p>
+<h4 id="singleTask"><a href="#singleTask" class="headerlink" title="singleTask"></a>singleTask</h4><p>栈内复用模式，在这种模式情况下，只要Activity在一个栈中存在，那么启动这个Activity都不会重新创建实例，也会调用onNewIntent。<strong>当一个singleTask模式的Activity『A』被请求启动，首先系统会寻找是否有A所需的任务栈，如果不存在，那就重新创建一个任务栈，然后创建A的实例放入栈中。如果存在A所需的任务栈，这时再看A是否在这个栈中有实例存在，如果存在，那么久回把A调到栈顶并调用onNewIntent方法。如果不存在，那么就创建A的实例并且压入栈中，举个例子</strong></p>
+<ul>
+<li>比如当前任务栈S1中有ABC三个实例，这个时候singleTask模式的D启动，但是其所需要的任务栈为S2，由于S2和D的实例都不存在，这个时候就会先创建S2任务栈，然后创建D的实例压栈到S2</li>
+<li>如果D需要的任务栈为S1，那么由于任务栈S1已经存在，所以直接会创建D的实例放到S1任务栈中</li>
+<li>如果D需要的任务栈为S1，并且S1的情况为ADBC，这时不会重新创建D的实例，会把D调用栈顶，同时<strong>singleTask默认具有clearTop效果，所以会导致D上面的Activity全部出栈</strong>，于是最终S1的情况为AD</li>
+</ul>
+<h4 id="singleInstance"><a href="#singleInstance" class="headerlink" title="singleInstance"></a>singleInstance</h4><p>单例模式，加强的singleTask，这种模式的Activity只能单独运行在一个单独的任务栈中，其他和singleTask一样</p>
+<blockquote>
+<p>所需的任务栈？</p>
+</blockquote>
+<p>在singleTask中提到『所需的任务栈』，什么是Activity所需的任务栈？这里就要提一个参数：TaskAffinity。这个参数标识了一个Activity所需的任务栈的名字，默认情况下所有的Activity所需的任务栈都是当前包名，当然我们也可以为每个Activity单独指定TaskAffinity，<strong>注意这个属性值必须不能和包名相同，</strong>TaskAffinity主要和singleTask配合使用，否则的话没什么意义。当启动一个被TaskAffinity标识了的Activity，那么该Activity就会运行在和TaskAffinity相同的任务栈中</p>
+<p>我们用两种方式设置Activity的启动模式</p>
+<ol>
+<li>在AndroidManifest里为Activity设置<br><code>android:launchMode=&quot;singleTop/singleTask/singleInstance&quot;</code></li>
+<li>通过Intent设置标志位来指定<br><code>intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</code></li>
+</ol>
+<p>这两种方式<strong>第二种的优先级要高于第一种，也就是说两者同时存在时，以第二种为准</strong></p>
+<hr>
+<h2 id="强行举个特殊的例子"><a href="#强行举个特殊的例子" class="headerlink" title="强行举个特殊的例子"></a>强行举个特殊的例子</h2><p>如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2e7d2017412beb22.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>首先我们看一下AndroidManifest里的配置</p>
+<pre><code>&lt;activity android:name=&quot;.MainActivity&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+
+&lt;activity
+    android:name=&quot;.SecondActivity&quot;
+    android:launchMode=&quot;singleTask&quot;
+    android:taskAffinity=&quot;com.task1&quot; /&gt;
+
+&lt;activity
+    android:name=&quot;.ThirdActivity&quot;
+    android:launchMode=&quot;singleTask&quot;
+    android:taskAffinity=&quot;com.task1&quot; /&gt;
+</code></pre><p>可以看到我们给SecondActivity和ThirdActivity设置了singleTask模式和taskAffinity，也就是所需的任务栈。从图里我们可以看出，首先由MainActivity启动SecondActivity，然后由SecondActivity启动ThirdActivity，再由ThirdActivity启动MainActivity，最后再启动SecondActivity。然后我们按两次回退键，发现回到了桌面了，这是为什么？</p>
+<p>首先我们把MainActivity设为A，SecondActivity为B，ThirdActivity为C。</p>
+<p>从Manifest文件中可以看到A为standard模式，任务栈为包名，而B和C是singleTask模式，任务栈为com.task1。</p>
+<p>所以当我们从A启动B的时候，系统会为我们新建一个任务栈，就是com.task1，从而把B进栈。</p>
+<p>从B启动C时，发现C所需要的任务栈com.task1已经存在，但是没有发现C的实例，这时候就创建C的实例并且进栈，这时com.task1里为BC</p>
+<p>然后我们又从C启动A，由于A为standard模式，所以A会进入到C的任务栈，这时有两个任务栈存在，一个是为包名的任务栈，一个是为com.task1的任务栈。包名的任务栈里只有一个A，而com.task1的任务栈里现在是BCA</p>
+<p>接着我们由A启动B，B是singleTask模式，而恰好当前栈里存在着B的实例，所以不会重新创建实例，而是把B调到栈顶，并且把前面的Activity通通出栈，此时com.task1的任务栈里就只剩下一个B了</p>
+<p>最后我们按下一次回退键，当前B被出栈，com.task1任务栈被销毁，调出包名任务栈，也就是A，然后再按一次就退出程序了，这也就间接的证明了切换singleTask模式的Activity会把在它之上的Activity出栈。</p>
+<hr>
+<p>写了这么多字累死我了</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http:/2018/04/13/hello-world/" data-id="cjfx8rwxx0000i4fymqghe4wx" class="article-share-link">Share</a>
+      <a data-url="http:/2018/04/13/Android/Android-Activity启动模式详解/" data-id="cjfx8xufe0002qqfy0ppu3owq" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-ViewDragHelper" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-ViewDragHelper/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/13/Android/Android-ViewDragHelper/">Android-ViewDragHelper</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="ViewDragHelper"><a href="#ViewDragHelper" class="headerlink" title="ViewDragHelper"></a>ViewDragHelper</h2><hr>
+<p>我们都知道在Google发布的support包中包含了DrawerLayout和SlidingPaneLayout这两个可以滑动的控件，其实这两个布局背后就隐藏着ViewDragHelper。通过ViewDragHelper基本上的滑动需求都可以满足，所以这个方法是<strong>各种滑动解决方案的终极绝招</strong></p>
+<p>下面我们来进行一个实例，来使用一下ViewDragHelper，类似于QQ的侧滑菜单。废话不多说，上图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-6892239ec9b94b03.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<h3 id="使用ViewDragHelper"><a href="#使用ViewDragHelper" class="headerlink" title="使用ViewDragHelper"></a>使用ViewDragHelper</h3><ol>
+<li>初始化ViewDragHelper</li>
+<li>重写拦截、触摸事件交给ViewDragHelper处理</li>
+<li>处理computeScroll()</li>
+<li>处理回调接口Callback</li>
+</ol>
+<h3 id="初始化ViewDragHelper"><a href="#初始化ViewDragHelper" class="headerlink" title="初始化ViewDragHelper"></a>初始化ViewDragHelper</h3><p>ViewDragHelper<strong>通常定义在一个ViewGroup的内部，并通过静态工厂方法进行初始化，</strong>代码如下：</p>
+<pre><code>mHelper = ViewDragHelper.create(this, callback);
+</code></pre><p>对，就这一行代码，这里的this就是只一个ViewGroup了，callback就是刚才我们说的回调接口</p>
+<h3 id="重写拦截、触摸事件交给ViewDragHelper处理"><a href="#重写拦截、触摸事件交给ViewDragHelper处理" class="headerlink" title="重写拦截、触摸事件交给ViewDragHelper处理"></a>重写拦截、触摸事件交给ViewDragHelper处理</h3><pre><code>@Override
+public boolean onTouchEvent(MotionEvent event) {
+    mHelper.processTouchEvent(event);
+    return true;
+}
+
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    return mHelper.shouldInterceptTouchEvent(ev);
+}
+</code></pre><p>这里就是一个事件拦截和触摸事件监听，上一文中都讲过，这里不在多说，就是调用了DragViewHelper的两个方法而已</p>
+<h3 id="处理computeScroll"><a href="#处理computeScroll" class="headerlink" title="处理computeScroll()"></a>处理computeScroll()</h3><p>因为ViewDragHelper也是通过Scroller来实现平滑移动的，所以我们要重写computeScroll()方法，一般代码如下：</p>
+<pre><code>@Override
+public void computeScroll() {
+    if (mHelper.continueSettling(true)) {
+        ViewCompat.postInvalidateOnAnimation(this);
+    }
+}
+</code></pre><h3 id="处理回调接口Callback"><a href="#处理回调接口Callback" class="headerlink" title="处理回调接口Callback"></a>处理回调接口Callback</h3><p>处理回调接口就是最关键的代码了，我们一般需要重写这几个方法</p>
+<ul>
+<li>tryCaptureView<ul>
+<li>这个方法是自动创建的，通过这个方法可以指定哪一个子View可以移动</li>
+</ul>
+</li>
+<li>clampViewPositionHorizontal<ul>
+<li>这个方法对应的是水平上的滑动</li>
+</ul>
+</li>
+<li>clampViewPositionVertical<ul>
+<li>这个方法对应的是垂直上的滑动</li>
+<li>如果想要滑动，这两个方法是必须要重写其中一个或者全部重写的，因为方法默认返回0，即不发生滑动</li>
+</ul>
+</li>
+<li>onViewReleased<ul>
+<li>这个方法在手指离开屏幕后调用</li>
+</ul>
+</li>
+</ul>
+<p>不多说，直接把代码撸上来，非常简单，对照注释一看就懂，整体代码如下</p>
+<pre><code>public class ViewDragHelperDemo extends FrameLayout {
+
+    ViewDragHelper mHelper;
+    View mainView, menuView;
+
+    public ViewDragHelperDemo(Context context) {
+        this(context, null);
+    }
+
+    public ViewDragHelperDemo(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public ViewDragHelperDemo(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        /**
+         * 初始化ViewDragHelper
+         */
+        mHelper = ViewDragHelper.create(this, callback);
+    }
+
+
+    ViewDragHelper.Callback callback = new ViewDragHelper.Callback() {
+        @Override
+        public boolean tryCaptureView(View child, int pointerId) {
+            /**
+             * 决定滑动的View
+             */
+            return child == mainView;
+        }
+
+        @Override
+        public int clampViewPositionHorizontal(View child, int left, int dx) {
+            /**
+             * 水平方向上的移动
+             */
+            return left;
+        }
+
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            super.onViewReleased(releasedChild, xvel, yvel);
+            /**
+             * 当手指离开屏幕后,如果当前移动的View和父布局之间的距离小于150,那么则移动回原位
+             * 如果大于150,那么则滑动到300
+             */
+            if (mainView.getLeft() &lt; 150) {
+                mHelper.smoothSlideViewTo(mainView, 0, 0);
+            }else{
+                mHelper.smoothSlideViewTo(mainView, 300, 0);
+            }
+
+            /**
+             * 通知重绘
+             */
+            ViewCompat.postInvalidateOnAnimation(DragViewHelperDemo.this);
+        }
+    };
+
+    /**
+     * 此方法会在布局加载完毕调用,我们把第一个布局设置为menuView,第二个设置为mainView
+     */
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        menuView = getChildAt(0);
+        mainView = getChildAt(1);
+    }
+
+    /**
+     * 这里设置触摸/拦截事件给DragViewHelper
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        mHelper.processTouchEvent(event);
+        return true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mHelper.shouldInterceptTouchEvent(ev);
+    }
+
+    /**
+     * 设置computeScroll
+     */
+    @Override
+    public void computeScroll() {
+        if (mHelper.continueSettling(true)) {
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+    }
+}
+</code></pre><p>运行程序，就会看到和上面一样的效果啦。ViewDragHelper是最麻烦的一种，但是多写一写就好啦~</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-ViewDragHelper/" data-id="cjfx8xuff0003qqfyt83kb5w7" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-Android/Android-View的滑动" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-View的滑动/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/13/Android/Android-View的滑动/">Android-View的滑动</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>滑动效果是如何产生的？</p>
+</blockquote>
+<p>滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。</p>
+<h2 id="Android中的坐标体系"><a href="#Android中的坐标体系" class="headerlink" title="Android中的坐标体系"></a>Android中的坐标体系</h2><p>Android中的坐标体系分为两种：</p>
+<ol>
+<li>Android坐标系</li>
+<li>视图坐标系</li>
+</ol>
+<blockquote>
+<p>Android坐标系</p>
+</blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0ea610d2436d0fe0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Android坐标系"></p>
+<p>从图中我们可以看的出来<strong>在Android坐标系中以屏幕的左上方作为坐标系的原点，从原点向右为X轴的正方向，向下为Y轴的正方向</strong>。在触控事件中使用<strong>getRawX()、getRawY()</strong>来获得Android坐标系的坐标</p>
+<blockquote>
+<p>视图坐标系</p>
+</blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-a6921068bc9cf072?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="视图坐标系"></p>
+<p>视图坐标系主要描述的是该View和该View在父视图中的位置关系，和Android坐标系一样，也是以原点右方为X正方向，以原点下方为Y轴正方向，不过这里不是以屏幕的左上角为原点，而是<strong>以父视图的左上角为原点</strong>。在触控事件中使用<strong>getX()、getY()</strong>来获得视图坐标系的坐标</p>
+<h2 id="触控事件"><a href="#触控事件" class="headerlink" title="触控事件"></a>触控事件</h2><p>在上一篇文章中我们使用到了MotionEvent，这个就是触控事件的封装，首先看一下MotionEvent中封装的事件常量</p>
+<ul>
+<li>public static final int ACTION_DOWN = 0;    //单点触摸按下动作</li>
+<li>public static final int ACTION_UP = 1;    //单点触摸离开动作</li>
+<li>public static final int ACTION_MOVE = 2;    //单点触摸移动动作</li>
+<li>public static final int ACTION_CANCEL = 3;    //触摸动作取消</li>
+<li>public staiic final int ACTION_OUTSIDE = 4;    //触摸动作超出边界</li>
+<li>public static final int ACTION_POINTER_DOWN = 5; //多点触摸按下动作</li>
+<li>public static final int ACTION_POINTER_UP = 6; 多点离开动作</li>
+</ul>
+<p>通常情况下我们会在onTouchEvent(MotionEvent event)方法中通过event.getAction()来获取触控事件的类型。知道Android中的坐标系和触控事件之后我们就可以来实现View的滑动了</p>
+<hr>
+<h1 id="滑动实现"><a href="#滑动实现" class="headerlink" title="滑动实现"></a>滑动实现</h1><blockquote>
+<p>实现滑动有好多种方法，但是其思想都是一样的。当触摸到View时，记录当前触摸点的坐标，然后当手指移动时，获取到相对于前一个点的偏移量，这样我们就可以通过这个偏移量来进行修改View的坐标，这样不断的重复，就能实现View的滑动</p>
+</blockquote>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>我们自定义一个View，让他来跟随我们手指的移动来移动，如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-82d4117c39eaf270.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<ul>
+<li><strong>layout方法</strong></li>
+</ul>
+<p>我们知道在View进行绘制的时候会通过onLayout()方法来设置View的显示位置，这里我们通过修改View的left, top, right, bottom四个值来控制View的坐标</p>
+<pre><code>public boolean onTouchEvent(MotionEvent event) {
+    int x = (int) event.getX();
+    int y = (int) event.getY();
+
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            //记录触摸点的坐标
+            lastX = x;
+            lastY = y;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            //计算偏移量
+            int offsetX = x - lastX;
+            int offsetY = y - lastY;
+
+            //在当前位置基础加上偏移量
+            layout(
+                    getLeft() + offsetX,
+                    getTop() + offsetY,
+                    getRight() + offsetX,
+                    getBottom() + offsetY
+            );
+            break;
+    }
+    return true;
+}
+</code></pre><hr>
+<ul>
+<li><strong>offsetLeftAndRight()和offsetTopAndBottom</strong></li>
+</ul>
+<p>这个方法就是相当于系统提供的一个对左右、上下移动的API的封装，计算好偏移量后，调用方法即可：</p>
+<pre><code>offsetLeftAndRight(offsetX);
+offsetTopAndBottom(offsetY);
+</code></pre><hr>
+<ul>
+<li><strong>LayoutParams</strong></li>
+</ul>
+<p>LayoutParams保存了View的布局参数，所以我们可以改变LayoutParams来动态的改变布局的位置来达到滑动的效果。在程序中使用getLayoutParams()来获取当前View的LayoutParams，这里就和上面一样，获取到偏移量后通过setLayoutParams来设置该View的LayoutParams：</p>
+<pre><code>RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) getLayoutParams();
+params.leftMargin = getLeft() + offsetX;
+params.topMargin = getTop() + offsetY;
+setLayoutParams(params);
+</code></pre><p><strong>需要注意一点，通过getLayoutParams()获取LayoutParams的时候，要根据View的父布局的类型来设置，当然前提还要有一个父布局。还有就是我们可以使用ViewGroup.MarginLayoutParams，这样就不用考虑父布局是什么了</strong></p>
+<hr>
+<ul>
+<li><strong>scrollTo、scrollBy</strong></li>
+</ul>
+<p>在View中，系统还提供了scrollTo、scrollBy两种方式来改变一个View的位置。</p>
+<p>其中scrollTo表示移动到一个具体的坐标点，scrollBy表示移动的偏移量，其实在scrollBy内部也是调用的scrollTo。</p>
+<p>和前面的方式一样，获取到偏移量后调用scrollBy来移动view，可是当我们运行程序，拖动View，发现View并没有移动！这是因为scrollTo、scrollBy方法移动的是View的内容，如果在ViewGroup中使用scrollTo、scrollBy的滑，那么移动的就是View了，但是如果在View中使用，那么移动的将是View里面的内容，比如TextView，那么移动的就是文本了。</p>
+<p>所以通过上面的分析，我们把代码改为如下:</p>
+<pre><code>((View)getParent()).scrollBy(offsetX, offsetY);
+</code></pre><p>再次运行程序，我们会发现动是动了，但是在乱动。因为这里我们其实是在相反的方向移动（这里由于篇幅限制，感兴趣的同学自行查找一下资料），我们把偏移量改为负的之后就会发现滑动正常了。</p>
+<hr>
+<ul>
+<li><strong>Scroller</strong></li>
+</ul>
+<p>首先来想一个场景：我们需要让一个Button向右面移动100个像素，如果我们用scrollTo/scrollBy的话，那么该View就会很突兀的移动到该点，没有过程，而Scroller则是可以实现平滑的过渡效果的</p>
+<p>下面我们把上面跟随手指滑动的例子改一下，我们在松开手指后，View自动回到原点（屏幕左上角）。使用Scroller需要三个步骤</p>
+<ol>
+<li>初始化<ul>
+<li>通过构造方法即可   Scroller mScroller = new Scroller(context);</li>
+</ul>
+</li>
+<li>重写computeScroll()方法，实现滑动</li>
+<li>startScroll()开启滑动</li>
+</ol>
+<p>代码如下：</p>
+<pre><code>        case MotionEvent.ACTION_UP:
+            View viewGroup = (View) getParent();
+            mScroller.startScroll(
+                    viewGroup.getScrollX(),
+                    viewGroup.getScrollY(),
+                    -viewGroup.getScrollX(),
+                    -viewGroup.getScrollY()
+            );
+            invalidate();
+            break;
+
+  ----------------------------------------------------------------     
+
+        @Overrid  
+        public void computeScroll() {
+            super.computeScroll();
+            if (mScroller.computeScrollOffset()) {
+            ((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            invalidate();
+    }
+}
+</code></pre><p>当我们手指抬起来的时候开启Scroller滑动，获取到当前view的移动距离，然后我们把需要移动的偏移量设置为相反数就ok，最后调用invalidate来通知重绘，从而调用computeScroll()方法。运行程序如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2251dce7b4d1c1c7.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>现在就把这几种View的滑动都说完了，自己动手写一下，感触良多。</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-View的滑动/" data-id="cjfx8xufp0007qqfyeqnh0i72" class="article-share-link">Share</a>
       
       
     </footer>
@@ -931,7 +890,7 @@ public boolean onTouchEvent(MotionEvent ev) {
           </li>
         
           <li>
-            <a href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+            <a href="/2018/04/13/Android/Android-各种情况下的『自动加载更多』/">Android-各种情况下的『自动加载更多』</a>
           </li>
         
       </ul>
