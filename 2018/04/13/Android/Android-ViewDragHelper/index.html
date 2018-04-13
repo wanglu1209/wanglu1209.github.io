@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-ViewDragHelper | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ViewDragHelper 我们都知道在Google发布的support包中包含了DrawerLayout和SlidingPaneLayout这两个可以滑动的控件，其实这两个布局背后就隐藏着ViewDragHelper。通过ViewDragHelper基本上的滑动需求都可以满足，所以这个方法是各种滑动解决方案的终极绝招 下面我们来进行一个实例，来使用一下ViewDragHelper，类似于QQ的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-ViewDragHelper">
+<meta property="og:url" content="http:/2018/04/13/Android/Android-ViewDragHelper/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="ViewDragHelper 我们都知道在Google发布的support包中包含了DrawerLayout和SlidingPaneLayout这两个可以滑动的控件，其实这两个布局背后就隐藏着ViewDragHelper。通过ViewDragHelper基本上的滑动需求都可以满足，所以这个方法是各种滑动解决方案的终极绝招 下面我们来进行一个实例，来使用一下ViewDragHelper，类似于QQ的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-6892239ec9b94b03.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2018-04-13T00:54:01.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-ViewDragHelper">
+<meta name="twitter:description" content="ViewDragHelper 我们都知道在Google发布的support包中包含了DrawerLayout和SlidingPaneLayout这两个可以滑动的控件，其实这两个布局背后就隐藏着ViewDragHelper。通过ViewDragHelper基本上的滑动需求都可以满足，所以这个方法是各种滑动解决方案的终极绝招 下面我们来进行一个实例，来使用一下ViewDragHelper，类似于QQ的">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-6892239ec9b94b03.gif?imageMogr2/auto-orient/strip">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-ViewDragHelper" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-ViewDragHelper/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-ViewDragHelper
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="ViewDragHelper"><a href="#ViewDragHelper" class="headerlink" title="ViewDragHelper"></a>ViewDragHelper</h2><hr>
+<p>我们都知道在Google发布的support包中包含了DrawerLayout和SlidingPaneLayout这两个可以滑动的控件，其实这两个布局背后就隐藏着ViewDragHelper。通过ViewDragHelper基本上的滑动需求都可以满足，所以这个方法是<strong>各种滑动解决方案的终极绝招</strong></p>
+<p>下面我们来进行一个实例，来使用一下ViewDragHelper，类似于QQ的侧滑菜单。废话不多说，上图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-6892239ec9b94b03.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<h3 id="使用ViewDragHelper"><a href="#使用ViewDragHelper" class="headerlink" title="使用ViewDragHelper"></a>使用ViewDragHelper</h3><ol>
+<li>初始化ViewDragHelper</li>
+<li>重写拦截、触摸事件交给ViewDragHelper处理</li>
+<li>处理computeScroll()</li>
+<li>处理回调接口Callback</li>
+</ol>
+<h3 id="初始化ViewDragHelper"><a href="#初始化ViewDragHelper" class="headerlink" title="初始化ViewDragHelper"></a>初始化ViewDragHelper</h3><p>ViewDragHelper<strong>通常定义在一个ViewGroup的内部，并通过静态工厂方法进行初始化，</strong>代码如下：</p>
+<pre><code>mHelper = ViewDragHelper.create(this, callback);
+</code></pre><p>对，就这一行代码，这里的this就是只一个ViewGroup了，callback就是刚才我们说的回调接口</p>
+<h3 id="重写拦截、触摸事件交给ViewDragHelper处理"><a href="#重写拦截、触摸事件交给ViewDragHelper处理" class="headerlink" title="重写拦截、触摸事件交给ViewDragHelper处理"></a>重写拦截、触摸事件交给ViewDragHelper处理</h3><pre><code>@Override
+public boolean onTouchEvent(MotionEvent event) {
+    mHelper.processTouchEvent(event);
+    return true;
+}
+
+@Override
+public boolean onInterceptTouchEvent(MotionEvent ev) {
+    return mHelper.shouldInterceptTouchEvent(ev);
+}
+</code></pre><p>这里就是一个事件拦截和触摸事件监听，上一文中都讲过，这里不在多说，就是调用了DragViewHelper的两个方法而已</p>
+<h3 id="处理computeScroll"><a href="#处理computeScroll" class="headerlink" title="处理computeScroll()"></a>处理computeScroll()</h3><p>因为ViewDragHelper也是通过Scroller来实现平滑移动的，所以我们要重写computeScroll()方法，一般代码如下：</p>
+<pre><code>@Override
+public void computeScroll() {
+    if (mHelper.continueSettling(true)) {
+        ViewCompat.postInvalidateOnAnimation(this);
+    }
+}
+</code></pre><h3 id="处理回调接口Callback"><a href="#处理回调接口Callback" class="headerlink" title="处理回调接口Callback"></a>处理回调接口Callback</h3><p>处理回调接口就是最关键的代码了，我们一般需要重写这几个方法</p>
+<ul>
+<li>tryCaptureView<ul>
+<li>这个方法是自动创建的，通过这个方法可以指定哪一个子View可以移动</li>
+</ul>
+</li>
+<li>clampViewPositionHorizontal<ul>
+<li>这个方法对应的是水平上的滑动</li>
+</ul>
+</li>
+<li>clampViewPositionVertical<ul>
+<li>这个方法对应的是垂直上的滑动</li>
+<li>如果想要滑动，这两个方法是必须要重写其中一个或者全部重写的，因为方法默认返回0，即不发生滑动</li>
+</ul>
+</li>
+<li>onViewReleased<ul>
+<li>这个方法在手指离开屏幕后调用</li>
+</ul>
+</li>
+</ul>
+<p>不多说，直接把代码撸上来，非常简单，对照注释一看就懂，整体代码如下</p>
+<pre><code>public class ViewDragHelperDemo extends FrameLayout {
+
+    ViewDragHelper mHelper;
+    View mainView, menuView;
+
+    public ViewDragHelperDemo(Context context) {
+        this(context, null);
+    }
+
+    public ViewDragHelperDemo(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public ViewDragHelperDemo(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        /**
+         * 初始化ViewDragHelper
+         */
+        mHelper = ViewDragHelper.create(this, callback);
+    }
+
+
+    ViewDragHelper.Callback callback = new ViewDragHelper.Callback() {
+        @Override
+        public boolean tryCaptureView(View child, int pointerId) {
+            /**
+             * 决定滑动的View
+             */
+            return child == mainView;
+        }
+
+        @Override
+        public int clampViewPositionHorizontal(View child, int left, int dx) {
+            /**
+             * 水平方向上的移动
+             */
+            return left;
+        }
+
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            super.onViewReleased(releasedChild, xvel, yvel);
+            /**
+             * 当手指离开屏幕后,如果当前移动的View和父布局之间的距离小于150,那么则移动回原位
+             * 如果大于150,那么则滑动到300
+             */
+            if (mainView.getLeft() &lt; 150) {
+                mHelper.smoothSlideViewTo(mainView, 0, 0);
+            }else{
+                mHelper.smoothSlideViewTo(mainView, 300, 0);
+            }
+
+            /**
+             * 通知重绘
+             */
+            ViewCompat.postInvalidateOnAnimation(DragViewHelperDemo.this);
+        }
+    };
+
+    /**
+     * 此方法会在布局加载完毕调用,我们把第一个布局设置为menuView,第二个设置为mainView
+     */
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        menuView = getChildAt(0);
+        mainView = getChildAt(1);
+    }
+
+    /**
+     * 这里设置触摸/拦截事件给DragViewHelper
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        mHelper.processTouchEvent(event);
+        return true;
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mHelper.shouldInterceptTouchEvent(ev);
+    }
+
+    /**
+     * 设置computeScroll
+     */
+    @Override
+    public void computeScroll() {
+        if (mHelper.continueSettling(true)) {
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+    }
+}
+</code></pre><p>运行程序，就会看到和上面一样的效果啦。ViewDragHelper是最麻烦的一种，但是多写一写就好啦~</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-ViewDragHelper/" data-id="cjfx8rwz50004i4fy65b3swmq" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/13/Android/Android-自定义ViewGroup/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          自定义ViewGroup
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/13/Android/Android-View的滑动/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-View的滑动</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-各种情况下的『自动加载更多』 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="在写项目的时候总是会碰到上拉自动加载更多这个需求，但是又不想用PullToRefresh，其实我们可以直接判断出来是否已经滑动到底端，如果滑动到底端则加载。一般的需求有在ScrollView、RecyclerView、ListView中自动加载 RecyclerView在RecyclerView中判断是否滑动到底部，其实就是判断是否已经达到了最后一个可见的item &amp;amp;&amp;amp; 滑动结束，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-各种情况下的『自动加载更多』">
+<meta property="og:url" content="http:/2018/04/13/Android/Android-各种情况下的『自动加载更多』/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="在写项目的时候总是会碰到上拉自动加载更多这个需求，但是又不想用PullToRefresh，其实我们可以直接判断出来是否已经滑动到底端，如果滑动到底端则加载。一般的需求有在ScrollView、RecyclerView、ListView中自动加载 RecyclerView在RecyclerView中判断是否滑动到底部，其实就是判断是否已经达到了最后一个可见的item &amp;amp;&amp;amp; 滑动结束，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-04-13T00:54:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-各种情况下的『自动加载更多』">
+<meta name="twitter:description" content="在写项目的时候总是会碰到上拉自动加载更多这个需求，但是又不想用PullToRefresh，其实我们可以直接判断出来是否已经滑动到底端，如果滑动到底端则加载。一般的需求有在ScrollView、RecyclerView、ListView中自动加载 RecyclerView在RecyclerView中判断是否滑动到底部，其实就是判断是否已经达到了最后一个可见的item &amp;amp;&amp;amp; 滑动结束，">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-各种情况下的『自动加载更多』" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-各种情况下的『自动加载更多』/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-各种情况下的『自动加载更多』
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在写项目的时候总是会碰到上拉自动加载更多这个需求，但是又不想用PullToRefresh，其实我们可以直接判断出来是否已经滑动到底端，如果滑动到底端则加载。一般的需求有在ScrollView、RecyclerView、ListView中自动加载</p>
+<h2 id="RecyclerView"><a href="#RecyclerView" class="headerlink" title="RecyclerView"></a>RecyclerView</h2><p>在RecyclerView中判断是否滑动到底部，其实就是判断是否已经达到了<strong>最后一个可见的item &amp;&amp; 滑动结束</strong>，伪代码如下</p>
+<pre><code>RecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+    @Override
+    public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+        if (newState == RecyclerView.SCROLL_STATE_IDLE &amp;&amp; 
+            (layoutManager.findLastVisibleItemPosition() == 
+            layoutManager.getItemCount() - 1)
+            &amp;&amp; !isRefreshing) {
+            isRefreshing = true;         
+            //处理逻辑
+        }
+    }
+});
+</code></pre><p>解释一下上面的判断，当状态为SCROLL_STATE_IDLE(停止滑动)时，并且目前可见的最后一个item的位置为总数-1，并且当前不在刷新状态中（<strong>因为有的时候需要网络请求，所以可能滑动到底部后一直请求接口，定义一个变量来判断一下</strong>），然后就可以处理逻辑了</p>
+<h2 id="ListView"><a href="#ListView" class="headerlink" title="ListView"></a>ListView</h2><p>关于ListView的滑动底部监听其实和RecyclerView的判断差不多，代码如下：</p>
+<pre><code>ListView.setOnScrollListener(new OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                    if((scrollState == OnScrollListener.SCROLL_STATE_IDLE) &amp;&amp;
+                            view.getLastVisiblePosition() == (view.getCount() - 1)
+                            &amp;&amp; !isRefreshing) {
+                        //处理逻辑
+                    }
+                }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem,
+                                 int visibleItemCount, int totalItemCount) {
+            }
+        });   
+</code></pre><p>ListView和RecyclerView差不多，就不多做解释了    </p>
+<h2 id="ScrollView"><a href="#ScrollView" class="headerlink" title="ScrollView"></a>ScrollView</h2><p>最后关于ScrollView滑动到底部，因为<strong>ScrollView没有停止滑动的监听，所以使用要慎重！</strong></p>
+<p>如果想要使用ScrollView来监听，那就要重写ScrollView，代码如下：</p>
+<pre><code>onScrollBottomListener bottomListener;
+
+public void setOnScrollBottomListener(onScrollBottomListener bottomListener){
+    this.bottomListener = bottomListener;
+}
+
+public interface onScrollBottomListener{
+    void onBottom();
+}
+
+@Override
+protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+    super.onScrollChanged(l, t, oldl, oldt);
+    if(getHeight() + getScrollY() &gt;= getChildAt(0).getMeasureHeight()){
+        if(bottomListener != null){
+            bottomListener.onBottom();
+        }
+    }
+}    
+</code></pre><p>看的出来，我们定义了一个接口来回调，因为ScrollView里只能包含一个布局，所以可以根据这个特性来判断，所以在滑动事件监听里获取到当前ScrollView的高度和Y轴的滑动值的相加来和ScrollView包含的布局的高度来进行对比，如果大于的话那么就等于滑动到底部（<strong>但是这个方法会调用好多次</strong>）    </p>
+<hr>
+<p>以前工作的时候碰到过这些需求，当时在网上找也没有找到合适的（<strong>确实当时技术很菜</strong>），过了好久了，分享出来，希望后来又有需求的少碰坑- -</p>
+<p>当然可以在布局的后面加一个FooterView，加载数据的时候显示『正在加载…』，加载到没有数据的时候显示一个『- end -』之类的</p>
+<p>没写Demo，有兴趣的可以自己试试啦~</p>
+<p>洗洗睡了，凌晨1:05</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android    </p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-各种情况下的『自动加载更多』/" data-id="cjfx8rwzj0007i4fyw0h89aj5" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/13/Android/Android-View的滑动/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-View的滑动
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/13/Android/Android-Activity启动模式详解/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-Activity启动模式详解</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

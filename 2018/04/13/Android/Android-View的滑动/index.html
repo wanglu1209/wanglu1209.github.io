@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android-View的滑动 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="滑动效果是如何产生的？  滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。 Android中的坐标体系Android中的坐标体系分为两种：  Android坐标系 视图坐标系   Android坐标系   从图中我们可以看的出来在Android坐标系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-View的滑动">
+<meta property="og:url" content="http:/2018/04/13/Android/Android-View的滑动/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="滑动效果是如何产生的？  滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。 Android中的坐标体系Android中的坐标体系分为两种：  Android坐标系 视图坐标系   Android坐标系   从图中我们可以看的出来在Android坐标系">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-0ea610d2436d0fe0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-a6921068bc9cf072?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-82d4117c39eaf270.gif?imageMogr2/auto-orient/strip">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-2251dce7b4d1c1c7.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2018-04-13T00:54:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-View的滑动">
+<meta name="twitter:description" content="滑动效果是如何产生的？  滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。 Android中的坐标体系Android中的坐标体系分为两种：  Android坐标系 视图坐标系   Android坐标系   从图中我们可以看的出来在Android坐标系">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-0ea610d2436d0fe0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-View的滑动" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-View的滑动/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android-View的滑动
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>滑动效果是如何产生的？</p>
+</blockquote>
+<p>滑动一个View从本质上来说就是移动一个View，改变其当前的坐标。所以，想要滑动一个View，就必须监听该View的触摸事件，并且根据事件的坐标，不断的改变View的坐标从而实现View的滑动。</p>
+<h2 id="Android中的坐标体系"><a href="#Android中的坐标体系" class="headerlink" title="Android中的坐标体系"></a>Android中的坐标体系</h2><p>Android中的坐标体系分为两种：</p>
+<ol>
+<li>Android坐标系</li>
+<li>视图坐标系</li>
+</ol>
+<blockquote>
+<p>Android坐标系</p>
+</blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0ea610d2436d0fe0.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Android坐标系"></p>
+<p>从图中我们可以看的出来<strong>在Android坐标系中以屏幕的左上方作为坐标系的原点，从原点向右为X轴的正方向，向下为Y轴的正方向</strong>。在触控事件中使用<strong>getRawX()、getRawY()</strong>来获得Android坐标系的坐标</p>
+<blockquote>
+<p>视图坐标系</p>
+</blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-a6921068bc9cf072?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="视图坐标系"></p>
+<p>视图坐标系主要描述的是该View和该View在父视图中的位置关系，和Android坐标系一样，也是以原点右方为X正方向，以原点下方为Y轴正方向，不过这里不是以屏幕的左上角为原点，而是<strong>以父视图的左上角为原点</strong>。在触控事件中使用<strong>getX()、getY()</strong>来获得视图坐标系的坐标</p>
+<h2 id="触控事件"><a href="#触控事件" class="headerlink" title="触控事件"></a>触控事件</h2><p>在上一篇文章中我们使用到了MotionEvent，这个就是触控事件的封装，首先看一下MotionEvent中封装的事件常量</p>
+<ul>
+<li>public static final int ACTION_DOWN = 0;    //单点触摸按下动作</li>
+<li>public static final int ACTION_UP = 1;    //单点触摸离开动作</li>
+<li>public static final int ACTION_MOVE = 2;    //单点触摸移动动作</li>
+<li>public static final int ACTION_CANCEL = 3;    //触摸动作取消</li>
+<li>public staiic final int ACTION_OUTSIDE = 4;    //触摸动作超出边界</li>
+<li>public static final int ACTION_POINTER_DOWN = 5; //多点触摸按下动作</li>
+<li>public static final int ACTION_POINTER_UP = 6; 多点离开动作</li>
+</ul>
+<p>通常情况下我们会在onTouchEvent(MotionEvent event)方法中通过event.getAction()来获取触控事件的类型。知道Android中的坐标系和触控事件之后我们就可以来实现View的滑动了</p>
+<hr>
+<h1 id="滑动实现"><a href="#滑动实现" class="headerlink" title="滑动实现"></a>滑动实现</h1><blockquote>
+<p>实现滑动有好多种方法，但是其思想都是一样的。当触摸到View时，记录当前触摸点的坐标，然后当手指移动时，获取到相对于前一个点的偏移量，这样我们就可以通过这个偏移量来进行修改View的坐标，这样不断的重复，就能实现View的滑动</p>
+</blockquote>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>我们自定义一个View，让他来跟随我们手指的移动来移动，如图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-82d4117c39eaf270.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<ul>
+<li><strong>layout方法</strong></li>
+</ul>
+<p>我们知道在View进行绘制的时候会通过onLayout()方法来设置View的显示位置，这里我们通过修改View的left, top, right, bottom四个值来控制View的坐标</p>
+<pre><code>public boolean onTouchEvent(MotionEvent event) {
+    int x = (int) event.getX();
+    int y = (int) event.getY();
+
+    switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            //记录触摸点的坐标
+            lastX = x;
+            lastY = y;
+            break;
+        case MotionEvent.ACTION_MOVE:
+            //计算偏移量
+            int offsetX = x - lastX;
+            int offsetY = y - lastY;
+
+            //在当前位置基础加上偏移量
+            layout(
+                    getLeft() + offsetX,
+                    getTop() + offsetY,
+                    getRight() + offsetX,
+                    getBottom() + offsetY
+            );
+            break;
+    }
+    return true;
+}
+</code></pre><hr>
+<ul>
+<li><strong>offsetLeftAndRight()和offsetTopAndBottom</strong></li>
+</ul>
+<p>这个方法就是相当于系统提供的一个对左右、上下移动的API的封装，计算好偏移量后，调用方法即可：</p>
+<pre><code>offsetLeftAndRight(offsetX);
+offsetTopAndBottom(offsetY);
+</code></pre><hr>
+<ul>
+<li><strong>LayoutParams</strong></li>
+</ul>
+<p>LayoutParams保存了View的布局参数，所以我们可以改变LayoutParams来动态的改变布局的位置来达到滑动的效果。在程序中使用getLayoutParams()来获取当前View的LayoutParams，这里就和上面一样，获取到偏移量后通过setLayoutParams来设置该View的LayoutParams：</p>
+<pre><code>RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) getLayoutParams();
+params.leftMargin = getLeft() + offsetX;
+params.topMargin = getTop() + offsetY;
+setLayoutParams(params);
+</code></pre><p><strong>需要注意一点，通过getLayoutParams()获取LayoutParams的时候，要根据View的父布局的类型来设置，当然前提还要有一个父布局。还有就是我们可以使用ViewGroup.MarginLayoutParams，这样就不用考虑父布局是什么了</strong></p>
+<hr>
+<ul>
+<li><strong>scrollTo、scrollBy</strong></li>
+</ul>
+<p>在View中，系统还提供了scrollTo、scrollBy两种方式来改变一个View的位置。</p>
+<p>其中scrollTo表示移动到一个具体的坐标点，scrollBy表示移动的偏移量，其实在scrollBy内部也是调用的scrollTo。</p>
+<p>和前面的方式一样，获取到偏移量后调用scrollBy来移动view，可是当我们运行程序，拖动View，发现View并没有移动！这是因为scrollTo、scrollBy方法移动的是View的内容，如果在ViewGroup中使用scrollTo、scrollBy的滑，那么移动的就是View了，但是如果在View中使用，那么移动的将是View里面的内容，比如TextView，那么移动的就是文本了。</p>
+<p>所以通过上面的分析，我们把代码改为如下:</p>
+<pre><code>((View)getParent()).scrollBy(offsetX, offsetY);
+</code></pre><p>再次运行程序，我们会发现动是动了，但是在乱动。因为这里我们其实是在相反的方向移动（这里由于篇幅限制，感兴趣的同学自行查找一下资料），我们把偏移量改为负的之后就会发现滑动正常了。</p>
+<hr>
+<ul>
+<li><strong>Scroller</strong></li>
+</ul>
+<p>首先来想一个场景：我们需要让一个Button向右面移动100个像素，如果我们用scrollTo/scrollBy的话，那么该View就会很突兀的移动到该点，没有过程，而Scroller则是可以实现平滑的过渡效果的</p>
+<p>下面我们把上面跟随手指滑动的例子改一下，我们在松开手指后，View自动回到原点（屏幕左上角）。使用Scroller需要三个步骤</p>
+<ol>
+<li>初始化<ul>
+<li>通过构造方法即可   Scroller mScroller = new Scroller(context);</li>
+</ul>
+</li>
+<li>重写computeScroll()方法，实现滑动</li>
+<li>startScroll()开启滑动</li>
+</ol>
+<p>代码如下：</p>
+<pre><code>        case MotionEvent.ACTION_UP:
+            View viewGroup = (View) getParent();
+            mScroller.startScroll(
+                    viewGroup.getScrollX(),
+                    viewGroup.getScrollY(),
+                    -viewGroup.getScrollX(),
+                    -viewGroup.getScrollY()
+            );
+            invalidate();
+            break;
+
+  ----------------------------------------------------------------     
+
+        @Overrid  
+        public void computeScroll() {
+            super.computeScroll();
+            if (mScroller.computeScrollOffset()) {
+            ((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+            invalidate();
+    }
+}
+</code></pre><p>当我们手指抬起来的时候开启Scroller滑动，获取到当前view的移动距离，然后我们把需要移动的偏移量设置为相反数就ok，最后调用invalidate来通知重绘，从而调用computeScroll()方法。运行程序如下：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-2251dce7b4d1c1c7.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>现在就把这几种View的滑动都说完了，自己动手写一下，感触良多。</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-View的滑动/" data-id="cjfx8rwzd0006i4fy4wmihq9d" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/13/Android/Android-ViewDragHelper/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-ViewDragHelper
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/13/Android/Android-各种情况下的『自动加载更多』/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-各种情况下的『自动加载更多』</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

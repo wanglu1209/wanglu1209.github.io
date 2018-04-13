@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Android View的测量 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Android View的测量  在绘制View之前，要对整个View进行测量，这个过程就在onMeasure()方法中进行的。 测量的模式 EXACTLY 精确值模式，当控件的width和height设置为具体值或者match_parent时就是这个模式   UNSPECIFIED 这个属性不指定测量的模式，View想多大就多大   AT_MOST 最大值模式，当控件的width和height">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android View的测量">
+<meta property="og:url" content="http:/2018/04/13/Android/Android-View的测量/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="Android View的测量  在绘制View之前，要对整个View进行测量，这个过程就在onMeasure()方法中进行的。 测量的模式 EXACTLY 精确值模式，当控件的width和height设置为具体值或者match_parent时就是这个模式   UNSPECIFIED 这个属性不指定测量的模式，View想多大就多大   AT_MOST 最大值模式，当控件的width和height">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-0e9fc7b558921b74.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2018-04-13T00:54:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android View的测量">
+<meta name="twitter:description" content="Android View的测量  在绘制View之前，要对整个View进行测量，这个过程就在onMeasure()方法中进行的。 测量的模式 EXACTLY 精确值模式，当控件的width和height设置为具体值或者match_parent时就是这个模式   UNSPECIFIED 这个属性不指定测量的模式，View想多大就多大   AT_MOST 最大值模式，当控件的width和height">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Android/Android-View的测量" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Android/Android-View的测量/" class="article-date">
+  <time datetime="2018-04-13T00:39:31.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android View的测量
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>Android View的测量</p>
+</blockquote>
+<p>在绘制View之前，要对整个View进行测量，这个过程就在onMeasure()方法中进行的。</p>
+<h4 id="测量的模式"><a href="#测量的模式" class="headerlink" title="测量的模式"></a>测量的模式</h4><ol>
+<li>EXACTLY<ul>
+<li>精确值模式，当控件的width和height设置为具体值或者match_parent时就是这个模式</li>
+</ul>
+</li>
+<li>UNSPECIFIED<ul>
+<li>这个属性不指定测量的模式，View想多大就多大</li>
+</ul>
+</li>
+<li>AT_MOST<ul>
+<li>最大值模式，当控件的width和height设置为wrap_context时就是这个模式，控件的大小随着子控件的大小而变化</li>
+</ul>
+</li>
+</ol>
+<p>其中View类<strong>默认的</strong>onMeasure()方法<strong>只支持EXACTLY模式</strong>，所以说如果不重写onMeasure()方法的话就只能使用EXACTLY模式。</p>
+<p>一言不合上代码</p>
+<pre><code>public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+    setBackgroundColor(Color.BLUE);
+} 
+</code></pre><p>这里我只给当前自定义View设置了一个背景颜色，然后在XML中设置成wrap_content</p>
+<pre><code>&lt;com.github.wanglu1209.CustomView
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot; /&gt; 
+</code></pre><p><img src="http://upload-images.jianshu.io/upload_images/1822424-15549d4c06f7dfbe.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>运行起来就是这样全屏的，下面我们还是这个例子，重写onMeasure()方法</p>
+<pre><code>protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+    int specMode, specSize = 0;
+    int mWidth, mHeight;
+
+    /**
+     * Measure Width
+     */
+    specMode = MeasureSpec.getMode(widthMeasureSpec);
+    switch (specMode){
+        case MeasureSpec.AT_MOST:   //wrap_content
+            specSize = 200;
+            break;
+        case MeasureSpec.EXACTLY:   //math_content 和 精确值
+            specSize = MeasureSpec.getSize(widthMeasureSpec);
+            break;
+        case MeasureSpec.UNSPECIFIED:
+            specSize = 400;
+            break;
+    }
+    mWidth = specSize;
+
+    /**
+     * Measure Height
+     */
+    specMode = MeasureSpec.getMode(heightMeasureSpec);
+    switch (specMode){
+        case MeasureSpec.AT_MOST:   //wrap_content
+            specSize = 200;
+            break;
+        case MeasureSpec.EXACTLY:   //math_content 和 精确值
+            specSize = MeasureSpec.getSize(heightMeasureSpec);
+            break;
+        case MeasureSpec.UNSPECIFIED:
+            specSize = 400;
+            break;
+    }
+    mHeight = specSize;
+
+    /**
+     * 最后调用setMeasuredDimension进行赋值
+     */
+    setMeasuredDimension(mWidth, mHeight);
+}
+</code></pre><p>可以看到这里我们给wrap_content赋值200，我们XML代码不变还是wrap_content，运行一下程序</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-0e9fc7b558921b74.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<p>可以看的出来大小确实变成了200，通过这个小例子就可以对View的测量有一个不错的认识了，并没有什么高深莫测的东西，一步一步来。</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Android/Android-View的测量/" data-id="cjfx8rwzb0005i4fysjgk1ifp" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/04/13/Android/Android-属性动画/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android-属性动画
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/04/13/Android/Android-Paint高级-PorterDuffXfermode/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Android-Paint高级-PorterDuffXfermode</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

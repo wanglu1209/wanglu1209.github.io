@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+
+  
+  <title>Python-学装饰器之前，有几个点要理解 | 王璐的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="要不这样吧，如果编程语言里有个地方你弄不明白，而正好又有个人用了这个功能，那就开枪把他打死，这比学习新特性要容易些，然后过不了多久，那些活下来的程序员就会开始用0.9.6版本的Python，而且他们只需要使用这个版本中易于理解的小部分就好了（眨眼）。                  - Tim Peters  首先推荐一波和朋友一起弄的壁纸下载，爬取了各大网站的壁纸，总有你喜欢的类型。http">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python-学装饰器之前，有几个点要理解">
+<meta property="og:url" content="http:/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="要不这样吧，如果编程语言里有个地方你弄不明白，而正好又有个人用了这个功能，那就开枪把他打死，这比学习新特性要容易些，然后过不了多久，那些活下来的程序员就会开始用0.9.6版本的Python，而且他们只需要使用这个版本中易于理解的小部分就好了（眨眼）。                  - Tim Peters  首先推荐一波和朋友一起弄的壁纸下载，爬取了各大网站的壁纸，总有你喜欢的类型。http">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-04-13T00:52:30.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python-学装饰器之前，有几个点要理解">
+<meta name="twitter:description" content="要不这样吧，如果编程语言里有个地方你弄不明白，而正好又有个人用了这个功能，那就开枪把他打死，这比学习新特性要容易些，然后过不了多久，那些活下来的程序员就会开始用0.9.6版本的Python，而且他们只需要使用这个版本中易于理解的小部分就好了（眨眼）。                  - Tim Peters  首先推荐一波和朋友一起弄的壁纸下载，爬取了各大网站的壁纸，总有你喜欢的类型。http">
+  
+    <link rel="alternate" href="/atom.xml" title="王璐的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">王璐的博客</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http:"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-Python/Python-学装饰器之前，有几个点要理解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/" class="article-date">
+  <time datetime="2018-04-13T00:50:44.000Z" itemprop="datePublished">2018-04-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Python-学装饰器之前，有几个点要理解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>要不这样吧，如果编程语言里有个地方你弄不明白，而正好又有个人用了这个功能，那就开枪把他打死，这比学习新特性要容易些，然后过不了多久，那些活下来的程序员就会开始用0.9.6版本的Python，而且他们只需要使用这个版本中易于理解的小部分就好了（眨眼）。                  - Tim Peters</p>
+</blockquote>
+<p>首先推荐一波和朋友一起弄的壁纸下载，爬取了各大网站的壁纸，总有你喜欢的类型。<a href="http://wp.d2collection.com/" target="_blank" rel="noopener">http://wp.d2collection.com/</a></p>
+<p>众所周知，Python里装饰器是一个很重要并且很牛X的功能，他可以在不改变原函数的功能和结构的基础上增加新功能。</p>
+<p>但是想要理解装饰器还是有很多知识点的：</p>
+<ul>
+<li>导入时、运行时</li>
+<li>闭包与变量的作用域</li>
+<li>nonlocal</li>
+</ul>
+<p>一般我们的装饰器都是在另外的一个文件里写的，类似xxx_deco。</p>
+<p>当我们在别的文件中引入进来并且在自己的函数上定义时，装饰器就<strong>立即运行</strong>了。（当然不是说代码刚写就运行了+_+）</p>
+<p>用《流畅的Python》中的例子</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">registry = []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">register</span><span class="params">(func)</span>:</span></span><br><span class="line">    print(<span class="string">'running register(%s)'</span> % func)</span><br><span class="line">    registry.append(func)</span><br><span class="line">    <span class="keyword">return</span> func</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@register</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f1</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'running f1()'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">@register</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f2</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'running f2()'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f3</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'running f3()'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'running main()'</span>)</span><br><span class="line">    print(<span class="string">'registry -&gt;'</span>, registry)</span><br><span class="line">    f1()</span><br><span class="line">    f2()</span><br><span class="line">    f3()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure>
+<p>运行结果如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">running register(&lt;function f1 at 0x10373d730&gt;)</span><br><span class="line">running register(&lt;function f2 at 0x10373d7b8&gt;)</span><br><span class="line">running main()</span><br><span class="line">registry -&gt; [&lt;function f1 at 0x10373d730&gt;, &lt;function f2 at 0x10373d7b8&gt;]</span><br><span class="line">running f1()</span><br><span class="line">running f2()</span><br><span class="line">running f3()</span><br></pre></td></tr></table></figure>
+<p>从结果我们可以证实刚才的话，在装饰后，就已经运行了。</p>
+<p>下面我们来讨论变量的问题，众所周知，一个函数内部的变量在函数执行结束后就被销毁了。那么我们看一个小例子</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_averager</span><span class="params">()</span>:</span></span><br><span class="line">    series = []</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">averager</span><span class="params">(new_value)</span>:</span></span><br><span class="line">        series.append(new_value)</span><br><span class="line">        total = sum(series)</span><br><span class="line">        <span class="keyword">return</span> total / len(series)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> averager</span><br></pre></td></tr></table></figure>
+<p>这是一个利用闭包实现的求平均数的方法，导入运行结果如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">In[<span class="number">2</span>]: <span class="keyword">from</span> average <span class="keyword">import</span> make_averager</span><br><span class="line">In[<span class="number">3</span>]: avg = make_averager()</span><br><span class="line">In[<span class="number">4</span>]: avg(<span class="number">10</span>)</span><br><span class="line">Out[<span class="number">4</span>]: <span class="number">10.0</span></span><br><span class="line">In[<span class="number">5</span>]: avg(<span class="number">11</span>)</span><br><span class="line">Out[<span class="number">5</span>]: <span class="number">10.5</span></span><br><span class="line">In[<span class="number">6</span>]: avg(<span class="number">12</span>)</span><br><span class="line">Out[<span class="number">6</span>]: <span class="number">11.0</span></span><br></pre></td></tr></table></figure>
+<p>这里爱思考的盆友会看出来，每次值都被记录了下来，我当时看到这里的时候在想，这不是坑爹么！谁说局部变量执行完就销毁的(╯‵□′)╯︵┻━┻</p>
+<p>跑回去看了一下闭包的解释：<strong>：闭包（Closure）是词法闭包（Lexical Closure）的简称，是引用了自由变量的函数。这个被引用的自由变量将和这个函数一同存在，即使已经离开了创造它的环境也不例外。</strong></p>
+<p>闭包延伸了变量的作用域，还起了个名字叫自由变量。所以上面的series就是一个自由变量。<strong>自由变量是指在本地作用域中绑定的变量</strong>，所以这个series没有被释放掉并且一直可以用。</p>
+<p>那么这个时候再来看，如果我想统计有多少个数字呢？代码增加如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_averager</span><span class="params">()</span>:</span></span><br><span class="line">    series = []</span><br><span class="line">    count = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">averager</span><span class="params">(new_value)</span>:</span></span><br><span class="line">        count += <span class="number">1</span></span><br><span class="line">        series.append(new_value)</span><br><span class="line">        total = sum(series)</span><br><span class="line">        <span class="keyword">return</span> total / len(series)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> averager</span><br></pre></td></tr></table></figure>
+<p>运行如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">In[<span class="number">2</span>]: <span class="keyword">from</span> average <span class="keyword">import</span> make_averager</span><br><span class="line">In[<span class="number">3</span>]: avg = make_averager()</span><br><span class="line">In[<span class="number">4</span>]: avg(<span class="number">10</span>)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"/Users/WangLu/.pyenv/versions/3.5.2/lib/python3.5/site-packages/IPython/core/interactiveshell.py"</span>, line <span class="number">2862</span>, <span class="keyword">in</span> run_code</span><br><span class="line">    exec(code_obj, self.user_global_ns, self.user_ns)</span><br><span class="line">  File <span class="string">"&lt;ipython-input-4-2b3d43cb065d&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    avg(<span class="number">10</span>)</span><br><span class="line">  File <span class="string">"/Users/WangLu/Study/FluentPython/average.py"</span>, line <span class="number">6</span>, <span class="keyword">in</span> averager</span><br><span class="line">    count += <span class="number">1</span></span><br><span class="line">UnboundLocalError: local variable <span class="string">'count'</span> referenced before assignment</span><br></pre></td></tr></table></figure>
+<p>报错了，在定义变量之前应用了变量。这跟刚才说的不一致。</p>
+<p>在Python中，数字、元组等不可变类型是只读的，想要重新赋值就要重新创建变量，在刚才的例子中，如果重新创建变量的话那就不是自由变量了，没有自由变量的闭包还是闭包么？所以在Python3中引入了<strong>nonlocal</strong>声明，被nonlocal声明的变量为自由变量，闭包中的数据就会更新。</p>
+<p>所以，代码改写如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">def make_averager():</span><br><span class="line">    series = []</span><br><span class="line">    count = 0</span><br><span class="line"></span><br><span class="line">    def averager(new_value):</span><br><span class="line">        nonlocal count</span><br><span class="line">        count += 1</span><br><span class="line">        series.append(new_value)</span><br><span class="line">        total = sum(series)</span><br><span class="line">        return total / len(series)</span><br><span class="line"></span><br><span class="line">    return averager</span><br></pre></td></tr></table></figure>
+<p>如果是Python2的话，就需要把变量设置为可变的如list等</p>
+<p>至此，我们就可以来实现装饰器了，在每次调用的时候输出 哈哈 + 方法名 + 结果</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">haha_deco</span><span class="params">(func)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">haha</span><span class="params">(*args)</span>:</span></span><br><span class="line">        result = func(*args)</span><br><span class="line">        print(<span class="string">'哈哈 -&gt; &#123;&#125;，结果为：&#123;&#125;'</span>.format(func.__name__, result))</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> haha</span><br></pre></td></tr></table></figure>
+<p>调用结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">In[<span class="number">2</span>]: <span class="keyword">from</span> haha_deco <span class="keyword">import</span> haha_deco</span><br><span class="line">In[<span class="number">3</span>]: @haha_deco</span><br><span class="line">  ...: <span class="function"><span class="keyword">def</span> <span class="title">demo</span><span class="params">(n)</span>:</span></span><br><span class="line">  ...:     <span class="keyword">return</span> <span class="number">1</span> <span class="keyword">if</span> n &lt; <span class="number">2</span> <span class="keyword">else</span> n * demo(n<span class="number">-1</span>)</span><br><span class="line">  ...: </span><br><span class="line">In[<span class="number">4</span>]: demo(<span class="number">5</span>)</span><br><span class="line">哈哈 -&gt; demo，结果为：1</span><br><span class="line">哈哈 -&gt; demo，结果为：2</span><br><span class="line">哈哈 -&gt; demo，结果为：6</span><br><span class="line">哈哈 -&gt; demo，结果为：24</span><br><span class="line">哈哈 -&gt; demo，结果为：120</span><br><span class="line">Out[<span class="number">4</span>]: <span class="number">120</span></span><br></pre></td></tr></table></figure>
+<p>我觉得想要理解装饰器，这几个点是应该会的。</p>
+<hr>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><h4 id="爱生活，爱小丽"><a href="#爱生活，爱小丽" class="headerlink" title="爱生活，爱小丽"></a>爱生活，爱小丽</h4>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http:/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/" data-id="cjfx8rx01000ei4fyoakuusme" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2018/04/13/Python/Python-记学习对象可变性/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Python-记学习对象可变性</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-学装饰器之前，有几个点要理解/">Python-学装饰器之前，有几个点要理解</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Python/Python-记学习对象可变性/">Python-记学习对象可变性</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义banner实现/">Android-自定义banner实现</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义View/">Android - 自定义View</a>
+          </li>
+        
+          <li>
+            <a href="/2018/04/13/Android/Android-自定义ViewGroup/">自定义ViewGroup</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 王璐<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
