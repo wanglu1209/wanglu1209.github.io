@@ -1,0 +1,715 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="ItemTouchHelper最近看其他项目中总会看到这个效果，『拖拽排序，拖拽删除』，其实这个效果放在以前的话是比较难做的，现在Google在support-v7包中添加了这个Helper，使得现在做这个效果很简单
+可以看到我工程名字起的就是RecyclerViewDrag，所以就可以看的出来这个Helper是和RecyclerView一起工作的，从Google官方文档我们也可以看到这样两句话">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-RecyclerView拖拽排序和删除">
+<meta property="og:url" content="http://yoursite.com/2016/09/08/Android-RecyclerView拖拽排序和删除/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="ItemTouchHelper最近看其他项目中总会看到这个效果，『拖拽排序，拖拽删除』，其实这个效果放在以前的话是比较难做的，现在Google在support-v7包中添加了这个Helper，使得现在做这个效果很简单
+可以看到我工程名字起的就是RecyclerViewDrag，所以就可以看的出来这个Helper是和RecyclerView一起工作的，从Google官方文档我们也可以看到这样两句话">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-1c7186c79c7c3176.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2016-09-08T01:00:51.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-RecyclerView拖拽排序和删除">
+<meta name="twitter:description" content="ItemTouchHelper最近看其他项目中总会看到这个效果，『拖拽排序，拖拽删除』，其实这个效果放在以前的话是比较难做的，现在Google在support-v7包中添加了这个Helper，使得现在做这个效果很简单
+可以看到我工程名字起的就是RecyclerViewDrag，所以就可以看的出来这个Helper是和RecyclerView一起工作的，从Google官方文档我们也可以看到这样两句话">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-1c7186c79c7c3176.gif?imageMogr2/auto-orient/strip">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/09/08/Android-RecyclerView拖拽排序和删除/"/>
+
+  <title> Android-RecyclerView拖拽排序和删除 | 王璐的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?4f0ee671d9128c0516d222fe031c08b2";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">王璐的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-RecyclerView拖拽排序和删除
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Veröffentlicht am</span>
+            <time itemprop="dateCreated" datetime="2016-09-08T09:00:37+08:00" content="2016-09-08">
+              2016-09-08
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="http://upload-images.jianshu.io/upload_images/1822424-1c7186c79c7c3176.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<h3 id="ItemTouchHelper"><a href="#ItemTouchHelper" class="headerlink" title="ItemTouchHelper"></a>ItemTouchHelper</h3><p>最近看其他项目中总会看到这个效果，『拖拽排序，拖拽删除』，其实这个效果放在以前的话是比较难做的，现在Google在support-v7包中添加了这个Helper，使得现在做这个效果很简单</p>
+<p>可以看到我工程名字起的就是RecyclerViewDrag，所以就可以看的出来这个Helper是和RecyclerView一起工作的，从Google官方文档我们也可以看到这样两句话：</p>
+<p>『This is a utility class to add swipe to dismiss and drag &amp; drop support to RecyclerView.』</p>
+<p>『Depending on which functionality you support, you should override onMove(RecyclerView, ViewHolder, ViewHolder) and / or onSwiped(ViewHolder, int).』</p>
+<p>大致意思就是这个工具类可以支持RecyclerView的拖拽和消除，根据你的需求应该要重写onMove或者onSwiped这两个方法，所以根据剧情需要，我们来重写这两个方法。</p>
+<p>但是在重写这两个方法之前我们首先应该看一下onMove()和onSwped()这两个方法，而这两个方法是在ItemTouchHelper的内部类Callback中，所以我们跟进官方文档，可以看到下面这段话：</p>
+<p>『If user drags an item, ItemTouchHelper will call onMove(recyclerView, dragged, target). Upon receiving this callback, you should move the item from the old position (dragged.getAdapterPosition()) to new position (target.getAdapterPosition()) in your adapter and also call notifyItemMoved(int, int)』</p>
+<p>这么长一大段，我以小学英语水平大致看了一下，差不多的意思就是说『如果用户拖动了某一个Item，那么就会回调onMove这个方法，而在收到这个回调的时候我们应该让RecyclerView做一些事情，比如从旧的位置(dragged.getAdapterPosition())到新的位置（target.getAdapterPosition()），然后在你的adapter中调用notifyItemMoved(int, int)方法』</p>
+<p><strong>大致就是这个意思，反正我看不太懂</strong></p>
+<p>所以我们应该能有点思路，就是拖动的时候要回调onMove()方法，然后我们根据这个方法来回调参数进行我们的操作，这首先就想到了接口，所以我们定义一个接口：</p>
+<pre><code>public interface OnItemCallbackListener {
+    /**
+     * @param fromPosition 起始位置
+     * @param toPosition 移动的位置
+     */
+    void onMove(int fromPosition, int toPosition);
+    void onSwipe(int position);
+}
+</code></pre><p>然后在onMove()/onSwipeed()方法中回调</p>
+<pre><code>/**
+ * Item是否能被Swipe到dismiss
+ * 也就是删除这条数据
+ */
+@Override
+public boolean isItemViewSwipeEnabled() {
+    return true;
+}
+
+/**
+ * Item长按是否可以拖拽
+ */
+@Override
+public boolean isLongPressDragEnabled() {
+    return true;
+}
+
+/**
+ * 设置Drag/Swipe的Flag
+ * 这里我们把滑动(Drag)的四个方向全都设置上了,说明Item可以随意移动
+ * 然后把删除(暂且叫删除/swipe)的方向设置为Start和End,说明可以水平拖动删除
+ */
+@Override
+public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+    int dragFlag = ItemTouchHelper.LEFT | ItemTouchHelper.DOWN | ItemTouchHelper.UP | ItemTouchHelper.RIGHT;
+    int swipeFlag = ItemTouchHelper.START | ItemTouchHelper.END;
+
+    return makeMovementFlags(dragFlag, swipeFlag);
+}
+
+@Override
+public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+    /**
+     * 回调
+     */
+    adapter.onMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+    return true;
+}
+
+@Override
+public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+    /**
+     * 回调
+     */
+    adapter.onSwipe(viewHolder.getAdapterPosition());
+}
+</code></pre><p>然后我们定义一个自己的adapter来实现这个接口，代码如下：</p>
+<pre><code>public class MyAdapter extends  RecyclerView.Adapter&lt;MyAdapter.Holder&gt; implements OnItemCallbackListener{
+
+    private List&lt;String&gt; mData;
+    private Context mContext;
+
+    public MyAdapter(Context mContext) {
+        this.mContext = mContext;
+        mData = new ArrayList&lt;&gt;();
+        mData.add(&quot;one&quot;);
+        mData.add(&quot;two&quot;);
+        mData.add(&quot;three&quot;);
+        mData.add(&quot;four&quot;);
+        mData.add(&quot;five&quot;);
+        mData.add(&quot;six&quot;);
+        mData.add(&quot;seven&quot;);
+    }
+
+    @Override
+    public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(mContext).inflate(R.layout.adapter_test, parent, false);
+        return new Holder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(final Holder holder, int position) {
+        holder.tv.setText(mData.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return mData.size();
+    }
+
+    @Override
+    public void onMove(int fromPosition, int toPosition) {
+        /**
+         * 在这里进行给原数组数据的移动
+         */
+        Collections.swap(mData, fromPosition, toPosition);
+        /**
+         * 通知数据移动
+         */
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void onSwipe(int position) {
+        /**
+         * 原数据移除数据
+         */
+        mData.remove(position);
+        /**
+         * 通知移除
+         */
+        notifyItemRemoved(position);
+    }
+
+    class Holder extends RecyclerView.ViewHolder {
+        TextView tv;
+        public Holder(View itemView) {
+            super(itemView);
+            tv = (TextView) itemView.findViewById(R.id.tv);
+        }
+    }
+}
+</code></pre><p>最后在Activity中：</p>
+<pre><code>@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    RecyclerView rv = (RecyclerView) findViewById(R.id.rv);
+    rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+
+    final MyAdapter adapter = new MyAdapter(this);
+    rv.setAdapter(adapter);
+
+    ItemTouchHelper.Callback callback = new OnItemCallbackHelper(adapter);
+
+    /**
+     * 实例化ItemTouchHelper对象,然后添加到RecyclerView
+     */
+    ItemTouchHelper helper = new ItemTouchHelper(callback);
+    helper.attachToRecyclerView(rv);
+}
+</code></pre><p>这样一个最简单的拖拽滑动、删除的效果就完成了，其实还可以设置RecyclerView的其他LayoutManager，这里就不过多做解释了，有兴趣的可以试试</p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/09/05/自定义banner实现/" rel="next" title="自定义banner实现">
+                <i class="fa fa-chevron-left"></i> 自定义banner实现
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/23/Android-MVP-Demo/" rel="prev" title="Android-MVP Demo">
+                Android-MVP Demo <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="爱小丽" />
+          <p class="site-author-name" itemprop="name">爱小丽</p>
+          <p class="site-description motion-element" itemprop="description">爱小丽，爱Android</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">Artikel</span>
+            </a>
+          </div>
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#ItemTouchHelper"><span class="nav-number">1.</span> <span class="nav-text">ItemTouchHelper</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number"></span> <span class="nav-text">最后</span></a></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱小丽</span>
+</div>
+
+<div class="powered-by">
+  Erstellt mit  <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

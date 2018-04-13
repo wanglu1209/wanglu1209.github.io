@@ -1,0 +1,742 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="惯例先上图：
+
+可以看到这是一个轮播图，只不过我们以前在用的时候一般都是用ViewPager，用正常的ViewPager有几点坏处：
+
+不能无限循环
+不能控制自动播放
+
+所以这就需要自己封装一个了，其实还是用的ViewPager，只不过更改了他的触摸事件并且设置了自动轮播的时间，然后自己写了一个PagerAdapter来实现无限轮播，最后下面的指示器和ViewPager、PagerAdapter封">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自定义banner实现">
+<meta property="og:url" content="http://yoursite.com/2016/09/05/自定义banner实现/index.html">
+<meta property="og:site_name" content="王璐的博客">
+<meta property="og:description" content="惯例先上图：
+
+可以看到这是一个轮播图，只不过我们以前在用的时候一般都是用ViewPager，用正常的ViewPager有几点坏处：
+
+不能无限循环
+不能控制自动播放
+
+所以这就需要自己封装一个了，其实还是用的ViewPager，只不过更改了他的触摸事件并且设置了自动轮播的时间，然后自己写了一个PagerAdapter来实现无限轮播，最后下面的指示器和ViewPager、PagerAdapter封">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1822424-f438927e8fb53ae2.gif?imageMogr2/auto-orient/strip">
+<meta property="og:updated_time" content="2016-09-05T05:13:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自定义banner实现">
+<meta name="twitter:description" content="惯例先上图：
+
+可以看到这是一个轮播图，只不过我们以前在用的时候一般都是用ViewPager，用正常的ViewPager有几点坏处：
+
+不能无限循环
+不能控制自动播放
+
+所以这就需要自己封装一个了，其实还是用的ViewPager，只不过更改了他的触摸事件并且设置了自动轮播的时间，然后自己写了一个PagerAdapter来实现无限轮播，最后下面的指示器和ViewPager、PagerAdapter封">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1822424-f438927e8fb53ae2.gif?imageMogr2/auto-orient/strip">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: 'Author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/09/05/自定义banner实现/"/>
+
+  <title> 自定义banner实现 | 王璐的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?4f0ee671d9128c0516d222fe031c08b2";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">王璐的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            Tags
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                自定义banner实现
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">Veröffentlicht am</span>
+            <time itemprop="dateCreated" datetime="2016-09-05T11:27:14+08:00" content="2016-09-05">
+              2016-09-05
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>惯例先上图：</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1822424-f438927e8fb53ae2.gif?imageMogr2/auto-orient/strip" alt=""></p>
+<p>可以看到这是一个轮播图，只不过我们以前在用的时候一般都是用ViewPager，用正常的ViewPager有几点坏处：</p>
+<ul>
+<li>不能无限循环</li>
+<li>不能控制自动播放</li>
+</ul>
+<p>所以这就需要自己封装一个了，其实还是用的ViewPager，只不过更改了他的触摸事件并且设置了自动轮播的时间，然后自己写了一个PagerAdapter来实现无限轮播，最后下面的指示器和ViewPager、PagerAdapter封装到了一起，所以使用的时候很简单。<strong>只需要继承自BannerPagerAdapter，重写构造和setView()方法。然后在使用的时候调用方法即可</strong>，基本代码如下：</p>
+<pre><code>List&lt;Integer&gt; data = new ArrayList&lt;&gt;();
+data.add(R.mipmap.a1);
+data.add(R.mipmap.a2);
+data.add(R.mipmap.a3);
+data.add(R.mipmap.a4);
+
+
+AdapterDemo ad = new AdapterDemo(this, data);
+
+Banner banner = (Banner) findViewById(R.id.banner);
+
+/**
+ * 关于这里的设置参数问题,是需要这样使用的
+ * 在设置了小圆点之后才能设置适配器
+ * 因为只有在适配器里才会根据一共多少条数据来适配
+ * 最后需要调用开始轮播
+ * 个人建议在onPause()/onDestroy()方法中来停止 -- stopAutoPlay()
+ */
+banner.setDot(R.drawable.no_selected_dot, R.drawable.selected_dot).
+    setDotGravity(Banner.CENTER).
+    setAdapter(ad).
+    setOnItemClickListener(new BannerPagerAdapter.onItemClickListener() {
+        @Override
+        public void onClick(int position) {
+            Toast.makeText(MainActivity.this, &quot;&quot; + position, Toast.LENGTH_SHORT).show();
+        }
+    }).
+    startAutoPlay(); 
+</code></pre><p>下面是AdapterDemo的代码：</p>
+<pre><code>public class AdapterDemo extends BannerPagerAdapter {
+
+    private Context mContext;
+    private List&lt;Integer&gt; data;
+
+    public AdapterDemo(Context context, List data) {
+        super(context, data);
+        mContext = context;
+        this.data = data;
+    }
+
+    /**
+     * 只需要重写构造和这个方法即可
+     * 在这里可以设置自己的View,使用自己的图片加载库
+     */
+    @Override
+    public View setView(int position) {
+        View v = LayoutInflater.from(mContext).inflate(R.layout.test, null);
+        ImageView iv = (ImageView) v.findViewById(R.id.iv);
+        iv.setImageResource(data.get(position));
+        return v;
+    }
+}
+</code></pre><p>可以看的出来这里给调用者很大的空间来进行自己的操作，在setView中直接可以根据position来设置自己的View和数据，<strong>并且使用自己的图片加载库。</strong></p>
+<p>如果感兴趣的可以移步<a href="https://github.com/wanglu1209/Banner" target="_blank" rel="external">GitHub</a></p>
+<hr>
+<p><strong>下面开始说如何写</strong></p>
+<p>首先我们要确定一下这个banner有几个需要注意的点：</p>
+<ol>
+<li>无限轮播</li>
+<li>点击事件</li>
+<li>指示器</li>
+<li>指示器的滑动效果</li>
+</ol>
+<h3 id="无限轮播、点击事件"><a href="#无限轮播、点击事件" class="headerlink" title="无限轮播、点击事件"></a>无限轮播、点击事件</h3><p>关于无限轮播，我参照的是任玉刚大神的博客，所以我也希望各位去看这个博客，也算是涨点人气，我这里就不写到底如何实现的了，各位可以查看我的代码</p>
+<p><a href="http://blog.csdn.net/singwhatiwanna/article/details/46541225" target="_blank" rel="external">循环广告位组件的实现 – 任玉刚</a></p>
+<h3 id="指示器、滑动效果"><a href="#指示器、滑动效果" class="headerlink" title="指示器、滑动效果"></a>指示器、滑动效果</h3><p>其实我写的时候有好多坑，但是写这篇文章的时候感觉都不是特别难的点（<strong>技术太菜</strong>）</p>
+<p>关于指示器，其实现在大部分都是小圆点，这里我实现的思路是创建一个FrameLayout来添加ViewPager和指示器</p>
+<p>但是可以看到，这里的指示器会有一个随着页面滑动而滑动的效果，这里就需要两层了，<strong>一个是包含未选中的，一个是包含了选中和未选中的（Group）</strong></p>
+<p>代码如下：</p>
+<pre><code>private void init() {
+    mPager = new BannerViewPager(mContext);
+    addView(mPager);
+    /**
+     * 实例化两个Group
+     */
+    mFrameLayout = new FrameLayout(mContext);
+    mDotGroup = new LinearLayout(mContext);
+    /**
+     * 设置小圆点Group的方向为水平
+     */
+    mDotGroup.setOrientation(LinearLayout.HORIZONTAL);
+    /**
+     * 如果不设置则小圆点在中间
+     */
+    mDotGroup.setGravity(CENTER | Gravity.BOTTOM);
+    /**
+     * 两个Group的大小都为match_parent
+     */
+    LinearLayout.LayoutParams params =
+            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+    /**
+     * 首先添加小圆点的Group
+     */
+    mFrameLayout.addView(mDotGroup, params);
+    /**
+     * 然后添加包含的Group（f**k,表达能力有限）
+     */
+    addView(mFrameLayout, params);
+
+    /**
+     * 添加到任务栈,当前所有任务完事之后添加已经选中的那个小圆点
+     */
+    post(new Runnable() {
+        @Override
+        public void run() {
+            ImageView iv = new ImageView(mContext);
+            iv.setImageDrawable(mContext.getResources().getDrawable(mDot[1]));
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            /**
+             * 设置选中小圆点的左边距
+             */
+            params.leftMargin = (int) mDotGroup.getChildAt(0).getX();
+            params.gravity = Gravity.BOTTOM;
+            mFrameLayout.addView(iv, params);
+            mSelectedDot = mFrameLayout.getChildAt(1);
+        }
+    });
+    mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            /**
+             * 获取到当前position
+             */
+            position %= mAdapter.size;
+            /**
+             * 判断如果当前的position不是最后一个,那么就设置偏移量来实现被选中小圆点的滑动效果
+             */
+            if (mSelectedDot != null &amp;&amp; position != mAdapter.size -1) {
+                float dx = mDotGroup.getChildAt(1).getX() - mDotGroup.getChildAt(0).getX();
+                mSelectedDot.setTranslationX((position * dx) + positionOffset * dx);
+            }
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            position %= mAdapter.size;
+            /**
+             * 如果已经是最后一个,那么则直接把小圆点定位到那,不然滑动效果会出错
+             */
+            if (mSelectedDot != null &amp;&amp; position == mAdapter.size - 1) {
+                float dx = mDotGroup.getChildAt(1).getX() - mDotGroup.getChildAt(0).getX();
+                mSelectedDot.setTranslationX(position * dx);
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    });
+
+}
+</code></pre><p>可以看到我们首先添加了ViewPager，然后我们添加了未选中指示器的Group，之后我们才添加的选中的指示器。在添加选中指示器的时候用了一个post，这个方法是把runnable里的代码添加到任务栈，前面的任务结束了这个任务才会执行，所以我们可以获取到第一个未选中小圆点的坐标，然后把选中指示器覆盖上去，后来我们移动的时候就直接移动选中的指示器就好了。</p>
+<p>关于滑动指示器，其实就是用了一个setTranslationX()方法，这个方法可以虽然移动View的位置，但是没有真正的移动该View，所以我们在移动的时候根据position来计算，但是当移动到最后一个的时候就不应该用这个方法了，如果还用的话就会造成一种『出界』了的感觉，所以这里在最后一个的时候不进入方法。</p>
+<p>有人应该会想到『在第一页的时候』，这里我们大家可以自己测试一下，当手指向右滑的时候，就已经是size-1页了，所以我们直接就用一个判断就够了</p>
+<p><strong>额，写的乱七八糟，但是代码会说话的~</strong></p>
+<p><strong>还是那句话，感兴趣的请移步GitHub哟~</strong></p>
+<hr>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>爱生活，爱小丽，爱Android</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/09/08/Android-RecyclerView拖拽排序和删除/" rel="prev" title="Android-RecyclerView拖拽排序和删除">
+                Android-RecyclerView拖拽排序和删除 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.jpg"
+               alt="爱小丽" />
+          <p class="site-author-name" itemprop="name">爱小丽</p>
+          <p class="site-description motion-element" itemprop="description">爱小丽，爱Android</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">Artikel</span>
+            </a>
+          </div>
+
+          
+
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#无限轮播、点击事件"><span class="nav-number">1.</span> <span class="nav-text">无限轮播、点击事件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#指示器、滑动效果"><span class="nav-number">2.</span> <span class="nav-text">指示器、滑动效果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number"></span> <span class="nav-text">最后</span></a></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱小丽</span>
+</div>
+
+<div class="powered-by">
+  Erstellt mit  <a class="theme-link" href="https://hexo.io">Hexo</a>
+</div>
+
+<div class="theme-info">
+  Theme -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
