@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keyword"  content="">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>
+        
+        
+        
+    </title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/aircloud.css">
+    <link rel="stylesheet" href="/css/gitment.css">
+    <!--<link rel="stylesheet" href="https://imsun.github.io/gitment/style/default.css">-->
+    <link href="//at.alicdn.com/t/font_620856_pl6z7sid89qkt9.css" rel="stylesheet" type="text/css">
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+<body>
+
+<div class="site-nav-toggle" id="site-nav-toggle">
+    <button>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+        <span class="btn-bar"></span>
+    </button>
+</div>
+
+<div class="index-about">
+    <i> Android </i>
+</div>
+
+<div class="index-container">
+    
+    <div class="index-left">
+        
+<div class="nav" id="nav">
+    <div class="avatar-name">
+        <div class="avatar">
+            <img src="/img/avatar.jpg" />
+        </div>
+        <div class="name">
+            <i>王璐</i>
+        </div>
+    </div>
+    <div class="contents" id="nav-content">
+        <ul>
+            <li >
+                <a href="/">
+                    <i class="iconfont icon-shouye1"></i>
+                    <span>HOME</span>
+                </a>
+            </li>
+            <li >
+                <a href="/tags">
+                    <i class="iconfont icon-biaoqian1"></i>
+                    <span>TAGS</span>
+                </a>
+            </li>
+            <li >
+                <a href="/archives">
+                    <i class="iconfont icon-guidang2"></i>
+                    <span>ARCHIVES</span>
+                </a>
+            </li>
+            <li >
+                <a href="/about/">
+                    <i class="iconfont icon-guanyu2"></i>
+                    <span>ABOUT</span>
+                </a>
+            </li>
+            
+        </ul>
+    </div>
+    
+        <div id="toc" class="toc-article">
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#kotlin-Lambda编程"><span class="toc-text">kotlin Lambda编程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#lambda-的语法"><span class="toc-text">lambda 的语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在作用域中访问变量"><span class="toc-text">在作用域中访问变量</span></a></li></ol></li></ol>
+</div>
+    
+</div>
+
+
+<div class="search-field" id="search-field">
+    <div class="search-container">
+        <div class="search-input">
+            <span id="esc-search"> <i class="icon-fanhui iconfont"></i></span>
+            <input id="search-input"/>
+            <span id="begin-search">search</span>
+        </div>
+        <div class="search-result-container" id="search-result-container">
+
+        </div>
+    </div>
+</div>
+        <div class="index-about-mobile">
+            <i> Android </i>
+        </div>
+    </div>
+    
+    <div class="index-middle">
+        <!-- Main Content -->
+        
+
+
+<div class="post-container">
+    <div class="post-title">
+        
+    </div>
+
+    <div class="post-meta">
+        <span class="attr">Post：<span>2018-09-29 09:53:51</span></span>
+        
+        </span>
+        <span class="attr">Visit：<span id="busuanzi_value_page_pv"></span>
+</span>
+</span>
+    </div>
+    <div class="post-content ">
+        <h1 id="kotlin-Lambda编程"><a href="#kotlin-Lambda编程" class="headerlink" title="kotlin Lambda编程"></a>kotlin Lambda编程</h1><blockquote>
+<p>Lambda本质上就是可以传递给其他函数的一小段代码。把函数当做值来对待</p>
+</blockquote>
+<h2 id="lambda-的语法"><a href="#lambda-的语法" class="headerlink" title="lambda 的语法"></a>lambda 的语法</h2><p>Kotlin的Lambda表达式始终用花括号包围 ，用箭头把实参和函数体隔开。例如：<code>{x: Int, y: Int -&gt; x + y}</code></p>
+<p>可以把它存储在变量里，把这个变量作为普通函数，例：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">val</span> sum = &#123;x: <span class="built_in">Int</span>, y: <span class="built_in">Int</span> -&gt; x + y&#125;</span><br><span class="line">sum(<span class="number">1</span>, <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<p>使用Lambda求出年龄最大的人，例：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fun</span> <span class="title">main</span><span class="params">(args: <span class="type">Array</span>&lt;<span class="type">String</span>&gt;)</span></span> &#123;</span><br><span class="line">    <span class="keyword">val</span> people = listOf(Person(<span class="string">"NameA"</span>, <span class="number">24</span>), Person(<span class="string">"NameB"</span>, <span class="number">18</span>))</span><br><span class="line">    print(people.maxBy &#123; p: Person -&gt; p.age &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">out</span>: Person(name=NameA, age=<span class="number">24</span>)</span><br></pre></td></tr></table></figure>
+<p>首先看一下<code>maxBy</code>方法，他只需要一个参数，就是一个『函数』，用来指定比较哪个值来确定最大元素：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">inline</span> <span class="function"><span class="keyword">fun</span> <span class="type">&lt;T, R : Comparable&lt;R&gt;</span>&gt; Iterable<span class="type">&lt;T&gt;</span>.<span class="title">maxBy</span><span class="params">(selector: (<span class="type">T</span>)</span></span> -&gt; R): T? &#123;</span><br><span class="line">    <span class="keyword">val</span> iterator = iterator()</span><br><span class="line">    <span class="keyword">if</span> (!iterator.hasNext()) <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">    <span class="keyword">var</span> maxElem = iterator.next()	<span class="comment">// 获取到第一个元素</span></span><br><span class="line">    <span class="keyword">var</span> maxValue = selector(maxElem)	<span class="comment">// 用传入的函数体来找到值</span></span><br><span class="line">    <span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">        <span class="keyword">val</span> e = iterator.next()	<span class="comment">// 获取到下一个元素</span></span><br><span class="line">        <span class="keyword">val</span> v = selector(e)	<span class="comment">// 获取下一个元素的值</span></span><br><span class="line">        <span class="keyword">if</span> (maxValue &lt; v) &#123;	<span class="comment">// 比较求出最大值</span></span><br><span class="line">            maxElem = e</span><br><span class="line">            maxValue = v</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> maxElem	<span class="comment">// 返回最大的元素</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Kotlin有一种语法规定，<strong>如果Lambda表达式是函数调用的『最后一个』实参，它可以放到括号的后边</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy() &#123; p: Person -&gt; p.age &#125;</span><br></pre></td></tr></table></figure>
+<p><strong>当Lambda是函数唯一的参数时，还可以去掉调用代码中的空括号</strong>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123; p: Person -&gt; p.age &#125;</span><br></pre></td></tr></table></figure>
+<p>这样就是我们上面写的代码的样子，但还可以继续简化，如果Lambda参数的类型可以被推导出来，就不需要显示的指定。例如上面的例子<code>maxBy</code>方法，我们是用一个Person的集合来调用的，所以可以推导出来类型就是Person</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123; p -&gt; p.age &#125;</span><br></pre></td></tr></table></figure>
+<p>如果当前只有一个参数，并且可以被推断出来，那么就可以使用默认的参数名<code>it</code>：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">people.maxBy &#123; it.age &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="在作用域中访问变量"><a href="#在作用域中访问变量" class="headerlink" title="在作用域中访问变量"></a>在作用域中访问变量</h2><p>在Java中，如果想要在匿名内部类里访问外部局部变量，那么这个变量必须也只能是final的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JavaMain</span> </span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">test</span></span>&#123;</span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">onClick</span><span class="params">(<span class="keyword">int</span> i)</span></span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testFun</span><span class="params">(test t)</span></span>&#123;</span><br><span class="line">        t.onClick(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line">        testFun(i -&gt; a++);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">out: Error:(<span class="number">11</span>, <span class="number">22</span>) java: 从lambda 表达式引用的本地变量必须是最终变量或实际上的最终变量</span><br></pre></td></tr></table></figure>
+<p>但Kotlin在Lambda内部是可以改变这些局部变量的：</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="number">0</span></span><br><span class="line">JavaMain.testFun &#123;</span><br><span class="line">    a++</span><br><span class="line">&#125;</span><br><span class="line">print(<span class="string">"值为：<span class="variable">$a</span>"</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">out</span>: 值为：<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>从lambda内部访问外部变量，称这些变量<strong>被Lambda捕捉</strong>，默认情况下，局部变量的生命周期被限制在声明这个变量的函数里，但是如果被Lambda捕捉，使用这个变量的代码可以被存储并且稍后在执行。<strong>当捕捉final变量时，值和使用这个值的Lambda代码一起被存储；而非final变量，值被封装在一个特殊的包装器中（例如IntArray），这样就可以改变这个值了，这个包装器和Lambda代码会一起被存储</strong></p>
+
+        
+        <div id="comment-container">
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+
+
+<footer class="footer">
+    <ul class="list-inline text-center">
+        
+        
+
+        
+
+        
+
+        
+
+        
+
+    </ul>
+    
+    <p>
+        <span id="busuanzi_container_site_pv">
+            <span id="busuanzi_value_site_pv"></span>PV
+        </span>
+        <span id="busuanzi_container_site_uv">
+            <span id="busuanzi_value_site_uv"></span>UV
+        </span>
+        Created By <a href="https://hexo.io/">Hexo</a>  Theme <a href="https://github.com/aircloud/hexo-theme-aircloud">AirCloud</a></p>
+</footer>
+
+
+
+
+</body>
+
+<script>
+    // We expose some of the variables needed by the front end
+    window.hexo_search_path = ""
+    window.hexo_root = "/"
+    window.isPost = true
+</script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+<script src="/js/index.js"></script>
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+</html>
